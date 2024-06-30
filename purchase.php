@@ -139,7 +139,7 @@ if(isset($_GET['filter'])) {
     $where_clause = implode(" AND ", $where_clauses);
     $sql = "SELECT * FROM invoices WHERE $where_clause";
 } else {
-    $sql = "SELECT * FROM invoices WHERE business_id = '$b_id' AND is_completed = 1 AND type='normal'";
+    $sql = "SELECT * FROM invoices WHERE business_id = '$b_id' AND is_completed = 1";
 }
 ?>
                                     <div class="row">
