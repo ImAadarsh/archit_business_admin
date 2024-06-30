@@ -51,8 +51,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     
     fputcsv($output, array(
         isset($row['serial_no']) ? $row['serial_no'] : 'N/A',
-        isset($row['name']) ? $row['name'] : 'N/A',
         date('d M Y', $invoice_date),
+        isset($row['name']) ? $row['name'] : 'N/A',
         isset($row['doc_no']) ? $row['doc_no'] : 'N/A',
         number_format($temp_amount_wgst, 2),
         isset($row['total_dgst']) ? $row['total_dgst'] : 'N/A',
