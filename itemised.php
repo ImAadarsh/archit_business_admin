@@ -17,43 +17,13 @@ include 'admin/aside.php';
                             <div class="row">
                                 <div class="col-md-12">
                                 <form role="form" action="itemised.php" method="GET" enctype="multipart/form-data">
+
+  
   <div class="row">
-    <div class="col-md-3 mb-3">
-      <label for="product">Product</label>
-      <select id="product" class="form-control" name="product">
-        <option value="">All Products</option>
-        <?php
-          $product_query = "SELECT id, name FROM products";
-          $product_result = $connect->query($product_query);
-          while($product = $product_result->fetch_assoc()) {
-            echo "<option value='".$product['id']."'>".$product['name']."</option>";
-          }
-        ?>
-      </select>
-    </div>
-    <div class="col-md-3 mb-3">
-      <label for="type">Invoice Type</label>
-      <select id="type" class="form-control" name="type">
-        <option value="">All</option>
-        <option value="normal">Normal</option>
-        <option value="performa">Performa</option>
-      </select>
-    </div>
-    <div class="col-md-3 mb-3">
-      <label for="payment_type">Payment Type</label>
-      <select id="payment_type" class="form-control" name="payment_type">
-        <option value="">All</option>
-        <option value="cash">Cash</option>
-        <option value="online">Online</option>
-      </select>
-    </div>
-    <div class="col-md-3 mb-3">
+  <div class="col-md-3 mb-3">
       <label for="price_min">Minimum Price</label>
       <input type="number" id="price_min" class="form-control" name="price_min">
     </div>
-  </div>
-  
-  <div class="row">
     <div class="col-md-3 mb-3">
       <label for="price_max">Maximum Price</label>
       <input type="number" id="price_max" class="form-control" name="price_max">
@@ -85,7 +55,7 @@ include 'admin/aside.php';
   
   <div class="row">
     <div class="col-md-12">
-      <input type="submit" name="filter" class="btn btn-primary" value="Filter">
+      <input type="submit" name="filter" class="form-control btn btn-primary" value="Filter">
     </div>
   </div>
 </form>
@@ -114,24 +84,13 @@ include 'admin/aside.php';
 $b_id = $_SESSION['business_id'];
 
 if(isset($_GET['filter'])) {
-    $product = $_GET['product'];
-    $payment_type = $_GET['payment_type'];
-    $type = $_GET['type'];
     $price_min = $_GET['price_min'];
     $price_max = $_GET['price_max'];
     $date_range = $_GET['date_range'];
 
     $where_clauses = ["inv.business_id = $b_id", "inv.is_completed = 1"];
+    $where_clauses[] = "inv.type = 'normal'";
 
-    if($product !== '') {
-        $where_clauses[] = "i.product_id = '$product'";
-    }
-    if($payment_type !== '') {
-        $where_clauses[] = "inv.payment_type = '$payment_type'";
-    }
-    if($type !== '') {
-        $where_clauses[] = "inv.type = '$type'";
-    }
     if($price_min !== '') {
         $where_clauses[] = "i.price_of_one >= '$price_min'";
     }
@@ -172,10 +131,11 @@ if(isset($_GET['filter'])) {
             FROM items i
             JOIN products p ON i.product_id = p.id
             JOIN invoices inv ON i.invoice_id = inv.id
-            WHERE inv.business_id = '$b_id' AND inv.is_completed = 1
+            WHERE inv.business_id = '$b_id' AND inv.is_completed = 1 AND inv.type = 'normal'
             GROUP BY i.product_id, i.price_of_one
             ORDER BY i.price_of_one";
 }
+// echo $sql;
 ?>
                                     
                                     <!-- Add export to Excel button if needed -->

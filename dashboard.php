@@ -35,8 +35,7 @@ include 'admin/aside.php';
                         ["users.php", "fe-users", "My Customers"],
                         ["create-user.php", "fe-user-plus", "Add Team"],
                         ["expense.php", "fe-dollar-sign", "Expenses"],
-                        ["invoices.php", "fe-file-text", "Invoices"],
-                        ["purchase.php", "fe-shopping-cart", "Purchase Sale"],
+                        ["purchase.php", "fe-shopping-cart", "Invoices"],
                         ["itemised.php", "fe-list", "Itemised Sale"]
                     ];
 

@@ -35,7 +35,7 @@ header('Expires: 0');
 
 // Output the CSV data
 $output = fopen('php://output', 'w');
-fputcsv($output, array('ID', 'Customer Name', 'Type', 'Payment Mode', 'Sale Amount', 'GST Amount', 'Total Amount', 'Invoice Date', 'Invoice URL'));
+fputcsv($output, array('Invoice Number','Date','Customer Name', 'GST/Adhaar Number', 'Amount', 'DGST Amount','CGST Amount','IGST Amount', 'Total Amount'));
 
 $temp = 0;
 while ($row = mysqli_fetch_assoc($result)) {
@@ -50,15 +50,15 @@ while ($row = mysqli_fetch_assoc($result)) {
     $invoice_date = isset($row['invoice_date']) ? strtotime($row['invoice_date']) : time();
     
     fputcsv($output, array(
-        $temp,
+        isset($row['serial_no']) ? $row['serial_no'] : 'N/A',
         isset($row['name']) ? $row['name'] : 'N/A',
-        (!empty($row['type']) && strtolower($row['type']) !== 'null') ? ucfirst($row['type']) : 'N/A',
-        isset($row['payment_mode']) ? ucfirst($row['payment_mode']) : 'N/A',
-        number_format($temp_amount_wgst, 2),
-        number_format($temp_gst, 2),
-        number_format($total_amount, 2),
         date('d M Y', $invoice_date),
-        'https://invoice.architartgallery.in/invoice.html?invoiceid=' . (isset($row['id']) ? $row['id'] : '')
+        isset($row['doc_no']) ? $row['doc_no'] : 'N/A',
+        number_format($temp_amount_wgst, 2),
+        isset($row['total_dgst']) ? $row['total_dgst'] : 'N/A',
+        isset($row['total_cgst']) ? $row['total_cgst'] : 'N/A',
+        isset($row['total_igst']) ? $row['total_igst'] : 'N/A',
+        number_format($total_amount, 2),
     ));
 }
 

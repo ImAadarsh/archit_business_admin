@@ -259,7 +259,7 @@ if(isset($_GET['filter'])) {
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-fail text-uppercase mb-1">
-                            Total Cash Sale (Actual)
+                            Total Cash Sale
                         </div>
                         <div class="h3 mb-0 font-weight-bold text-gray-800" id="totalExpenses3">₹0</div>
                     </div>
@@ -274,7 +274,7 @@ if(isset($_GET['filter'])) {
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Online Sale (Actual)
+                            Total Online Sale
                         </div>
                         <div class="h3 mb-0 font-weight-bold text-gray-800" id="totalExpenses4">₹0</div>
                     </div>
@@ -323,6 +323,7 @@ $online = 0;
             <th><input type="checkbox" id="checkAll"></th>
             <th>ID</th>
             <th>Customer Name</th>
+            <th>Customer Number</th>
             <th>Type</th>
             <th>Payment Mode</th>
             <th>Sale Amount</th>
@@ -345,8 +346,8 @@ $online = 0;
                     
                     $total_amount = isset($final['total_amount']) ? floatval($final['total_amount']) : 0;
                     $temp_amount_wgst = $total_amount - $temp_gst;
-                    $cash = $cash + ($final['payment_mode']=='cash'?$temp_amount_wgst:0);
-                    $online = $online + ($final['payment_mode']=='online'?$temp_amount_wgst:0);
+                    $cash = $cash + ($final['payment_mode']=='cash'?$final['total_amount']:0);
+                    $online = $online + ($final['payment_mode']=='online'?$final['total_amount']:0);
                     $t_amount += $temp_amount_wgst;
                     $gst += $temp_gst;
                     $final_total = $final_total + $final['total_amount'];
@@ -359,6 +360,7 @@ $online = 0;
                 <td><input type="checkbox" class="rowCheckbox" value="<?php echo isset($final['id']) ? htmlspecialchars($final['id']) : ''; ?>"></td>
                 <td><?php echo $temp; ?></td>
                 <td><?php echo isset($final['name']) ? htmlspecialchars($final['name']) : 'N/A'; ?></td>
+                <td><?php echo isset($final['mobile_number']) ? htmlspecialchars($final['mobile_number']) : 'N/A'; ?></td>
                 <td><?php echo (!empty($final['type']) && strtolower($final['type']) !== 'null') ? ucfirst(htmlspecialchars($final['type'])) : 'N/A'; ?></td>
                 <td><?php echo isset($final['payment_mode']) ? ucfirst(htmlspecialchars($final['payment_mode'])) : 'N/A'; ?></td>
                 <td><?php echo number_format($temp_amount_wgst, 2); ?></td>
