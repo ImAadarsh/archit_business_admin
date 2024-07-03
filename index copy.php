@@ -49,22 +49,13 @@ if ($response['user']['role']=='admin') {
                 <br>
                 <h1 class="h6 mb-3">Sign in</h1>
                 <div class="form-group">
-                    <label for="inputPhone" class="sr-only">Select Business</label>
-                    <select name="phone" type="tel" id="inputEmail" class="form-control form-control-lg"
+                    <label for="inputPhone" class="sr-only">Phone Number</label>
+                    <input name="phone" type="tel" id="inputEmail" class="form-control form-control-lg"
                         placeholder="Phone Number" required autofocus="">
-                        <?php
-                                        // echo $sql;
-                                        $sql = "SELECT * FROM businessses";
-                                        $results = $connect->query($sql);
-                                        while($final=$results->fetch_assoc()){?>
-                                        <option value="<?php echo $final['phone'] ?>"><?php echo $final['business_name'] ?></option>
-                                        <?php } ?>
-
-                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="inputPassword" class="sr-only">Passcode</label>
-                    <input type="tel" id="inputPassword" class="form-control form-control-lg"
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input type="password" id="inputPassword" class="form-control form-control-lg"
                         placeholder="Password" name="password" required>
                 </div>
                 <div class="checkbox mb-3">
