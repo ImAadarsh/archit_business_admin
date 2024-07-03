@@ -66,7 +66,7 @@ include 'admin/aside.php';
             <input type="number" id="purchase_at" class="form-control" name="purchase_at" min="0" max="100" value="100">
         </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-2 mt-3 mb-3">
         <button id="exportExcel" class="btn btn-success">Export to Purchase @</button>
     </div>
     <div class="col-md-6">
