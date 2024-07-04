@@ -1,12 +1,13 @@
 <?php
 
+require('api/vendor/fpdf/fpdf/src/Fpdf/Fpdf.php');
 use setasign\Fpdi\Tcpdf\Fpdi;
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require('api/vendor/fpdf/fpdf/src/Fpdf/Fpdf.php');
+
 // require('api/vendor/fpdi2/src/autoload.php');
 include 'admin/connect.php';
 
