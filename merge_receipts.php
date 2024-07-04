@@ -64,10 +64,11 @@ if(isset($_POST['selected_ids'])) {
     }
 
     try {
-        $pdf->Output('D', 'merged_receipts.pdf');
-        fwrite($log, "PDF generated successfully\n");
+        $pdf->Output('merged_receipts.pdf', 'I');
+        fwrite($log, "PDF generated successfully and sent to browser\n");
     } catch (Exception $e) {
         fwrite($log, "Error generating PDF: " . $e->getMessage() . "\n");
+        echo "Error generating PDF. Please check the log file.";
     }
 } else {
     fwrite($log, "No receipts selected.\n");
