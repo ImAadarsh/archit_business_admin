@@ -1,4 +1,7 @@
 <?php
+
+use setasign\Fpdi\Tcpdf\Fpdi;
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -14,7 +17,7 @@ if(isset($_POST['selected_ids'])) {
     $selectedIds = explode(',', $_POST['selected_ids']);
     fwrite($log, "Selected IDs: " . implode(", ", $selectedIds) . "\n");
     
-    $pdf = new \setasign\Fpdi\Fpdi();
+    $pdf = new Fpdi();
 
     foreach($selectedIds as $id) {
         $sql = "SELECT file FROM expenses WHERE id = ?";
