@@ -1,5 +1,5 @@
 <?php
-
+require 'api/vendor/autoload.php';
 require('api/vendor/fpdf/fpdf/src/Fpdf/Fpdf.php');
 use setasign\Fpdi\Tcpdf\Fpdi;
 
