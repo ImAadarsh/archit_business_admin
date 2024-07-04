@@ -120,16 +120,20 @@ include 'admin/header.php';
                                     <form action="expenses-excel.php" method="GET">
                                         <div class="form-group mb-3">
                                             <input hidden value="<?php echo $sql; ?>" name="query">
-                                            <input type="submit" name="export_all" id="exportAll" class="btn btn-primary" value="Export All to Excel">
+                                            <input type="submit" name="export_all" id="exportAll" class="btn btn-primary form-control" value="Export All to Excel">
                                         </div>
                                     </form>
                                     <form action="expenses-excel.php" method="POST" id="exportForm">
+                                        <div class="form-group mb-3">
     <input type="hidden" name="selected_ids" id="selectedIds">
-    <input type="submit" name="export_selected" id="exportSelected" class="btn btn-primary" value="Export Selected to Excel" disabled>
+    <input type="submit" name="export_selected" id="exportSelected" class="btn btn-primary form-control" value="Export Selected to Excel" disabled>
+    </div>
 </form>
 <form action="merge_receipts.php" method="POST" id="mergeReceiptsForm">
+<div class="form-group mb-3">
     <input type="hidden" name="selected_ids" id="selectedIdsReceipts">
-    <input type="submit" name="merge_receipts" id="mergeReceipts" class="btn btn-primary" value="Export Selected Receipts" disabled>
+    <input type="submit" name="merge_receipts" id="mergeReceipts" class="btn btn-primary form-control" value="Export Selected Receipts" disabled>
+    </div>
 </form>
                                 </div>
                             </div>
