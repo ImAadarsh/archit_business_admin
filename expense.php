@@ -120,9 +120,17 @@ include 'admin/header.php';
                                     <form action="expenses-excel.php" method="GET">
                                         <div class="form-group mb-3">
                                             <input hidden value="<?php echo $sql; ?>" name="query">
-                                            <input type="submit" name="export" id="example-placeholder" class="btn btn-primary" value="Export to Excel">
+                                            <input type="submit" name="export_all" id="exportAll" class="btn btn-primary" value="Export All to Excel">
                                         </div>
                                     </form>
+                                    <form action="expenses-excel.php" method="POST" id="exportForm">
+    <input type="hidden" name="selected_ids" id="selectedIds">
+    <input type="submit" name="export_selected" id="exportSelected" class="btn btn-primary" value="Export Selected to Excel" disabled>
+</form>
+<form action="merge_receipts.php" method="POST" id="mergeReceiptsForm">
+    <input type="hidden" name="selected_ids" id="selectedIdsReceipts">
+    <input type="submit" name="merge_receipts" id="mergeReceipts" class="btn btn-primary" value="Export Selected Receipts" disabled>
+</form>
                                 </div>
                             </div>
                         </div>
@@ -144,6 +152,7 @@ include 'admin/header.php';
                                 <table class="table datatables" id="dataTable-1">
                                     <thead>
                                         <tr>
+                                        <th><input type="checkbox" id="selectAll"></th>
                                             <th>ID</th>
                                             <th>Name</th>
                                             <th>Amount</th>
@@ -169,6 +178,7 @@ include 'admin/header.php';
                                                 $totalExpenses += $final['amount'];
                                             ?>
                                             <tr>
+                                            <td><input type="checkbox" class="rowCheckbox" value="<?php echo $final['id']; ?>"></td>
                                                 <td><?php echo $final['id']?></td>
                                                 <td><?php echo $final['name']?></td>
                                                 <td><?php echo $final['amount']?></td>
@@ -295,6 +305,39 @@ window.onload = function () {
 document.addEventListener('DOMContentLoaded', function() {
     const totalExpensesElement = document.getElementById('totalExpenses');
     totalExpensesElement.textContent = '₹<?php echo number_format($totalExpenses, 2); ?>';
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
+    const exportSelectedButton = document.getElementById('exportSelected');
+    const mergeReceiptsButton = document.getElementById('mergeReceipts');
+    const selectedIdsInput = document.getElementById('selectedIds');
+    const selectedIdsReceiptsInput = document.getElementById('selectedIdsReceipts');
+
+    selectAll.addEventListener('change', function() {
+        rowCheckboxes.forEach(checkbox => checkbox.checked = this.checked);
+        updateButtons();
+    });
+
+    rowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateButtons);
+    });
+
+    function updateButtons() {
+        const selectedRows = document.querySelectorAll('.rowCheckbox:checked');
+        const anySelected = selectedRows.length > 0;
+        
+        exportSelectedButton.disabled = !anySelected;
+        mergeReceiptsButton.disabled = !anySelected;
+        
+        const selectedIds = Array.from(selectedRows).map(checkbox => checkbox.value);
+        const selectedIdsString = selectedIds.join(',');
+        
+        selectedIdsInput.value = selectedIdsString;
+        selectedIdsReceiptsInput.value = selectedIdsString;
+    }
 });
 </script>
 

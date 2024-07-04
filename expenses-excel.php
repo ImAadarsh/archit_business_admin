@@ -8,16 +8,39 @@ if (!isset($_SESSION)) {
     die("Unauthorized access");
 }
 
-// retrieve the data
-$query = $_GET['query'];
-
-// Validate and sanitize the query
-if (!$query) {
-    die("No query provided");
+if (isset($_GET['export_all'])) {
+    // Export all data
+    $query = $_GET['query'];
+    
+    // Validate and sanitize the query
+    if (!$query) {
+        die("No query provided");
+    }
+    
+    // Execute the query
+    $result = mysqli_query($connect, $query);
+} elseif (isset($_POST['export_selected'])) {
+    // Export selected rows
+    $selected_ids = isset($_POST['selected_ids']) ? $_POST['selected_ids'] : '';
+    $selected_ids = array_map('intval', explode(',', $selected_ids));
+    
+    if (empty($selected_ids)) {
+        die("No rows selected");
+    }
+    
+    // Prepare the query with selected IDs
+    $ids_string = implode(',', $selected_ids);
+    $query = "SELECT e.*, u.name as user_name, l.location_name 
+              FROM expenses e
+              LEFT JOIN users u ON e.user_id = u.id
+              LEFT JOIN locations l ON e.location_id = l.id
+              WHERE e.id IN ($ids_string) AND e.business_id = '{$_SESSION['business_id']}'";
+    
+    // Execute the query
+    $result = mysqli_query($connect, $query);
+} else {
+    die("Invalid export option");
 }
-
-// Execute the query
-$result = mysqli_query($connect, $query);
 
 if (!$result) {
     die("Query failed: " . mysqli_error($connect));
@@ -43,5 +66,3 @@ while ($row = mysqli_fetch_assoc($result)) {
 }
 
 mysqli_close($connect);
-
-// No need for JavaScript redirect, the file download will happen automatically
