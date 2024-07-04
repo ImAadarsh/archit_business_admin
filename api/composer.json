@@ -4,6 +4,7 @@
         "phpoffice/phpspreadsheet": "^2.1",
         "setasign/fpdi": "^2.6",
         "setasign/fpdi-tcpdf": "^2.3",
-        "tecnickcom/tcpdf": "^6.7"
+        "tecnickcom/tcpdf": "^6.7",
+        "fpdf/fpdf": "^1.86"
     }
 }

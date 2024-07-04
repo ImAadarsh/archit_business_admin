@@ -26,6 +26,10 @@ class ComposerStaticInit959e8777fb4abafbe90e9088833260b3
         array (
             'Matrix\\' => 7,
         ),
+        'F' => 
+        array (
+            'Fpdf\\' => 5,
+        ),
         'C' => 
         array (
             'Complex\\' => 8,
@@ -61,6 +65,10 @@ class ComposerStaticInit959e8777fb4abafbe90e9088833260b3
         'Matrix\\' => 
         array (
             0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
+        ),
+        'Fpdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/fpdf/fpdf/src/Fpdf',
         ),
         'Complex\\' => 
         array (
