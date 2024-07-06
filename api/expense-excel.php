@@ -1,10 +1,14 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require 'vendor/autoload.php'; // Make sure you have PhpSpreadsheet installed
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 // Include database connection
 include '../admin/connect.php';
+
 
 // Function to validate date format
 function validateDate($date, $format = 'Y-m-d')
@@ -23,6 +27,18 @@ $type = isset($_GET['type']) ? intval($_GET['type']) : null;
 $name = isset($_GET['name']) ? $_GET['name'] : null;
 $amount_min = isset($_GET['amount_min']) ? floatval($_GET['amount_min']) : null;
 $amount_max = isset($_GET['amount_max']) ? floatval($_GET['amount_max']) : null;
+
+// Validate month input
+if ($month !== null && ($month < 1 || $month > 12)) {
+    echo "Invalid month. Please enter a number between 1 and 12.";
+    exit;
+}
+
+// Validate year input
+if ($year !== null && !is_numeric($year)) {
+    echo "Invalid year. Please enter a valid year.";
+    exit;
+}
 
 // Build the SQL query
 $where_clauses = ["1=1"];
@@ -82,15 +98,21 @@ if ($amount_min !== null && $amount_max !== null) {
 
 $where_clause = implode(" AND ", $where_clauses);
 
-$sql = "SELECT e.id, e.name, e.amount, e.type, l.location_name, u.user_name, e.created_at
+$sql = "SELECT e.id, e.name, e.amount, e.type, l.location_name, u.name as user_name, e.created_at
         FROM expenses e
         JOIN locations l ON e.location_id = l.id
         JOIN users u ON e.user_id = u.id
         WHERE $where_clause";
-
+echo "SQL Query: " . $sql . "<br>";
+echo "Parameters: " . print_r($params, true) . "<br>";
 // Prepare and execute the query
 $stmt = $connect->prepare($sql);
-$stmt->bind_param($types, ...$params);
+
+// Only bind parameters if there are any
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -108,8 +130,16 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
+// Check if $data is empty
+if (empty($data)) {
+    echo "No results found for the given criteria.";
+    exit;
+}
+
 $spreadsheet = new Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
+
+// Rest of your code...
 
 // Add headers
 $headers = array_keys($data[0]);
