@@ -21,6 +21,7 @@ $name = isset($_GET['name']) ? $_GET['name'] : null;
 $amount_min = isset($_GET['amount_min']) ? floatval($_GET['amount_min']) : null;
 $amount_max = isset($_GET['amount_max']) ? floatval($_GET['amount_max']) : null;
 $invoice_id = isset($_GET['invoice_id']) ? intval($_GET['invoice_id']) : null;
+$location_id = isset($_GET['location_id']) ? intval($_GET['location_id']) : null;
 
 // Validate business_id
 if (!$business_id) {
@@ -81,6 +82,11 @@ if ($amount_min && $amount_max) {
 if ($invoice_id) {
     $where_clauses[] = "inv.id = ?";
     $params[] = $invoice_id;
+    $types .= "i";
+}
+if ($location_id) {
+    $where_clauses[] = "inv.location_id = ?";
+    $params[] = $location_id;
     $types .= "i";
 }
 

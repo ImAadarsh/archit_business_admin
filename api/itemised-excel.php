@@ -38,6 +38,62 @@ $types = "i";
 
 // ... [rest of the query building code remains the same] ...
 
+// Apply filters based on the provided parameters
+if ($day) {
+    $where_clauses[] = "DATE(inv.invoice_date) = ?";
+    $params[] = $day;
+    $types .= "s";
+}
+
+if ($month) {
+    $where_clauses[] = "MONTH(inv.invoice_date) = ?";
+    $params[] = $month;
+    $types .= "i";
+}
+
+if ($week_start && $week_end) {
+    $where_clauses[] = "inv.invoice_date BETWEEN ? AND ?";
+    $params[] = $week_start;
+    $params[] = $week_end;
+    $types .= "ss";
+}
+
+if ($year) {
+    $where_clauses[] = "YEAR(inv.invoice_date) = ?";
+    $params[] = $year;
+    $types .= "i";
+}
+
+if ($type) {
+    $where_clauses[] = "inv.type = ?";
+    $params[] = $type;
+    $types .= "s";
+}
+
+if ($name) {
+    $where_clauses[] = "inv.name LIKE ?";
+    $params[] = "%" . $name . "%";
+    $types .= "s";
+}
+
+if ($amount_min && $amount_max) {
+    $where_clauses[] = "inv.total_amount BETWEEN ? AND ?";
+    $params[] = $amount_min;
+    $params[] = $amount_max;
+    $types .= "dd";
+}
+
+if ($invoice_id) {
+    $where_clauses[] = "inv.id = ?";
+    $params[] = $invoice_id;
+    $types .= "i";
+}
+if ($location_id) {
+    $where_clauses[] = "inv.location_id = ?";
+    $params[] = $location_id;
+    $types .= "i";
+}
+
 $where_clause = implode(" AND ", $where_clauses);
 
 $sql = "SELECT p.name AS product_name, i.price_of_one, SUM(i.quantity) AS total_quantity, SUM(i.price_of_all) AS total_sales
