@@ -203,7 +203,7 @@ $b_id = $_SESSION['business_id'];
                                             <tr>
                                             <td><input type="checkbox" class="rowCheckbox" value="<?php echo $final['id']; ?>"></td>
                                                 <td><?php echo $final['id']?></td>
-                                                <td><?php echo $final['name']?></td>
+                                                <td><b style="color: <?php if($final['file']==NULL || $final['file']==null || $final['file']==""){echo "Red";}else{echo "Green";}?>;"><?php echo $final['name']?></b></td>
                                                 <td><?php echo $final['amount']?></td>
                                                 <td><?php echo $final['type'] == 0 ? 'Monthly' : 'Adhoc'?></td>
                                                 <td><?php echo $final['location_name']?></td>
@@ -223,8 +223,10 @@ $b_id = $_SESSION['business_id'];
                                         <?php } ?>
                                     </tbody>
                                 </table>
+                                <p>Color: <b style="color: red;">RED</b> means Reciept is Not available.</p>
                             </div>
                         </div>
+                       
                     </div>
                 </div>
             </div>

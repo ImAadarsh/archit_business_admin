@@ -60,7 +60,7 @@ include 'admin/aside.php';
                                     <div class="form-group mb-3">
     <label for="business_id">Associate Business</label>
     
-    <select required type="text" id="location_id" class="form-control" name="business_id">
+    <select required type="text" id="location_id" class="form-control" name="location_id">
         <option>Choose Business Location</option>
         <?php
         $b_id = $_SESSION['business_id'];
