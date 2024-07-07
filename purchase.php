@@ -10,6 +10,7 @@ include 'admin/header.php';
         <?php
         include 'admin/navbar.php';
 include 'admin/aside.php';
+$b_id = $_SESSION['business_id'];
 ?>
         <main role="main" class="main-content">
             <div class="container-fluid">
@@ -22,6 +23,22 @@ include 'admin/aside.php';
     <div class="row mb-3">
         <div class="col-md-3">
             <div class="form-group">
+                <label for="location_id">Business Location</label>
+                <select id="location_id" class="form-control" name="location_id">
+                    <option value="">All</option>
+                    <?php
+                                        // echo $sql;
+                                        $sql = "SELECT * FROM locations where business_id=$b_id";
+                                        $results = $connect->query($sql);
+                                        while($final=$results->fetch_assoc()){?>
+                                        <option value="<?php echo $final['id'] ?>"><?php echo $final['location_name'] ?></option>
+
+                                        <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
                 <label for="invoice_type">Invoice Type</label>
                 <select id="invoice_type" class="form-control" name="invoice_type">
                     <option value="">Choose Invoice Type</option>
@@ -30,7 +47,7 @@ include 'admin/aside.php';
                 </select>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="form-group">
                 <label for="payment_type">Payment Type</label>
                 <select id="payment_type" class="form-control" name="payment_type">
@@ -40,15 +57,15 @@ include 'admin/aside.php';
                 </select>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="form-group">
-                <label for="amount_min">Minimum Amount</label>
+                <label for="amount_min">Min. Amount</label>
                 <input type="number" id="amount_min" class="form-control" name="amount_min">
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="form-group">
-                <label for="amount_max">Maximum Amount</label>
+                <label for="amount_max">Max. Amount</label>
                 <input type="number" id="amount_max" class="form-control" name="amount_max">
             </div>
         </div>
@@ -92,7 +109,7 @@ include 'admin/aside.php';
 </form>
                                     
                                     <?php
-                            $b_id = $_SESSION['business_id'];
+                          
 
 if(isset($_GET['filter'])) {
     $invoice_type = $_GET['invoice_type'];
@@ -100,6 +117,7 @@ if(isset($_GET['filter'])) {
     $amount_min = $_GET['amount_min'];
     $amount_max = $_GET['amount_max'];
     $date_range = $_GET['date_range'];
+    $location_id = $_GET['location_id'];
 
     $where_clauses = ["business_id = $b_id", "is_completed = 1"];
 
@@ -115,6 +133,10 @@ if(isset($_GET['filter'])) {
     if($amount_max !== '') {
         $where_clauses[] = "total_amount <= '$amount_max'";
     }
+    if($location_id !== '') {
+        $where_clauses[] = "location_id = '$location_id'";
+    }
+
 
     switch ($date_range) {
         case "today":

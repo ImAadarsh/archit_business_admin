@@ -2,6 +2,7 @@
 include 'admin/connect.php';
 include 'admin/session.php';
 include 'admin/header.php';
+$b_id = $_SESSION['business_id'];
 ?>
 <body class="vertical light">
     <div class="wrapper">
@@ -20,6 +21,22 @@ include 'admin/aside.php';
 
   
   <div class="row">
+  <div class="col-md-3 mb-3">
+           
+                <label for="location_id">Business Location</label>
+                <select id="location_id" class="form-control" name="location_id">
+                    <option value="">All</option>
+                    <?php
+                                        // echo $sql;
+                                        $sql = "SELECT * FROM locations where business_id=$b_id";
+                                        $results = $connect->query($sql);
+                                        while($final=$results->fetch_assoc()){?>
+                                        <option value="<?php echo $final['id'] ?>"><?php echo $final['location_name'] ?></option>
+
+                                        <?php } ?>
+                </select>
+
+        </div>
   <div class="col-md-3 mb-3">
       <label for="price_min">Minimum Price</label>
       <input type="number" id="price_min" class="form-control" name="price_min">
@@ -81,12 +98,13 @@ include 'admin/aside.php';
 </div>
 
 <?php
-$b_id = $_SESSION['business_id'];
+
 
 if(isset($_GET['filter'])) {
     $price_min = $_GET['price_min'];
     $price_max = $_GET['price_max'];
     $date_range = $_GET['date_range'];
+    $location_id = $_GET['location_id'];
 
     $where_clauses = ["inv.business_id = $b_id", "inv.is_completed = 1"];
     $where_clauses[] = "inv.type = 'normal'";
@@ -96,6 +114,9 @@ if(isset($_GET['filter'])) {
     }
     if($price_max !== '') {
         $where_clauses[] = "i.price_of_one <= '$price_max'";
+    }
+    if($location_id !== '') {
+        $where_clauses[] = "inv.location_id = '$location_id'";
     }
 
     switch ($date_range) {

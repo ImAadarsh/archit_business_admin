@@ -26,6 +26,14 @@ include 'admin/header.php';
         </select>
     </div>
     <div class="form-group mb-3">
+        <label for="invoice_type">Business Location</label>
+        <select id="invoice_type" class="form-control" name="invoice_type">
+            <option value="">All</option>
+            <option value="normal">Normal</option>
+            <option value="performa">Performa</option>
+        </select>
+    </div>
+    <div class="form-group mb-3">
         <label for="amount_min">Minimum Amount</label>
         <input type="number" id="amount_min" class="form-control" name="amount_min">
     </div>
@@ -74,6 +82,9 @@ include 'admin/header.php';
                                         }
                                         if($amount_max !== '') {
                                             $where_clauses[] = "total_amount <= '$amount_max'";
+                                        }
+                                        if($location_id !== '') {
+                                            $where_clauses[] = "location_id <= '$location_id'";
                                         }
                                     
                                         switch ($date_range) {

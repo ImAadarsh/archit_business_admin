@@ -2,6 +2,7 @@
 include 'admin/connect.php';
 include 'admin/session.php';
 include 'admin/header.php';
+$b_id = $_SESSION['business_id'];
 ?>
 <body class="vertical light">
     <div class="wrapper">
@@ -18,6 +19,20 @@ include 'admin/header.php';
                                 <div class="col-md-12">
                                 <form role="form" action="expense.php" method="GET" enctype="multipart/form-data">
     <div class="row">
+        <div class="col-md-3 mb-3">
+                <label for="location_id">Business Location</label>
+                <select id="location_id" class="form-control" name="location_id">
+                    <option value="">All</option>
+                    <?php
+                                        // echo $sql;
+                                        $sql = "SELECT * FROM locations where business_id=$b_id";
+                                        $results = $connect->query($sql);
+                                        while($final=$results->fetch_assoc()){?>
+                                        <option value="<?php echo $final['id'] ?>"><?php echo $final['location_name'] ?></option>
+
+                                        <?php } ?>
+                </select>
+        </div>
         <div class="col-md-2 mb-3">
             <label for="expense_type">Expense Type</label>
             <select id="expense_type" class="form-control" name="expense_type">
@@ -34,7 +49,7 @@ include 'admin/header.php';
             <label for="amount_max">Maximum Amount</label>
             <input type="number" id="amount_max" class="form-control" name="amount_max">
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-2 mb-3">
             <label for="date_range">Date Range</label>
             <select onchange="showHideCustomRange()" name="date_range" id="date_range" class="form-control">
                 <option value="all">All Time</option>
@@ -45,7 +60,7 @@ include 'admin/header.php';
                 <option value="custom">Custom range</option>
             </select>
         </div>
-        <div class="col-md-2 mb-3">
+        <div class="col-md-1 mb-3">
             <label for="filter">&nbsp;</label>
             <input type="submit" name="filter" id="example-placeholder" class="btn btn-primary form-control" value="Filter">
         </div>
@@ -63,13 +78,14 @@ include 'admin/header.php';
 </form>
                                     
                                     <?php
-                                    $b_id = $_SESSION['business_id'];
+                                    
                                     
                                     if(isset($_GET['filter'])){
                                         $expense_type = $_GET['expense_type'];
                                         $amount_min = $_GET['amount_min'];
                                         $amount_max = $_GET['amount_max'];
                                         $date_range = $_GET['date_range'];
+                                        $location_id = $_GET['location_id'];
 
                                         $where_clauses = ["e.business_id = $b_id"];
 
@@ -81,6 +97,9 @@ include 'admin/header.php';
                                         }
                                         if($amount_max !== '') {
                                             $where_clauses[] = "amount <= '$amount_max'";
+                                        }
+                                        if($location_id !== '') {
+                                            $where_clauses[] = "e.location_id = '$location_id'";
                                         }
 
                                         switch ($date_range) {
