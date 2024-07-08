@@ -1,0 +1,14 @@
+[
+    {
+      "relation": [
+        "delegate_permission/common.handle_all_urls"
+      ],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "in.architartgallerybusiness.app",
+        "sha256_cert_fingerprints": [
+          "44:CC:53:2D:0D:A1:06:88:89:5A:E7:69:5C:22:93:CF:C5:83:CF:61:A8:9D:DF:93:5F:AF:BC:DD:10:ED:37:DF"
+        ]
+      }
+    }
+  ]
