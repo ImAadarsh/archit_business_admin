@@ -108,9 +108,17 @@ include 'admin/header.php';
                                         }
                                     
                                         $where_clause = implode(" AND ", $where_clauses);
-                                        $sql = "SELECT * FROM invoices WHERE $where_clause";
+                                        $sql = "SELECT i.*, l.location_name, b.business_name 
+                                               FROM invoices i 
+                                               LEFT JOIN locations l ON i.location_id = l.id 
+                                               LEFT JOIN businessses b ON i.business_id = b.id 
+                                               WHERE $where_clause";
                                     } else {
-                                        $sql = "SELECT * FROM invoices WHERE business_id = '$b_id' AND is_completed = 1";
+                                        $sql = "SELECT i.*, l.location_name, b.business_name 
+                                               FROM invoices i 
+                                               LEFT JOIN locations l ON i.location_id = l.id 
+                                               LEFT JOIN businessses b ON i.business_id = b.id 
+                                               WHERE i.business_id = '$b_id' AND i.is_completed = 1";
                                     }
                                     ?>
                                     <form action="invoices-excel.php" method="GET">
@@ -138,6 +146,8 @@ include 'admin/header.php';
             <th>Serial No</th>
             <th>Customer Name</th>
             <th>Type</th>
+            <th>Business</th>
+            <th>Location</th>
             <th>Total Amount</th>
             <th>Invoice Date</th>
             <th>Action</th>
@@ -156,11 +166,20 @@ include 'admin/header.php';
         ?>
         <tr>
             <td><?php echo $temp?></td>
-            <td><?php echo (!empty($final['serial_no']) && strtolower($final['serial_no']) !== 'null') ? ($final['serial_no']) : 'N/A';?></td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <span class="serial-no"><?php echo (!empty($final['serial_no']) && strtolower($final['serial_no']) !== 'null') ? ($final['serial_no']) : 'N/A';?></span>
+                    <button class="btn btn-sm btn-link edit-serial-btn" data-invoice-id="<?php echo $final['id']?>" data-serial-no="<?php echo $final['serial_no']?>">
+                        <i class="fe fe-edit-2"></i>
+                    </button>
+                </div>
+            </td>
             <td><?php echo $final['name']?></td>
             <td>
                 <?php echo (!empty($final['type']) && strtolower($final['type']) !== 'null') ? ucfirst($final['type']) : 'N/A'; ?>
             </td>
+            <td><?php echo $final['business_name'] ?? 'N/A' ?></td>
+            <td><?php echo $final['location_name'] ?? 'N/A' ?></td>
             <td><?php echo $final['total_amount']?></td>
             <td><?php echo  date('d M Y | H:i', $date);?></td>
             <td>
@@ -177,6 +196,33 @@ include 'admin/header.php';
         <?php } ?>
     </tbody>
 </table>
+
+<!-- Edit Serial Number Modal -->
+<div class="modal fade" id="editSerialModal" tabindex="-1" role="dialog" aria-labelledby="editSerialModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSerialModalLabel">Edit Invoice Serial Number</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editSerialForm">
+                    <input type="hidden" id="editInvoiceId" name="invoice_id">
+                    <div class="form-group">
+                        <label for="newSerialNo">New Serial Number</label>
+                        <input type="text" class="form-control" id="newSerialNo" name="serial_no" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveSerialNo">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
                             </div>
                         </div>
                     </div>
@@ -184,87 +230,14 @@ include 'admin/header.php';
             </div>
         </main>
     </div>
+    <!-- Required Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
     <?php
-// Convert array to string
-$dataPointsString = implode(",", $dataPoints);
-?>
-
-<script>
-    console.log("Data points:", <?php echo json_encode($dataPoints); ?>);
-window.onload = function () {
-    if (window.innerWidth > 767) {
-    var dataPoints = [<?php echo $dataPointsString; ?>];
-    var cumulativeDataPoints = [];
-    var cumulativeTotal = 0;
-
-    // Calculate cumulative values
-    for (var i = 0; i < dataPoints.length; i++) {
-        cumulativeTotal += dataPoints[i].y;
-        cumulativeDataPoints.push({
-            x: new Date(dataPoints[i].x),
-            y: cumulativeTotal
-        });
-    }
-
-    var chart = new CanvasJS.Chart("expenseChartContainer", {
-    animationEnabled: true,
-    zoomEnabled: true,
-    theme: "light2",
-    title: {
-        text: "Invoice Amount Over Time"
-    },
-    axisX: {
-        valueFormatString: "DD MMM YYYY",
-        crosshair: {
-            enabled: true,
-            snapToDataPoint: true
-        }
-    },
-    axisY: {
-        title: "Invoice Amount",
-        includeZero: true,
-        crosshair: {
-            enabled: true
-        }
-    },
-    axisY2: {
-        title: "Cumulative Invoice Amount",
-        includeZero: true
-    },
-    toolTip:{
-        shared:true
-    },
-    legend:{
-        cursor:"pointer",
-        verticalAlign: "bottom",
-        horizontalAlign: "left",
-        dockInsidePlotArea: true,
-    },
-    data: [
-        {
-            type: "column",
-            showInLegend: true,
-            name: "Daily Invoice Amount",
-            xValueFormatString: "DD MMM YYYY",
-            color: "#1B5F92",
-            dataPoints: dataPoints
-        },
-        {
-            type: "line",
-            showInLegend: true,
-            name: "Cumulative Invoice Amount",
-            markerType: "square",
-            xValueFormatString: "DD MMM YYYY",
-            color: "#F08080",
-            axisYType: "secondary",
-            dataPoints: cumulativeDataPoints
-        }
-    ]
-});
-    chart.render();
-}}
-</script>
+    // Convert array to string
+    $dataPointsString = implode(",", $dataPoints);
+    ?>
 
     <script>
     function showHideCustomRange() {
@@ -277,7 +250,137 @@ window.onload = function () {
             customRange.style.display = "none";
         }
     }
+
+    $(document).ready(function() {
+        // Function to open the edit modal
+        function openEditModal(invoiceId, currentSerialNo) {
+            $('#editInvoiceId').val(invoiceId);
+            $('#newSerialNo').val(currentSerialNo);
+            $('#editSerialModal').modal('show');
+        }
+
+        // Handle save button click
+        $('#saveSerialNo').click(function() {
+            var invoiceId = $('#editInvoiceId').val();
+            var newSerialNo = $('#newSerialNo').val();
+
+            $.ajax({
+                url: 'edit/serial_no.php',
+                type: 'POST',
+                data: {
+                    invoice_id: invoiceId,
+                    serial_no: newSerialNo
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update the serial number in the table without reloading
+                        $('button[data-invoice-id="' + invoiceId + '"]').closest('td').find('.serial-no').text(newSerialNo);
+                        $('#editSerialModal').modal('hide');
+                        // Show success message
+                        alert('Serial number updated successfully');
+                    } else {
+                        alert('Error updating serial number: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error updating serial number. Please try again.');
+                }
+            });
+        });
+
+        // Handle edit button click
+        $(document).on('click', '.edit-serial-btn', function(e) {
+            e.preventDefault();
+            var invoiceId = $(this).data('invoice-id');
+            var currentSerialNo = $(this).data('serial-no');
+            openEditModal(invoiceId, currentSerialNo);
+        });
+
+        // Enhanced chart configuration
+        if (window.innerWidth > 767) {
+            var dataPoints = [<?php echo $dataPointsString; ?>];
+            var cumulativeDataPoints = [];
+            var cumulativeTotal = 0;
+
+            // Calculate cumulative values
+            for (var i = 0; i < dataPoints.length; i++) {
+                cumulativeTotal += dataPoints[i].y;
+                cumulativeDataPoints.push({
+                    x: new Date(dataPoints[i].x),
+                    y: cumulativeTotal
+                });
+            }
+
+            var chart = new CanvasJS.Chart("expenseChartContainer", {
+                animationEnabled: true,
+                zoomEnabled: true,
+                theme: "light2",
+                title: {
+                    text: "Invoice Analysis"
+                },
+                subtitles: [{
+                    text: "Daily and Cumulative Invoice Amounts"
+                }],
+                axisX: {
+                    valueFormatString: "DD MMM YYYY",
+                    crosshair: {
+                        enabled: true,
+                        snapToDataPoint: true
+                    }
+                },
+                axisY: {
+                    title: "Daily Invoice Amount",
+                    includeZero: true,
+                    crosshair: {
+                        enabled: true
+                    }
+                },
+                axisY2: {
+                    title: "Cumulative Invoice Amount",
+                    includeZero: true
+                },
+                toolTip:{
+                    shared:true,
+                    contentFormatter: function(e) {
+                        var content = "";
+                        for(var i = 0; i < e.entries.length; i++){
+                            content += e.entries[i].dataSeries.name + ": " + e.entries[i].dataPoint.y.toFixed(2) + "<br/>";
+                        }
+                        return content;
+                    }
+                },
+                legend:{
+                    cursor:"pointer",
+                    verticalAlign: "bottom",
+                    horizontalAlign: "left",
+                    dockInsidePlotArea: true,
+                },
+                data: [
+                    {
+                        type: "column",
+                        showInLegend: true,
+                        name: "Daily Invoice Amount",
+                        xValueFormatString: "DD MMM YYYY",
+                        color: "#1B5F92",
+                        dataPoints: dataPoints
+                    },
+                    {
+                        type: "line",
+                        showInLegend: true,
+                        name: "Cumulative Invoice Amount",
+                        markerType: "square",
+                        xValueFormatString: "DD MMM YYYY",
+                        color: "#F08080",
+                        axisYType: "secondary",
+                        dataPoints: cumulativeDataPoints
+                    }
+                ]
+            });
+            chart.render();
+        }
+    });
     </script>
 
     <?php include "admin/footer.php"; ?>
 </body>
+</html>

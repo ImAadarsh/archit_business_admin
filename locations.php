@@ -50,10 +50,10 @@ include 'admin/aside.php';
     <tbody>
         <?php
      
-
+$bid = $_SESSION['business_id'];
         // Fetch locations from the database
         $sql = "SELECT locations.*, businessses.business_name, businessses.owner_name FROM locations
-                INNER JOIN businessses ON locations.business_id = businessses.id";
+                INNER JOIN businessses ON locations.business_id = businessses.id where businessses.id = $bid";
         $results = $connect->query($sql);
         while ($final = $results->fetch_assoc()) {
             ?>

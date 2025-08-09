@@ -25,6 +25,7 @@ if ($response['user']['role']=='admin') {
     $_SESSION['phone'] = $response['user']['phone'];
     $_SESSION['userid'] = $response['user']['id'];
     $_SESSION['business_id'] = $response['user']['business_id'];
+    $_SESSION['logo'] = $response['user']['logo'];
     $_SESSION['role'] = 'admin';
     header('location: dashboard.php');
 }else{
