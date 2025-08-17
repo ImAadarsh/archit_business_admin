@@ -85,6 +85,12 @@
             <span>Sales & Inventory</span>
         </p>
         <ul class="navbar-nav flex-fill w-100 mb-2">
+            <!-- <li class="nav-item">
+                <a href="product-dashboard.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-bar-chart-2 fe-16"></i>
+                    <span class="ml-3 item-text">Product Dashboard</span>
+                </a>
+            </li> -->
             <li class="nav-item">
                 <a href="products.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-package fe-16"></i>
@@ -95,6 +101,30 @@
                 <a href="add-product.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-plus-circle fe-16"></i>
                     <span class="ml-3 item-text">Add Product</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="category.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-tag fe-16"></i>
+                    <span class="ml-3 item-text">Add Product Type</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="category-view.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-layers fe-16"></i>
+                    <span class="ml-3 item-text">View Product Types</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="art-category.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-package fe-16"></i>
+                    <span class="ml-3 item-text">Add Art Category</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="art-category-view.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-image fe-16"></i>
+                    <span class="ml-3 item-text">View Art Categories</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -113,6 +143,12 @@
                 <a href="itemised.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-shopping-cart fe-16"></i>
                     <span class="ml-3 item-text">Itemised Sales</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="user-inquiries.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-message-circle fe-16"></i>
+                    <span class="ml-3 item-text">User Inquiries</span>
                 </a>
             </li>
         </ul>

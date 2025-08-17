@@ -18,8 +18,8 @@ include 'admin/aside.php';
                     <div class="col-12">
                         <div class="card shadow mb-4">
                             <div class="card-header">
-                                <strong class="card-title">Product Types</strong>
-                                <a href="category.php" class="btn btn-primary float-right">Add New Product Type</a>
+                                <strong class="card-title">Art Categories</strong>
+                                <a href="art-category.php" class="btn btn-primary float-right">Add New Art Category</a>
                             </div>
                             <div class="card-body">
                                 <?php if(isset($_SESSION['success'])): ?>
@@ -52,8 +52,7 @@ include 'admin/aside.php';
                                             <tr>
                                                 <th>ID</th>
                                                 <th>Name</th>
-                                                <th>HSN Code</th>
-                                                <th>Location</th>
+                                                <th>Product Type</th>
                                                 <th>Created At</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -61,11 +60,11 @@ include 'admin/aside.php';
                                         <tbody>
                                             <?php
                                             $business_id = $_SESSION['business_id'];
-                                            $sql = "SELECT c.*, l.location_name 
-                                                   FROM categories c 
-                                                   LEFT JOIN locations l ON c.location_id = l.id 
+                                            $sql = "SELECT pc.*, c.name as category_name 
+                                                   FROM product_category pc 
+                                                   LEFT JOIN categories c ON pc.category_id = c.id 
                                                    WHERE c.business_id = $business_id 
-                                                   ORDER BY c.created_at DESC";
+                                                   ORDER BY pc.created_at DESC";
                                             $result = $connect->query($sql);
                                             
                                             if ($result && $result->num_rows > 0) {
@@ -73,17 +72,16 @@ include 'admin/aside.php';
                                                     echo "<tr>";
                                                     echo "<td>" . $row['id'] . "</td>";
                                                     echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                                                    echo "<td>" . htmlspecialchars($row['hsn_code'] ?? '') . "</td>";
-                                                    echo "<td>" . htmlspecialchars($row['location_name'] ?? 'N/A') . "</td>";
+                                                    echo "<td>" . htmlspecialchars($row['category_name'] ?? 'N/A') . "</td>";
                                                     echo "<td>" . date('d M Y, h:i A', strtotime($row['created_at'])) . "</td>";
                                                     echo "<td>
-                                                            <a href='edit-category.php?id=" . $row['id'] . "' class='btn btn-sm btn-info'>Edit</a>
-                                                            <a href='controller/_delete-category.php?id=" . $row['id'] . "' class='btn btn-sm btn-danger' onclick='return confirm(\"Are you sure you want to delete this product type?\")'>Delete</a>
+                                                            <a href='edit-art-category.php?id=" . $row['id'] . "' class='btn btn-sm btn-info'>Edit</a>
+                                                            <a href='controller/_delete-art-category.php?id=" . $row['id'] . "' class='btn btn-sm btn-danger' onclick='return confirm(\"Are you sure you want to delete this art category?\")'>Delete</a>
                                                           </td>";
                                                     echo "</tr>";
                                                 }
                                             } else {
-                                                echo "<tr><td colspan='6' class='text-center'>No product types found</td></tr>";
+                                                echo "<tr><td colspan='5' class='text-center'>No art categories found</td></tr>";
                                             }
                                             ?>
                                         </tbody>
@@ -95,4 +93,4 @@ include 'admin/aside.php';
                 </div>
             </div> <!-- .container-fluid -->
 
-            <?php include "admin/footer.php"; ?>
+            <?php include "admin/footer.php"; ?> 

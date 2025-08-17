@@ -51,9 +51,12 @@ include 'admin/aside.php';
                                             <tr>
                                                 <th>ID</th>
                                                 <th>Name</th>
-                                                <!--<th>Product Serial Number</th>-->
                                                 <th>HSN Code</th>
                                                 <th>Price</th>
+                                                <th>Product Type</th>
+                                                <th>Art Category</th>
+                                                <th>itemCode</th>
+                                                <th>Images</th>
                                                 <th>Location</th>
                                                 <th>Created At</th>
                                                 <th>Updated At</th>
@@ -63,9 +66,13 @@ include 'admin/aside.php';
                                         <tbody>
                                             <?php
                                             $business_id = $_SESSION['business_id'];
-                                            $sql = "SELECT p.*, l.location_name 
+                                            $sql = "SELECT p.*, l.location_name, c.name AS category_name, 
+                                                           pc.name AS art_category_name,
+                                                           (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id = p.id) AS images_count
                                                     FROM products p 
                                                     JOIN locations l ON p.location_id = l.id 
+                                                    LEFT JOIN categories c ON p.category_id = c.id
+                                                    LEFT JOIN product_category pc ON p.art_category_id = pc.id
                                                     WHERE p.business_id = $business_id 
                                                     ORDER BY p.id DESC";
                                             $result = $connect->query($sql);
@@ -75,9 +82,12 @@ include 'admin/aside.php';
                                                     echo "<tr>";
                                                     echo "<td>" . $row['id'] . "</td>";
                                                     echo "<td>" . $row['name'] . "</td>";
-                                                    // echo "<td>" . $row['product_serial_number'] . "</td>";
                                                     echo "<td>" . $row['hsn_code'] . "</td>";
                                                     echo "<td>" . $row['price'] . "</td>";
+                                                    echo "<td>" . ($row['category_name'] ?? '-') . "</td>";
+                                                    echo "<td>" . ($row['art_category_name'] ?? '-') . "</td>";
+                                                    echo "<td>" . ($row['item_code'] ?? '-') . "</td>";
+                                                    echo "<td>" . (int)$row['images_count'] . "</td>";
                                                     echo "<td>" . $row['location_name'] . "</td>";
                                                     echo "<td>" . date('d M Y, h:i A', strtotime($row['created_at'])) . "</td>";
                                                     echo "<td>" . date('d M Y, h:i A', strtotime($row['updated_at'])) . "</td>";
@@ -88,7 +98,7 @@ include 'admin/aside.php';
                                                     echo "</tr>";
                                                 }
                                             } else {
-                                                echo "<tr><td colspan='9' class='text-center'>No products found</td></tr>";
+                                                echo "<tr><td colspan='11' class='text-center'>No products found</td></tr>";
                                             }
                                             ?>
                                         </tbody>

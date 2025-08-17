@@ -17,22 +17,42 @@ include 'admin/aside.php';
 
                 <div class="card shadow mb-4">
                     <a href="category-view.php">
-                        <button type="button" class="btn btn-primary">View Workshop Categories</button>
+                        <button type="button" class="btn btn-primary">View Product Types</button>
                     </a>
                     <div class="card-header">
-                        <strong class="card-title">Add Workshop Category</strong>
+                        <strong class="card-title">Add Product Type</strong>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-12">
-                                <form role="form" action="controller/_category.php" method="POST"
-                                    enctype="multipart/form-data">
+                                <form role="form" action="controller/_category.php" method="POST">
                                     <div class="form-group mb-3">
-                                        <label for="simpleinput">Category Name</label>
+                                        <label for="simpleinput">Product Type Name</label>
                                         <input type="text" id="simpleinput" class="form-control"
-                                            placeholder="Category Name" name="name">
+                                            placeholder="Product Type Name" name="name" required>
+                                        <input type="hidden" name="business_id" value="<?php echo $_SESSION['business_id']; ?>">
                                     </div>
 
+                                    <div class="form-group mb-3">
+                                        <label for="location_id">Business Location *</label>
+                                        <select required id="location_id" class="form-control" name="location_id">
+                                            <option value="">Choose Business Location</option>
+                                            <?php
+                                            $b_id = $_SESSION['business_id'];
+                                            $sql = "SELECT * FROM locations WHERE business_id=$b_id ORDER BY location_name";
+                                            $results = $connect->query($sql);
+                                            while($location = $results->fetch_assoc()) {
+                                                echo '<option value="' . $location['id'] . '">' . htmlspecialchars($location['location_name']) . '</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="hsn_code">HSN Code</label>
+                                        <input type="text" id="hsn_code" class="form-control"
+                                            placeholder="HSN Code" name="hsn_code">
+                                    </div>
 
                                     <div class="form-group mb-3">
 
@@ -44,7 +64,6 @@ include 'admin/aside.php';
                         </div>
                     </div>
                 </div>
-
 
 
 
