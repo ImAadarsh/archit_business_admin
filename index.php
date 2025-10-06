@@ -42,8 +42,11 @@ if ($response['user']['role']=='admin') {
     .login-container {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
+        height: 100vh;
         position: relative;
         overflow: hidden;
+        display: flex;
+        align-items: center;
     }
     
     .login-container::before {
@@ -65,12 +68,15 @@ if ($response['user']['role']=='admin') {
         border: 1px solid rgba(255, 255, 255, 0.2);
         position: relative;
         z-index: 2;
-        margin-top: 3rem;
+        margin: 0;
     }
     
     .logo-container {
         text-align: center;
         margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
     .logo-container img {
@@ -86,12 +92,14 @@ if ($response['user']['role']=='admin') {
         font-weight: 700;
         font-size: 1.5rem;
         margin-bottom: 0.5rem;
+        text-align: center;
     }
     
     .login-subtitle {
         color: #718096;
         font-size: 0.9rem;
         margin-bottom: 2rem;
+        text-align: center;
     }
     
     .form-floating {
@@ -100,7 +108,7 @@ if ($response['user']['role']=='admin') {
     }
     
     .form-floating .form-control {
-        height: 3.5rem;
+        height: 60px;
         border-radius: 12px;
         border: 2px solid #e2e8f0;
         background: #f8fafc;
@@ -194,9 +202,10 @@ if ($response['user']['role']=='admin') {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 15px;
         padding: 2rem;
-        margin-top: 2rem;
+        margin: 0;
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
+        height: fit-content;
     }
     
     .feature-item {
@@ -242,9 +251,8 @@ if ($response['user']['role']=='admin') {
     
     @media (max-width: 768px) {
         .login-card {
-            margin: 1rem;
+            margin: 1.5rem;
             border-radius: 15px;
-            margin-top: 2rem;
         }
         
         .features-preview {
@@ -266,64 +274,32 @@ if ($response['user']['role']=='admin') {
             margin-bottom: 1.5rem;
         }
     }
+    
+    @media (min-width: 992px) {
+        .row {
+            gap: 1.5rem;
+        }
+        
+        .col-lg-6 {
+            flex: 0 0 auto;
+            width: 50%;
+        }
+        
+        .col-lg-4 {
+            flex: 0 0 auto;
+            width: 40%;
+        }
+    }
 </style>
 
 <body class="light">
     <div class="login-container">
-        <div class="container-fluid h-100">
-            <div class="row h-100 align-items-center justify-content-center">
-                <div class="col-lg-4 col-md-6 col-11">
-                    <div class="login-card p-4 p-md-5">
-                        <div class="logo-container">
-                            <a href="index.php" class="text-decoration-none">
-                                <img height="80" src="assets/images/invoice_mate.svg" alt="InvoiceMate Logo" class="mb-3">
-                            </a>
-                            <h1 class="login-title">Welcome Back</h1>
-                            <p class="login-subtitle">Sign in to your InvoiceMate dashboard</p>
-                        </div>
-                        
-                        <form action="index.php" method="POST">
-                            <div class="form-floating">
-                                <select name="phone" id="businessSelect" class="form-control" required autofocus>
-                                    <option value="">Select your business</option>
-                                    <?php
-                                    $sql = "SELECT * FROM businessses";
-                                    $results = $connect->query($sql);
-                                    while($final = $results->fetch_assoc()) {
-                                        echo '<option value="' . $final['phone'] . '">' . $final['business_name'] . '</option>';
-                                    }
-                                    ?>
-                                </select>
-                                <label for="businessSelect">Select Business</label>
-                            </div>
-                            
-                            <div class="form-floating">
-                                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
-                                <label for="password">Password</label>
-                            </div>
-                            
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="remember-me" id="rememberMe">
-                                <label class="form-check-label" for="rememberMe">
-                                    Keep me signed in
-                                </label>
-                            </div>
-                            
-                            <button class="btn btn-login w-100" name="login" type="submit">
-                                <i class="feather feather-log-in me-2"></i>
-                                Sign In
-                            </button>
-                        </form>
-                        
-                        <div class="text-center mt-4">
-                            <small class="text-muted">
-                                Secure business dashboard • Powered by InvoiceMate
-                            </small>
-                        </div>
-                    </div>
-                    
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <!-- Left Column with stacked cards -->
+                <div class="col-lg-6 col-md-6 col-11">
                     <!-- Features Preview for Desktop -->
-                    <div class="features-preview d-none d-lg-block">
+                    <div class="features-preview d-none d-lg-block mb-4">
                         <h5 class="text-white mb-3">Everything you need to run your business</h5>
                         <div class="feature-item">
                             <div class="feature-icon">📊</div>
@@ -352,11 +328,88 @@ if ($response['user']['role']=='admin') {
                                 <span class="stat-label">Invoices Generated</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-number">99.98%</span>
+                                <span class="stat-number">99%</span>
                                 <span class="stat-label">Uptime</span>
                             </div>
                         </div>
+                        
+                        
                     </div>
+                    
+                    <!-- Why Choose InvoiceMate Card -->
+                    <div class="features-preview d-none d-lg-block">
+                        <h5 class="text-white mb-1">Why Choose InvoiceMate?</h5>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">🔒</div>
+                            <span>Secure & Reliable</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">📱</div>
+                            <span>Mobile Friendly</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🎯</div>
+                            <span>Easy to Use</span>
+                        </div>
+                       
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 col-11">
+                    <div class="login-card p-4 p-md-5">
+                        <div class="logo-container">
+                            <a href="index.php" class="text-decoration-none">
+                                <img height="80" src="assets/images/invoice_mate.svg" alt="InvoiceMate Logo" class="mb-3">
+                            </a>
+                            <h1 class="login-title">Welcome Back</h1>
+                            <p class="login-subtitle">Sign in to your <strong>InvoiceMate</strong> dashboard</p>
+                        </div>
+                        
+                        <form action="index.php" method="POST">
+                            <div class="form-floating">
+                                <select name="phone" id="businessSelect" class="form-control" required autofocus>
+                                    <option value="">Select your business</option>
+                                    <?php
+                                    $sql = "SELECT * FROM businessses";
+                                    $results = $connect->query($sql);
+                                    while($final = $results->fetch_assoc()) {
+                                        echo '<option value="' . $final['phone'] . '">' . $final['business_name'] . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                                <label for="businessSelect">Select Business</label>
+                            </div>
+                            
+                            <div class="form-floating">
+                                <input type="password" id="password" name="password" class="form-control" placeholder="" required>
+                                <label for="password">Password</label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="remember-me" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">
+                                    Keep me signed in
+                                </label>
+                            </div>
+                            
+                            <button class="btn btn-login w-100" name="login" type="submit">
+                                <i class="feather feather-log-in me-2"></i>
+                                Sign In
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <small class="text-muted">
+                                Secure business dashboard • Powered by InvoiceMate
+                            </small>
+                            <br>
+                            <small class="text-muted">
+                                Developed by <a href="https://endeavourdigital.in/" target="_blank" class="text-decoration-none" style="color: #667eea;">Endeavour Digital</a>
+                            </small>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
