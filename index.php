@@ -108,7 +108,7 @@ if ($response['user']['role']=='admin') {
     }
     
     .form-floating .form-control {
-        height: 60px;
+        height: 6rem;
         border-radius: 12px;
         border: 2px solid #e2e8f0;
         background: #f8fafc;
@@ -429,10 +429,13 @@ if ($response['user']['role']=='admin') {
         // Enhanced login form interactions
         $(document).ready(function() {
             // Add loading state to login button
-            $('form').on('submit', function() {
+            $('form').on('submit', function(e) {
                 const submitBtn = $('button[name="login"]');
                 submitBtn.html('<i class="feather feather-loader me-2"></i>Signing In...');
                 submitBtn.prop('disabled', true);
+                
+                // Allow form to submit normally
+                return true;
             });
             
             // Add focus effects to form controls
@@ -496,10 +499,15 @@ if ($response['user']['role']=='admin') {
                 $('form').submit();
             }
         });
+        
+        // Debug form submission
+        console.log('Login form initialized');
+        $('form').on('submit', function(e) {
+            console.log('Form submitted');
+            console.log('Phone:', $('select[name="phone"]').val());
+            console.log('Password:', $('input[name="password"]').val());
+        });
     </script>
-</body>
-
-</html>
 </body>
 
 </html>
