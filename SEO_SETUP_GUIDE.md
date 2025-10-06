@@ -33,7 +33,7 @@
 ## Next Steps for Complete SEO Setup
 
 ### 1. Update Domain URLs
-Replace `https://your-domain.com` with your actual domain in:
+Replace `https://invoicemate.in` with your actual domain in:
 - header.php (canonical URL, Open Graph URLs)
 - sitemap.xml (all URLs)
 - robots.txt (sitemap URL)

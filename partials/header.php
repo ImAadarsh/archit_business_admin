@@ -8,7 +8,7 @@
     <!-- SEO Meta Tags -->
     <meta name="description" content="InvoiceMate - Complete business solution for invoicing, billing, E-way bills, inventory management, and B2B APIs. Streamline your business operations with our powerful platform.">
     <meta name="keywords" content="invoice software, billing software, e-way bill generator, inventory management, business invoicing, GST compliance, B2B APIs, business automation">
-    <meta name="author" content="InvoiceMate">
+    <meta name="author" content="Endeavour Digital">
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow">
     
@@ -16,7 +16,7 @@
     <meta property="og:title" content="InvoiceMate - Complete Business Solution">
     <meta property="og:description" content="Complete solution for Invoicing, Billing, E-way Bills, Inventory, Product Catalog, and Business B2B APIs. Everything you need in one powerful platform.">
     <meta property="og:image" content="assets/images/favicon.png">
-    <meta property="og:url" content="https://your-domain.com">
+    <meta property="og:url" content="https://invoicemate.in">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="InvoiceMate">
     
@@ -33,7 +33,7 @@
     <link rel="shortcut icon" href="assets/images/favicon.png">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://your-domain.com">
+    <link rel="canonical" href="https://invoicemate.in">
     
     <!-- Web App Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -57,7 +57,7 @@
         "@type": "SoftwareApplication",
         "name": "InvoiceMate",
         "description": "Complete business solution for invoicing, billing, E-way bills, inventory management, and B2B APIs",
-        "url": "https://your-domain.com",
+        "url": "https://invoicemate.in",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web, iOS, Android",
         "offers": {
@@ -79,10 +79,10 @@
         "publisher": {
             "@type": "Organization",
             "name": "InvoiceMate",
-            "url": "https://your-domain.com",
+            "url": "https://invoicemate.in",
             "logo": {
                 "@type": "ImageObject",
-                "url": "https://your-domain.com/assets/images/favicon.png"
+                "url": "https://invoicemate.in/assets/images/favicon.png"
             }
         },
         "featureList": [

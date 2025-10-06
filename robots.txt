@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://invoicemate.in/sitemap.xml
 
 # Disallow admin and sensitive directories
 Disallow: /admin/
