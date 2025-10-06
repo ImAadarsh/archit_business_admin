@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://your-domain.com/sitemap.xml
+
+# Disallow admin and sensitive directories
+Disallow: /admin/
+Disallow: /api/
+Disallow: /controller/
+Disallow: /vendor/
+Disallow: /storage/
+Disallow: /logs/
+Disallow: /config/
+Disallow: /database/
+Disallow: /tests/
+
+# Allow important pages
+Allow: /index.php
+Allow: /dashboard.php
+Allow: /products.php
+Allow: /invoices.php
+Allow: /contact-us.php
+Allow: /privacy.php
+Allow: /assets/
+Allow: /css/
+Allow: /js/
+Allow: /images/
+
+# Crawl delay (optional)
+Crawl-delay: 1

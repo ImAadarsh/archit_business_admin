@@ -38,47 +38,279 @@ if ($response['user']['role']=='admin') {
 ?>
 <?php include("partials/header.php"); ?>
 
-<body class="light ">
-    <div class="wrapper vh-100">
-        <div class="row align-items-center h-100">
-            <form class="col-lg-3 col-md-4 col-10 mx-auto text-center" action="index.php" method="POST">
-                <a class="navbar-brand mx-auto mt-2 flex-fill text-center" href="index.php">
-                    <img  height="110" src="assets/images/invoice_mate.svg" alt="SVG image">
-                    </img>
+<style>
+    .login-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        z-index: 2;
+    }
+    
+    .logo-container {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .logo-container img {
+        transition: transform 0.3s ease;
+    }
+    
+    .logo-container:hover img {
+        transform: scale(1.05);
+    }
+    
+    .login-title {
+        color: #2d3748;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .login-subtitle {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-floating {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-floating .form-control {
+        height: 3.5rem;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .form-floating .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+    
+    .form-floating label {
+        color: #718096;
+        font-weight: 500;
+    }
+    
+    .form-check {
+        margin: 1.5rem 0;
+    }
+    
+    .form-check-input {
+        border-radius: 6px;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+    
+    .form-check-label {
+        color: #4a5568;
+        font-weight: 500;
+    }
+    
+    .btn-login {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        height: 3.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-login:active {
+        transform: translateY(0);
+    }
+    
+    .features-preview {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-top: 2rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: white;
+    }
+    
+    .feature-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+    
+    .stats-container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 2rem;
+        text-align: center;
+    }
+    
+    .stat-item {
+        color: white;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+    
+    @media (max-width: 768px) {
+        .login-card {
+            margin: 1rem;
+            border-radius: 15px;
+        }
+        
+        .features-preview {
+            display: none;
+        }
+    }
+</style>
 
-                </a>
-                <br>
-                <h1 class="h6 mb-3">Sign in</h1>
-                <div class="form-group">
-                    <label for="inputPhone" class="sr-only">Select Business</label>
-                    <select name="phone" type="tel" id="inputEmail" class="form-control form-control-lg"
-                        placeholder="Phone Number" required autofocus="">
-                        <?php
-                                        // echo $sql;
-                                        $sql = "SELECT * FROM businessses";
-                                        $results = $connect->query($sql);
-                                        while($final=$results->fetch_assoc()){?>
-                                        <option value="<?php echo $final['phone'] ?>"><?php echo $final['business_name'] ?></option>
-                                        <?php } ?>
-
-                    </select>
+<body class="light">
+    <div class="login-container">
+        <div class="container-fluid h-100">
+            <div class="row h-100 align-items-center justify-content-center">
+                <div class="col-lg-4 col-md-6 col-11">
+                    <div class="login-card p-4 p-md-5">
+                        <div class="logo-container">
+                            <a href="index.php" class="text-decoration-none">
+                                <img height="80" src="assets/images/invoice_mate.svg" alt="InvoiceMate Logo" class="mb-3">
+                            </a>
+                            <h1 class="login-title">Welcome Back</h1>
+                            <p class="login-subtitle">Sign in to your InvoiceMate dashboard</p>
+                        </div>
+                        
+                        <form action="index.php" method="POST">
+                            <div class="form-floating">
+                                <select name="phone" id="businessSelect" class="form-control" required autofocus>
+                                    <option value="">Select your business</option>
+                                    <?php
+                                    $sql = "SELECT * FROM businessses";
+                                    $results = $connect->query($sql);
+                                    while($final = $results->fetch_assoc()) {
+                                        echo '<option value="' . $final['phone'] . '">' . $final['business_name'] . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                                <label for="businessSelect">Select Business</label>
+                            </div>
+                            
+                            <div class="form-floating">
+                                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                                <label for="password">Password</label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="remember-me" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">
+                                    Keep me signed in
+                                </label>
+                            </div>
+                            
+                            <button class="btn btn-login w-100" name="login" type="submit">
+                                <i class="feather feather-log-in me-2"></i>
+                                Sign In
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <small class="text-muted">
+                                Secure business dashboard • Powered by InvoiceMate
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Features Preview for Desktop -->
+                    <div class="features-preview d-none d-lg-block">
+                        <h5 class="text-white mb-3">Everything you need to run your business</h5>
+                        <div class="feature-item">
+                            <div class="feature-icon">📊</div>
+                            <span>Smart Invoicing & Billing</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">📦</div>
+                            <span>Inventory Management</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🚛</div>
+                            <span>E-way Bill Generation</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🔗</div>
+                            <span>B2B API Integration</span>
+                        </div>
+                        
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <span class="stat-number">10K+</span>
+                                <span class="stat-label">Happy Customers</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">50M+</span>
+                                <span class="stat-label">Invoices Generated</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">99.98%</span>
+                                <span class="stat-label">Uptime</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="inputPassword" class="sr-only">Passcode</label>
-                    <input type="tel" id="inputPassword" class="form-control form-control-lg"
-                        placeholder="Password" name="password" required>
-                </div>
-                <div class="checkbox mb-3">
-                    <label>
-                        <input type="checkbox" value="remember-me"> Stay logged in </label>
-                </div>
-                <button class="btn btn-lg btn-primary btn-block" name="login" type="submit">Login</button>
-                <!-- <a href="forgotpassword.php">
-                    <p class="mt-5 mb-3 text-muted">Forgot Password</p>
-                </a>
-                <br> -->
-                <!--<p class="mt-5 mb-3 text-muted">Endeavour Digital © 2023</p>-->
-            </form>
+            </div>
         </div>
     </div>
     <script src="js/jquery.min.js"></script>
@@ -91,6 +323,79 @@ if ($response['user']['role']=='admin') {
     <script src="js/tinycolor-min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/apps.js"></script>
+    
+    <script>
+        // Enhanced login form interactions
+        $(document).ready(function() {
+            // Add loading state to login button
+            $('form').on('submit', function() {
+                const submitBtn = $('button[name="login"]');
+                submitBtn.html('<i class="feather feather-loader me-2"></i>Signing In...');
+                submitBtn.prop('disabled', true);
+            });
+            
+            // Add focus effects to form controls
+            $('.form-control').on('focus', function() {
+                $(this).closest('.form-floating').addClass('focused');
+            }).on('blur', function() {
+                if (!$(this).val()) {
+                    $(this).closest('.form-floating').removeClass('focused');
+                }
+            });
+            
+            // Initialize floating labels
+            $('.form-floating .form-control').each(function() {
+                if ($(this).val()) {
+                    $(this).closest('.form-floating').addClass('focused');
+                }
+            });
+            
+            // Add smooth animations
+            $('.login-card').hide().fadeIn(800);
+            $('.features-preview').hide().delay(1000).fadeIn(600);
+            
+            // Add hover effects to feature items
+            $('.feature-item').hover(
+                function() {
+                    $(this).css('transform', 'translateX(5px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateX(0)');
+                }
+            );
+            
+            // Add typing animation to stats
+            $('.stat-number').each(function() {
+                const $this = $(this);
+                const text = $this.text();
+                $this.text('');
+                $this.prop('Counter', 0).animate({
+                    Counter: text.replace(/[^\d]/g, '')
+                }, {
+                    duration: 2000,
+                    easing: 'swing',
+                    step: function(now) {
+                        if (text.includes('K+')) {
+                            $this.text(Math.ceil(now) + 'K+');
+                        } else if (text.includes('M+')) {
+                            $this.text(Math.ceil(now) + 'M+');
+                        } else if (text.includes('%')) {
+                            $this.text(Math.ceil(now) + '%');
+                        } else {
+                            $this.text(Math.ceil(now));
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Add keyboard navigation
+        $(document).keydown(function(e) {
+            if (e.key === 'Enter' && !$('button[name="login"]').prop('disabled')) {
+                $('form').submit();
+            }
+        });
+    </script>
 </body>
 
 </html>
