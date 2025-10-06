@@ -108,7 +108,7 @@ if ($response['user']['role']=='admin') {
     }
     
     .form-floating .form-control {
-        height: 6rem;
+        height: 70px;
         border-radius: 12px;
         border: 2px solid #e2e8f0;
         background: #f8fafc;
@@ -251,27 +251,113 @@ if ($response['user']['role']=='admin') {
     
     @media (max-width: 768px) {
         .login-card {
-            margin: 1.5rem;
+            margin: 1rem;
             border-radius: 15px;
+            padding: 1.5rem !important;
         }
         
         .features-preview {
             display: none;
         }
         
+        .login-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .login-subtitle {
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .logo-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .logo-container img {
+            height: 60px !important;
+        }
+        
         .btn-login {
-            font-size: 1rem;
-            height: 3rem;
+            font-size: 0.9rem;
+            height: 2.5rem;
+            padding: 0.5rem;
         }
         
         .form-floating .form-control {
-            height: 3rem;
-            font-size: 1rem;
+            height: 60px;
+            font-size: 0.9rem;
+            padding-top: 1rem;
+            padding-bottom: 0.5rem;
             color: #2d3748;
         }
         
+        .form-floating label {
+            font-size: 0.85rem;
+            padding: 0.8rem 0.6rem;
+        }
+        
         .form-floating {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-check {
+            margin: 1rem 0;
+        }
+        
+        .form-check-label {
+            font-size: 0.8rem;
+        }
+        
+        .text-center small {
+            font-size: 0.7rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .login-card {
+            margin: 0.5rem;
+            padding: 1rem !important;
+        }
+        
+        .login-title {
+            font-size: 1rem;
+        }
+        
+        .login-subtitle {
+            font-size: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .logo-container {
+            margin-bottom: 1rem;
+        }
+        
+        .logo-container img {
+            height: 50px !important;
+        }
+        
+        .form-floating .form-control {
+            height: 60px;
+            font-size: 0.85rem;
+        }
+        
+        .form-floating label {
+            font-size: 0.8rem;
+            padding: 0.7rem 0.5rem;
+        }
+        
+        .btn-login {
+            font-size: 0.85rem;
+            height: 2.2rem;
+        }
+        
+        .form-check-label {
+            font-size: 0.75rem;
+        }
+        
+        .text-center small {
+            font-size: 0.65rem;
         }
     }
     
@@ -429,13 +515,10 @@ if ($response['user']['role']=='admin') {
         // Enhanced login form interactions
         $(document).ready(function() {
             // Add loading state to login button
-            $('form').on('submit', function(e) {
+            $('form').on('submit', function() {
                 const submitBtn = $('button[name="login"]');
                 submitBtn.html('<i class="feather feather-loader me-2"></i>Signing In...');
                 submitBtn.prop('disabled', true);
-                
-                // Allow form to submit normally
-                return true;
             });
             
             // Add focus effects to form controls
@@ -498,14 +581,6 @@ if ($response['user']['role']=='admin') {
             if (e.key === 'Enter' && !$('button[name="login"]').prop('disabled')) {
                 $('form').submit();
             }
-        });
-        
-        // Debug form submission
-        console.log('Login form initialized');
-        $('form').on('submit', function(e) {
-            console.log('Form submitted');
-            console.log('Phone:', $('select[name="phone"]').val());
-            console.log('Password:', $('input[name="password"]').val());
         });
     </script>
 </body>
