@@ -42,7 +42,7 @@ if ($response['user']['role']=='admin') {
         <div class="row align-items-center h-100">
             <form class="col-lg-3 col-md-4 col-10 mx-auto text-center" action="index.php" method="POST">
                 <a class="navbar-brand mx-auto mt-2 flex-fill text-center" href="index.php">
-                    <img  height="110" src="assets/images/archit.svg" alt="SVG image">
+                    <img  height="110" src="assets/images/invoice_mate.svg" alt="SVG image">
                     </img>
 
                 </a>

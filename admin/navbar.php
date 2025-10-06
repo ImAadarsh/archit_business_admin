@@ -3,7 +3,7 @@ $bid = $_SESSION['business_id'];
 $sql = "SELECT logo FROM businessses WHERE id = $bid";
 $result = $connect->query($sql);
 $business = $result->fetch_assoc();
-$logo = $business['logo'] ? $uri . $business['logo'] : 'assets/images/archit.svg';
+$logo = $business['logo'] ? $uri . $business['logo'] : 'assets/images/invoice_mate.svg';
 ?>
 <nav class="topnav navbar navbar-light">
     <button type="button" class="navbar-toggler text-muted mt-2 p-0 mr-3 collapseSidebar">

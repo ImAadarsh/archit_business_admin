@@ -5,13 +5,13 @@ $user = "u954141192_archit";
 $password = "Endeavour@2023";
 $dbname = "u954141192_archit";
 $connect = mysqli_connect($host,$user,$password,$dbname);
-$uri = 'https://v2.architartgallery.in/storage/app/';
+$uri = 'https://api.invoicemate.in/storage/app/';
 function callAPI($method, $urlpoint, $data, $token){
     if (!isset($token)) {
         $token = "";
     }
     
-    $url = 'https://v2.architartgallery.in/public/api/'.$urlpoint.'';
+    $url = 'https://api.invoicemate.in/public/api/'.$urlpoint.'';
     $curl = curl_init($url);
     switch ($method){
        case "POST":
@@ -55,7 +55,7 @@ function callAPI1($method, $urlpoint, $data, $token){
         $token = "";
     }
     
-    $url = 'https://v2.architartgallery.in/public/api/'.$urlpoint.'';
+    $url = 'https://api.invoicemate.in/public/api/'.$urlpoint.'';
     $curl = curl_init($url);
     switch ($method){
        case "POST":

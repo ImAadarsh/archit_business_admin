@@ -45,7 +45,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         (!empty($row['type']) && strtolower($row['type']) !== 'null') ? ucfirst($row['type']) : 'N/A',
         $row['total_amount'],
         $invoice_date ? date('d M Y | H:i', $invoice_date) : 'N/A',
-        'https://invoice.architartgallery.in/invoice.html?invoiceid='.$row['id']
+        'https://invoice.invoicemate.in/invoice.html?invoiceid='.$row['id']
     ));
 }
 

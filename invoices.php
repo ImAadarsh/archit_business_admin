@@ -188,7 +188,7 @@ include 'admin/header.php';
                         <span class="text-muted sr-only">Action</span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" href="https://invoice.architartgallery.in/invoice.html?invoiceid=<?php echo $final['id']?>">View Invoice</a>
+                        <a class="dropdown-item" href="https://invoice.invoicemate.in/invoice.html?invoiceid=<?php echo $final['id']?>">View Invoice</a>
                     </div>
                 </div>
             </td>

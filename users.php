@@ -114,7 +114,7 @@ while ($final = $results->fetch_assoc()) {
         </button>
         <div class="dropdown-menu dropdown-menu-right">
             <a class="dropdown-item" href="users-edit.php?id=<?php echo $final['id']?>">Edit</a>
-            <a class="dropdown-item" href="https://invoice.architartgallery.in/invoice.html?invoiceid=<?php echo $final['id']?>">View</a>
+            <a class="dropdown-item" href="https://invoice.invoicemate.in/invoice.html?invoiceid=<?php echo $final['id']?>">View</a>
         </div>
     </div>
 </td>

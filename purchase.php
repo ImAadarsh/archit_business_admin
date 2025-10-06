@@ -174,7 +174,7 @@ if(isset($_GET['filter'])) {
         </form>
     </div>
     <div class="col-md-4">
-        <form action="https://invoice.architartgallery.in/invoices.html" method="GET">
+        <form action="https://invoice.invoicemate.in/invoices.html" method="GET">
             <div class="form-group">
                 <input type="hidden" name="business_id" value="<?php echo $b_id; ?>">
                 <input type="hidden" name="type" value="<?php echo isset($_GET['invoice_type']) ? $_GET['invoice_type'] : ''; ?>">
@@ -212,7 +212,7 @@ if(isset($_GET['filter'])) {
         </form>
     </div>
     <div class="col-md-4">
-        <form action="https://invoice.architartgallery.in/selected.html" method="GET" id="selectedForm">
+        <form action="https://invoice.invoicemate.in/selected.html" method="GET" id="selectedForm">
             <div class="form-group">
                 <input type="hidden" name="ids" id="selectedIds">
                 <input type="submit" value="Download Selected Invoice" id="selectedOnlineBtn" class="btn btn-primary form-control">
@@ -395,7 +395,7 @@ $online = 0;
                             <span class="text-muted sr-only">Action</span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="https://invoice.architartgallery.in/invoice.html?invoiceid=<?php echo isset($final['id']) ? htmlspecialchars($final['id']) : ''; ?>">View Invoice</a>
+                            <a class="dropdown-item" href="https://invoice.invoicemate.in/invoice.html?invoiceid=<?php echo isset($final['id']) ? htmlspecialchars($final['id']) : ''; ?>">View Invoice</a>
                         </div>
                     </div>
                 </td>
