@@ -65,6 +65,7 @@ if ($response['user']['role']=='admin') {
         border: 1px solid rgba(255, 255, 255, 0.2);
         position: relative;
         z-index: 2;
+        margin-top: 3rem;
     }
     
     .logo-container {
@@ -105,6 +106,8 @@ if ($response['user']['role']=='admin') {
         background: #f8fafc;
         transition: all 0.3s ease;
         font-size: 1rem;
+        padding-top: 1.625rem;
+        padding-bottom: 0.625rem;
     }
     
     .form-floating .form-control:focus {
@@ -116,6 +119,14 @@ if ($response['user']['role']=='admin') {
     .form-floating label {
         color: #718096;
         font-weight: 500;
+        z-index: 1;
+        padding: 1rem 0.75rem;
+    }
+    
+    .form-floating .form-control:focus ~ label,
+    .form-floating .form-control:not(:placeholder-shown) ~ label {
+        color: #667eea;
+        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
     }
     
     .form-check {
@@ -147,6 +158,8 @@ if ($response['user']['role']=='admin') {
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
     
     .btn-login:hover {
@@ -212,10 +225,20 @@ if ($response['user']['role']=='admin') {
         .login-card {
             margin: 1rem;
             border-radius: 15px;
+            margin-top: 2rem;
         }
         
         .features-preview {
             display: none;
+        }
+        
+        .btn-login {
+            font-size: 1rem;
+            height: 3rem;
+        }
+        
+        .form-floating .form-control {
+            height: 3rem;
         }
     }
 </style>
