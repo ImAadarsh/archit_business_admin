@@ -96,7 +96,7 @@ if ($response['user']['role']=='admin') {
     
     .form-floating {
         position: relative;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
     
     .form-floating .form-control {
@@ -105,20 +105,23 @@ if ($response['user']['role']=='admin') {
         border: 2px solid #e2e8f0;
         background: #f8fafc;
         transition: all 0.3s ease;
-        font-size: 1rem;
+        font-size: 1.1rem;
         padding-top: 1.625rem;
         padding-bottom: 0.625rem;
+        color: #2d3748;
     }
     
     .form-floating .form-control:focus {
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         background: white;
+        color: #2d3748;
     }
     
     .form-floating label {
         color: #718096;
         font-weight: 500;
+        font-size: 1rem;
         z-index: 1;
         padding: 1rem 0.75rem;
     }
@@ -127,6 +130,22 @@ if ($response['user']['role']=='admin') {
     .form-floating .form-control:not(:placeholder-shown) ~ label {
         color: #667eea;
         transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    }
+    
+    /* Ensure select dropdown has proper styling */
+    .form-floating select.form-control {
+        color: #2d3748;
+        background-color: #f8fafc;
+    }
+    
+    .form-floating select.form-control:focus {
+        color: #2d3748;
+        background-color: white;
+    }
+    
+    .form-floating select.form-control option {
+        color: #2d3748;
+        background-color: white;
     }
     
     .form-check {
@@ -239,6 +258,12 @@ if ($response['user']['role']=='admin') {
         
         .form-floating .form-control {
             height: 3rem;
+            font-size: 1rem;
+            color: #2d3748;
+        }
+        
+        .form-floating {
+            margin-bottom: 1.5rem;
         }
     }
 </style>
