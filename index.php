@@ -7,15 +7,17 @@ session_start();
 include("admin/connect.php");
 
 if (isset($_POST['login'])) {
+    
     $data_array =  array(
     "user_type" => 'admin',
     "phone" => $_POST['phone'],
     "password" => $_POST['password'],
     "role" => "admin"
 );
+    
     $make_call = callAPI('POST', 'login', json_encode($data_array),NULL);
     $response = json_decode($make_call, true);
-    // echo $response;
+    
     if($response['message']){
         echo '<script>alert("'.$response['message'].'")</script>';
     }  
@@ -30,13 +32,14 @@ if ($response['user']['role']=='admin') {
     header('location: dashboard.php');
 }else{
     if($response['message']){
-        echo '<script>alert("Invaild Role.")</script>';
+        echo '<script>alert("Invalid Role.")</script>';
     }  
 }
 }
 
 ?>
 <?php include("partials/header.php"); ?>
+
 
 <style>
     .login-container {
@@ -514,11 +517,29 @@ if ($response['user']['role']=='admin') {
     <script>
         // Enhanced login form interactions
         $(document).ready(function() {
-            // Add loading state to login button
-            $('form').on('submit', function() {
+            // Form submit handler
+            $('form').on('submit', function(e) {
+                const phone = $('select[name="phone"]').val();
+                const password = $('input[name="password"]').val();
+                
+                // Form validation
+                if (!phone) {
+                    alert('Please select a business');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (!password) {
+                    alert('Please enter your password');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Change button text
                 const submitBtn = $('button[name="login"]');
                 submitBtn.html('<i class="feather feather-loader me-2"></i>Signing In...');
-                submitBtn.prop('disabled', true);
+                
+                return true;
             });
             
             // Add focus effects to form controls
@@ -576,12 +597,13 @@ if ($response['user']['role']=='admin') {
             });
         });
         
-        // Add keyboard navigation
-        $(document).keydown(function(e) {
-            if (e.key === 'Enter' && !$('button[name="login"]').prop('disabled')) {
-                $('form').submit();
-            }
-        });
+            // Add keyboard navigation
+            $(document).keydown(function(e) {
+                if (e.key === 'Enter' && !$('button[name="login"]').prop('disabled')) {
+                    $('form').submit();
+                }
+            });
+            
     </script>
 </body>
 
