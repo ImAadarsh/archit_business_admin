@@ -111,7 +111,7 @@ if ($response['user']['role']=='admin') {
     }
     
     .form-floating .form-control {
-        height: 70px;
+        height: 60px;
         border-radius: 12px;
         border: 2px solid #e2e8f0;
         background: #f8fafc;
