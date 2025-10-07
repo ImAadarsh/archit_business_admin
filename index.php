@@ -457,17 +457,8 @@ if ($response['user']['role']=='admin') {
                         
                         <form action="index.php" method="POST">
                             <div class="form-floating">
-                                <select name="phone" id="businessSelect" class="form-control" required autofocus>
-                                    <option value="">Select your business</option>
-                                    <?php
-                                    $sql = "SELECT * FROM businessses";
-                                    $results = $connect->query($sql);
-                                    while($final = $results->fetch_assoc()) {
-                                        echo '<option value="' . $final['phone'] . '">' . $final['business_name'] . '</option>';
-                                    }
-                                    ?>
-                                </select>
-                                <label for="businessSelect">Select Business</label>
+                                <input type="tel" id="phone" name="phone" class="form-control" placeholder="" required autofocus>
+                                <label for="phone">Phone Number</label>
                             </div>
                             
                             <div class="form-floating">
@@ -519,12 +510,20 @@ if ($response['user']['role']=='admin') {
         $(document).ready(function() {
             // Form submit handler
             $('form').on('submit', function(e) {
-                const phone = $('select[name="phone"]').val();
+                const phone = $('input[name="phone"]').val();
                 const password = $('input[name="password"]').val();
                 
                 // Form validation
                 if (!phone) {
-                    alert('Please select a business');
+                    alert('Please enter your phone number');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Phone format validation (basic)
+                const phoneRegex = /^[0-9+\-\s()]{10,}$/;
+                if (!phoneRegex.test(phone)) {
+                    alert('Please enter a valid phone number');
                     e.preventDefault();
                     return false;
                 }
