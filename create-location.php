@@ -52,22 +52,7 @@ include 'admin/aside.php';
                                         <input required type="text" id="simpleinput" class="form-control"
                                             placeholder="Alternate Mobile" name="alternate_phone">
                                     </div>
-                                    <div class="form-group mb-3">
-                                        <label for="simpleinput">Associate BE</label>
-                                        <select required type="text" id="simpleinput" class="form-control"
-                                            placeholder="Alternate Mobile" name="business_id">
-                                            <option>Choose Business for Location</option>
-                                            <?php
-                                        // echo $sql;
-                                        $sql = "SELECT * FROM businessses";
-                                        $results = $connect->query($sql);
-                                        while($final=$results->fetch_assoc()){?>
-                                        <option value="<?php echo $final['id'] ?>"><?php echo $final['business_name'] ?></option>
-
-                                        <?php } ?>
-                                            
-                                        </select>
-                                    </div>
+                                    <input type="hidden" name="business_id" value="<?php echo $_SESSION['business_id']; ?>">
                                     <div class="form-group mb-3">
 
                                         <input type="submit" id="example-palaceholder" class="btn btn-primary"

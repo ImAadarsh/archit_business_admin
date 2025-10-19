@@ -29,7 +29,7 @@ include 'admin/aside.php';
                         <div class="card shadow eq-card">
                             <div class="card-header">
                                 <strong class="card-title"> View locations </strong>
-                                <a class="float-right small text-muted" href="#!"></a>
+                                <a href="create-location.php" class="btn btn-primary float-right">Add New Location</a>
                             </div>
                             <div class="card-body">
                             <table class="table datatables" id="dataTable-1">
@@ -74,6 +74,7 @@ $bid = $_SESSION['business_id'];
                             <span class="text-muted sr-only">Action</span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="edit-location.php?id=<?php echo $final['id'] ?>">Edit</a>
                             <a class="dropdown-item" href="remove_location.php?id=<?php echo $final['id'] ?>">Delete</a>
                             <!-- Assuming remove_location.php handles deletion -->
                             <a class="dropdown-item" href="change/location.php?id=<?php echo $final['id'] ?>&state=<?php echo ($final['is_active'] == 1) ? "0" : "1"; ?>"><?php echo ($final['is_active'] == 1) ? "Make Inactive" : "Make Active"; ?></a>

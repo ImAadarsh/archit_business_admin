@@ -8,16 +8,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $location_id = $_POST['location_id'];
     $name = $_POST['name'];
     $hsn_code = $_POST['hsn_code'] ?? '';
+    $gst_percent = $_POST['gst_percent'] ?? 0;
     
     // Current timestamp for created_at and updated_at
     $current_timestamp = date('Y-m-d H:i:s');
     
     // Prepare SQL statement
-    $sql = "INSERT INTO categories (business_id, location_id, name, hsn_code, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO categories (business_id, location_id, name, hsn_code, gst_percent, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
     
     // Prepare and bind parameters
     $stmt = $connect->prepare($sql);
-    $stmt->bind_param("iissss", $business_id, $location_id, $name, $hsn_code, $current_timestamp, $current_timestamp);
+    $stmt->bind_param("iisssds", $business_id, $location_id, $name, $hsn_code, $gst_percent, $current_timestamp, $current_timestamp);
     
     // Execute the statement
     if ($stmt->execute()) {

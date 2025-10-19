@@ -9,6 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $location_id = $_POST['location_id'];
     $name = $_POST['name'];
     $hsn_code = $_POST['hsn_code'] ?? '';
+    $gst_percent = $_POST['gst_percent'] ?? 0;
     
     // Current timestamp for updated_at
     $current_timestamp = date('Y-m-d H:i:s');
@@ -22,11 +23,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($check_result->num_rows > 0) {
         // Prepare SQL statement for update
-        $update_sql = "UPDATE categories SET name = ?, location_id = ?, hsn_code = ?, updated_at = ? WHERE id = ? AND business_id = ?";
+        $update_sql = "UPDATE categories SET name = ?, location_id = ?, hsn_code = ?, gst_percent = ?, updated_at = ? WHERE id = ? AND business_id = ?";
         
         // Prepare and bind parameters
         $update_stmt = $connect->prepare($update_sql);
-        $update_stmt->bind_param("sisisi", $name, $location_id, $hsn_code, $current_timestamp, $id, $business_id);
+        $update_stmt->bind_param("sissdsi", $name, $location_id, $hsn_code, $gst_percent, $current_timestamp, $id, $business_id);
         
         // Execute the statement
         if ($update_stmt->execute()) {

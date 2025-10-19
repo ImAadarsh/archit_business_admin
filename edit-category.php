@@ -82,6 +82,13 @@ include 'admin/aside.php';
                                     </div>
                                     
                                     <div class="form-group mb-3">
+                                        <label for="gst_percent">GST Percentage</label>
+                                        <input type="number" id="gst_percent" class="form-control"
+                                            placeholder="GST Percentage" name="gst_percent" step="0.01" min="0" max="100" 
+                                            value="<?php echo htmlspecialchars($category['gst_percent'] ?? '0'); ?>">
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
                                         <input type="submit" class="btn btn-primary" value="Update Product Type">
                                     </div>
                                 </form>

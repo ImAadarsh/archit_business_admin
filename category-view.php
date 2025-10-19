@@ -53,6 +53,7 @@ include 'admin/aside.php';
                                                 <th>ID</th>
                                                 <th>Name</th>
                                                 <th>HSN Code</th>
+                                                <th>GST %</th>
                                                 <th>Location</th>
                                                 <th>Created At</th>
                                                 <th>Actions</th>
@@ -74,6 +75,7 @@ include 'admin/aside.php';
                                                     echo "<td>" . $row['id'] . "</td>";
                                                     echo "<td>" . htmlspecialchars($row['name']) . "</td>";
                                                     echo "<td>" . htmlspecialchars($row['hsn_code'] ?? '') . "</td>";
+                                                    echo "<td>" . ($row['gst_percent'] ?? '0') . "%</td>";
                                                     echo "<td>" . htmlspecialchars($row['location_name'] ?? 'N/A') . "</td>";
                                                     echo "<td>" . date('d M Y, h:i A', strtotime($row['created_at'])) . "</td>";
                                                     echo "<td>
@@ -83,7 +85,7 @@ include 'admin/aside.php';
                                                     echo "</tr>";
                                                 }
                                             } else {
-                                                echo "<tr><td colspan='6' class='text-center'>No product types found</td></tr>";
+                                                echo "<tr><td colspan='7' class='text-center'>No product types found</td></tr>";
                                             }
                                             ?>
                                         </tbody>
