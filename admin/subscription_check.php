@@ -3,13 +3,14 @@
 include("connect.php");
 include("cashfree_config.php");
 
-// Check if user has active subscription or trial
+// Check if user has active subscription or approved trial
 if (!function_exists('checkSubscriptionAccess')) {
 function checkSubscriptionAccess($businessId, $requiredFeature = null) {
     $subscriptionStatus = getBusinessSubscriptionStatus($businessId);
     
-    // Allow access if user has active subscription or trial
-    if ($subscriptionStatus['status'] == 'active' || $subscriptionStatus['status'] == 'trialing') {
+    // Allow access if user has active subscription or approved trial
+    if ($subscriptionStatus['status'] == 'active' || 
+        ($subscriptionStatus['status'] == 'trialing' && isTrialApproved($businessId))) {
         
         // If specific feature is required, check if plan includes it
         if ($requiredFeature && !empty($subscriptionStatus['features'])) {
@@ -31,10 +32,10 @@ function checkSubscriptionAccess($businessId, $requiredFeature = null) {
         ];
     }
     
-    // No active subscription
+    // No active subscription or trial
     return [
         'access' => false,
-        'reason' => 'You need an active subscription to access this feature',
+        'reason' => 'You need an active subscription or approved trial to access this feature',
         'status' => $subscriptionStatus['status'],
         'plan' => $subscriptionStatus['plan_name']
     ];
@@ -78,12 +79,40 @@ function isTrialExpiringSoon($businessId) {
 }
 }
 
+// Check if trial is approved (mandate approved)
+if (!function_exists('isTrialApproved')) {
+function isTrialApproved($businessId) {
+    global $connect;
+    
+    $sql = "SELECT authorization_status, authorization_time 
+            FROM subscriptions 
+            WHERE business_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT 1";
+    
+    $stmt = $connect->prepare($sql);
+    $stmt->bind_param("i", $businessId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $subscription = $result->fetch_assoc();
+    $stmt->close();
+    
+    if ($subscription) {
+        // Trial is approved if authorization status is ACTIVE
+        return $subscription['authorization_status'] === 'ACTIVE';
+    }
+    
+    return false;
+}
+}
+
 // Get trial warning message
 if (!function_exists('getTrialWarning')) {
 function getTrialWarning($businessId) {
     $subscription = getBusinessSubscriptionStatus($businessId);
     
-    if ($subscription['status'] == 'trialing') {
+    // Only show trial warnings if trial is approved
+    if ($subscription['status'] == 'trialing' && isTrialApproved($businessId)) {
         $days = $subscription['trial_remaining'];
         
         if ($days <= 0) {

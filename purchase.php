@@ -1,8 +1,8 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-include 'admin/connect.php';
-include 'admin/session.php';
+// Include access control at the very top
+include 'admin/access_control.php';
 include 'admin/header.php';
 ?>
 <body class="vertical light">

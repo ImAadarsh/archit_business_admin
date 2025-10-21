@@ -1,6 +1,6 @@
 <?php
-include 'admin/connect.php';
-include 'admin/session.php';
+// Include access control at the very top
+include 'admin/access_control.php';
 
 $business_id = $_SESSION['business_id'] ?? 1;
 ?>

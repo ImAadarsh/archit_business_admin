@@ -50,26 +50,49 @@ if ($_POST && isset($_POST['cf_status'])) {
         }
         
         if ($business_id) {
-            // Update subscription status
-            $dbStatus = ($cf_status === 'ACTIVE') ? 'active' : 'trialing';
-            $sql = "UPDATE subscriptions SET 
-                    status = ?, 
-                    cashfree_subscription_id = ?,
-                    authorization_status = ?,
-                    authorization_reference = ?,
-                    authorization_time = NOW()
-                    WHERE id = ?";
-            $stmt = $connect->prepare($sql);
-            $stmt->bind_param("ssssi", $dbStatus, $cf_subscription_id, $cf_status, $payment_id, $subscription_id);
-            $stmt->execute();
-            $stmt->close();
-            
-            // Update business subscription status
-            $sql = "UPDATE businessses SET subscription_status = ? WHERE id = ?";
-            $stmt = $connect->prepare($sql);
-            $stmt->bind_param("si", $dbStatus, $business_id);
-            $stmt->execute();
-            $stmt->close();
+            // Update subscription status based on authorization
+            if ($cf_status === 'ACTIVE') {
+                // Mandate approved - activate trial or subscription
+                $dbStatus = 'trialing'; // Start with trial
+                
+                // Set trial end date (e.g., 7 days from now)
+                $trialEndDate = date('Y-m-d H:i:s', strtotime('+7 days'));
+                
+                $sql = "UPDATE subscriptions SET 
+                        status = ?, 
+                        cashfree_subscription_id = ?,
+                        authorization_status = ?,
+                        authorization_reference = ?,
+                        authorization_time = NOW(),
+                        trial_ends_at = ?
+                        WHERE id = ?";
+                $stmt = $connect->prepare($sql);
+                $stmt->bind_param("sssssi", $dbStatus, $cf_subscription_id, $cf_status, $payment_id, $trialEndDate, $subscription_id);
+                $stmt->execute();
+                $stmt->close();
+                
+                // Update business subscription status
+                $sql = "UPDATE businessses SET subscription_status = ? WHERE id = ?";
+                $stmt = $connect->prepare($sql);
+                $stmt->bind_param("si", $dbStatus, $business_id);
+                $stmt->execute();
+                $stmt->close();
+            } else {
+                // Mandate not approved - keep as pending
+                $dbStatus = 'pending';
+                
+                $sql = "UPDATE subscriptions SET 
+                        status = ?, 
+                        cashfree_subscription_id = ?,
+                        authorization_status = ?,
+                        authorization_reference = ?,
+                        authorization_time = NOW()
+                        WHERE id = ?";
+                $stmt = $connect->prepare($sql);
+                $stmt->bind_param("ssssi", $dbStatus, $cf_subscription_id, $cf_status, $payment_id, $subscription_id);
+                $stmt->execute();
+                $stmt->close();
+            }
         }
         
         // Record authorization payment if successful

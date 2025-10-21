@@ -1,4 +1,18 @@
 {
-    "plan
+    "FREE": {
+        "name": "Free Plan",
+        "id" : "FREE",
+        "page_access" : ["ALL"]
+    },
+    "STANDARD": {
+        "name": "Standard Plan",
+        "id" : "STD_INVOICE",
+        "page_access" : ["ALL"]
+    },
+    "ALL_ACCESS": {
+        "name": "All Access Plan",
+        "id" : "ALL_ACCESS",
+        "page_access" : ["ALL"]
+    }
     
 }

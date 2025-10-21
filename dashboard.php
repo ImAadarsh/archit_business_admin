@@ -1,10 +1,10 @@
 
 <?php
-include 'admin/connect.php';
-include 'admin/session.php';
+// Include access control at the very top
+include 'admin/access_control.php';
 include 'admin/header.php';
 
-// Check subscription access
+// Get subscription info for display
 $businessId = $_SESSION['business_id'];
 $subscriptionInfo = getBusinessSubscriptionStatus($businessId);
 
@@ -72,6 +72,28 @@ include 'admin/aside.php';
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Quick Actions Card -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <i class="fe fe-zap"></i> Quick Actions
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <a href="subscription.php" class="btn btn-primary btn-block">
+                                            <i class="fe fe-credit-card"></i> View Plans & Pricing
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <a href="subscription-management.php" class="btn btn-outline-primary btn-block">
+                                            <i class="fe fe-settings"></i> Manage Subscription
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="card shadow my-4">
     <div class="card-body">
         <div class="row align-items-center my-12">

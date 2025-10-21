@@ -64,7 +64,7 @@ if (isset($_POST['subscribe'])) {
                 'payment_methods' => ['enach', 'pnach', 'upi', 'card']
             ],
             'subscription_meta' => [
-                'return_url' => 'https://dashboard.invoicemate.in/business/business/subscription/success.php',
+                'return_url' => 'https://dashboard.invoicemate.in/business/subscription/success.php',
                 'notification_channel' => ['EMAIL', 'SMS']
             ],
             'subscription_expiry_time' => date('Y-m-d\TH:i:s\Z', strtotime('+1 year')),
