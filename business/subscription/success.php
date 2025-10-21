@@ -34,14 +34,21 @@ if ($_POST && isset($_POST['cf_status'])) {
     
     // Update subscription in database with Cashfree data
     if ($cf_subscription_id && $subscription_id) {
-        // Get business_id first
-        $business_id = $_SESSION['business_id'] ?? null;
+        // Get business_id from subscription using the subscription ID
+        $sql = "SELECT business_id FROM subscriptions WHERE id = ?";
+        $stmt = $connect->prepare($sql);
+        $stmt->bind_param("i", $subscription_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $business_id = $row['business_id'] ?? null;
+        $stmt->close();
         
+        // If still no business_id, try using razorpay_subscription_id field
         if (!$business_id) {
-            // Try to get business_id from subscription
-            $sql = "SELECT business_id FROM subscriptions WHERE id = ?";
+            $sql = "SELECT business_id FROM subscriptions WHERE razorpay_subscription_id = ?";
             $stmt = $connect->prepare($sql);
-            $stmt->bind_param("i", $subscription_id);
+            $stmt->bind_param("s", $subscription_id);
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
@@ -97,20 +104,8 @@ if ($_POST && isset($_POST['cf_status'])) {
         
         // Record authorization payment if successful
         if (($cf_status === 'ACTIVE' || $cf_status === 'BANK_APPROVAL_PENDING') && $payment_id && $auth_amount > 0) {
-            // Get business_id from session or subscription
-            $business_id = $_SESSION['business_id'] ?? null;
-            
-            if (!$business_id) {
-                // Try to get business_id from subscription
-                $sql = "SELECT business_id FROM subscriptions WHERE id = ?";
-                $stmt = $connect->prepare($sql);
-                $stmt->bind_param("i", $subscription_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $row = $result->fetch_assoc();
-                $business_id = $row['business_id'] ?? null;
-                $stmt->close();
-            }
+            // Get business_id from subscription (already retrieved above)
+            // Use the business_id we already found
             
             if ($business_id) {
                 $sql = "INSERT INTO subscription_payments (
@@ -264,6 +259,27 @@ include("../../partials/header.php");
     echo "\nSubscription ID: " . ($subscription_id ?? 'NULL') . "\n";
     echo "CF Subscription ID: " . ($cf_subscription_id ?? 'NULL') . "\n";
     echo "Business ID: " . ($_SESSION['business_id'] ?? 'NULL') . "\n";
+    
+    // Debug database lookup
+    if ($subscription_id) {
+        $sql = "SELECT business_id FROM subscriptions WHERE id = ?";
+        $stmt = $connect->prepare($sql);
+        $stmt->bind_param("i", $subscription_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        echo "DB Business ID (by id): " . ($row['business_id'] ?? 'NULL') . "\n";
+        $stmt->close();
+        
+        $sql = "SELECT business_id FROM subscriptions WHERE razorpay_subscription_id = ?";
+        $stmt = $connect->prepare($sql);
+        $stmt->bind_param("s", $subscription_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        echo "DB Business ID (by razorpay_subscription_id): " . ($row['business_id'] ?? 'NULL') . "\n";
+        $stmt->close();
+    }
     echo "</pre>";
     ?>
     <div class="success-container">
