@@ -1,13 +1,13 @@
 <?php
 session_start();
-include("../admin/connect.php");
-include("../admin/cashfree_config.php");
+include("../../admin/connect.php");
+include("../../admin/cashfree_config.php");
 
 $sessionId = $_GET['session_id'] ?? '';
 $subscriptionId = $_GET['subscription_id'] ?? '';
 
 if (empty($sessionId)) {
-    echo "<script>alert('Invalid session. Please try again.'); window.location.href='../subscription.php';</script>";
+    echo "<script>alert('Invalid session. Please try again.'); window.location.href='../../subscription.php';</script>";
     exit;
 }
 
@@ -15,7 +15,7 @@ if (empty($sessionId)) {
 $_SESSION['checkout_session_id'] = $sessionId;
 $_SESSION['checkout_subscription_id'] = $subscriptionId;
 
-include("../partials/header.php");
+include("../../partials/header.php");
 ?>
 
 <style>
@@ -171,11 +171,11 @@ include("../partials/header.php");
             
             <div id="error-section" style="display: none;">
                 <p style="color: #dc3545;">There was an error loading the payment authorization. Please try again.</p>
-                <a href="../subscription.php" class="btn btn-secondary">Try Again</a>
+                <a href="../../subscription.php" class="btn btn-secondary">Try Again</a>
             </div>
             
             <div style="margin-top: 30px;">
-                <a href="../dashboard.php" class="btn btn-secondary">Cancel & Return to Dashboard</a>
+                <a href="../../dashboard.php" class="btn btn-secondary">Cancel & Return to Dashboard</a>
             </div>
         </div>
     </div>

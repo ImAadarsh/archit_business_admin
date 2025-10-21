@@ -1,7 +1,7 @@
 <?php
 // Cashfree Subscription Webhook Handler
-include("../admin/connect.php");
-include("../admin/cashfree_config.php");
+include("../../admin/connect.php");
+include("../../admin/cashfree_config.php");
 
 // Get the raw POST data
 $input = file_get_contents('php://input');

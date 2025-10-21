@@ -1,7 +1,7 @@
 <?php
 session_start();
-include("../admin/connect.php");
-include("../admin/cashfree_config.php");
+include("../../admin/connect.php");
+include("../../admin/cashfree_config.php");
 
 // Get subscription details from URL parameters or session
 $subscription_id = $_GET['subscription_id'] ?? $_SESSION['checkout_subscription_id'] ?? $_SESSION['subscription_id'] ?? '';
@@ -52,7 +52,7 @@ unset($_SESSION['cf_subscription_id']);
 unset($_SESSION['checkout_session_id']);
 unset($_SESSION['checkout_subscription_id']);
 
-include("../partials/header.php");
+include("../../partials/header.php");
 ?>
 
 <style>
@@ -133,6 +133,17 @@ include("../partials/header.php");
 </style>
 
 <body>
+    <?php 
+    echo print_r($_POST);
+    echo print_r($_GET);
+    echo print_r($_SESSION);
+    echo print_r($_REQUEST);
+    echo print_r($_SERVER);
+    echo print_r($_ENV);
+    echo print_r($_FILES);
+    echo print_r($_COOKIE);
+    echo print_r($_SERVER);
+    ?>
     <div class="success-container">
         <div class="success-card">
             <?php if ($status === 'success' && $subscriptionData && !isset($subscriptionData['error'])): ?>
@@ -168,8 +179,8 @@ include("../partials/header.php");
                 </div>
                 
                 <div class="action-buttons">
-                    <a href="../dashboard.php" class="btn btn-primary">Go to Dashboard</a>
-                    <a href="../subscription-management.php" class="btn btn-secondary">Manage Subscription</a>
+                    <a href="../../dashboard.php" class="btn btn-primary">Go to Dashboard</a>
+                    <a href="../../subscription-management.php" class="btn btn-secondary">Manage Subscription</a>
                 </div>
                 
             <?php else: ?>
@@ -179,8 +190,8 @@ include("../partials/header.php");
                 <p>There was an issue with your subscription setup. Please try again or contact support.</p>
                 
                 <div class="action-buttons">
-                    <a href="../subscription.php" class="btn btn-primary">Try Again</a>
-                    <a href="../dashboard.php" class="btn btn-secondary">Go to Dashboard</a>
+                    <a href="../../subscription.php" class="btn btn-primary">Try Again</a>
+                    <a href="../../dashboard.php" class="btn btn-secondary">Go to Dashboard</a>
                 </div>
             <?php endif; ?>
         </div>

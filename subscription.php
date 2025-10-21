@@ -64,7 +64,7 @@ if (isset($_POST['subscribe'])) {
                 'payment_methods' => ['enach', 'pnach', 'upi', 'card']
             ],
             'subscription_meta' => [
-                'return_url' => 'https://dashboard.invoicemate.in/business/subscription/success.php',
+                'return_url' => 'https://dashboard.invoicemate.in/business/business/subscription/success.php',
                 'notification_channel' => ['EMAIL', 'SMS']
             ],
             'subscription_expiry_time' => date('Y-m-d\TH:i:s\Z', strtotime('+1 year')),
@@ -123,7 +123,7 @@ if (isset($_POST['subscribe'])) {
                 // Redirect to Cashfree checkout page
                 echo "<script>
                     alert('Subscription created successfully! Redirecting to payment authorization...');
-                    window.location.href='subscription/checkout.php?session_id=" . $result['subscription_session_id'] . "&subscription_id=" . $subscriptionId . "';
+                    window.location.href='business/subscription/checkout.php?session_id=" . $result['subscription_session_id'] . "&subscription_id=" . $subscriptionId . "';
                 </script>";
             } else {
                 echo "<script>alert('Failed to create subscription. Please try again.');</script>";
