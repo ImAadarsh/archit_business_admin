@@ -1,7 +1,15 @@
+
 <?php
 include 'admin/connect.php';
 include 'admin/session.php';
 include 'admin/header.php';
+
+// Check subscription access
+$businessId = $_SESSION['business_id'];
+$subscriptionInfo = getBusinessSubscriptionStatus($businessId);
+
+// Show trial warning if applicable
+$trialWarning = getTrialWarning($businessId);
 ?>
 
 <body class="vertical  light  ">
@@ -21,6 +29,47 @@ include 'admin/aside.php';
                             </div>
                             <div class="col-auto">
 
+                            </div>
+                        </div>
+                        
+                        <!-- Trial Warning -->
+                        <?php if ($trialWarning): ?>
+                            <div class="alert alert-<?php echo $trialWarning['type']; ?> alert-dismissible fade show">
+                                <h5><i class="fas fa-exclamation-triangle"></i> Trial Alert</h5>
+                                <p><?php echo $trialWarning['message']; ?></p>
+                                <a href="subscription.php" class="btn btn-primary">Subscribe Now</a>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <!-- Subscription Status Card -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="card-title mb-1">
+                                            <i class="fe fe-credit-card"></i> 
+                                            Subscription Status
+                                        </h5>
+                                        <p class="text-muted mb-0">
+                                            Plan: <strong><?php echo htmlspecialchars($subscriptionInfo['plan_name']); ?></strong> | 
+                                            Status: <span class="badge badge-<?php echo $subscriptionInfo['status'] == 'active' ? 'success' : ($subscriptionInfo['status'] == 'trialing' ? 'warning' : 'secondary'); ?>">
+                                                <?php echo ucfirst($subscriptionInfo['status']); ?>
+                                            </span>
+                                        </p>
+                                        <?php if ($subscriptionInfo['trial_remaining'] > 0): ?>
+                                            <small class="text-warning">
+                                                <i class="fe fe-clock"></i> 
+                                                Trial expires in <?php echo $subscriptionInfo['trial_remaining']; ?> days
+                                            </small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <a href="subscription-management.php" class="btn btn-outline-primary">
+                                            <i class="fe fe-settings"></i> Manage
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="card shadow my-4">

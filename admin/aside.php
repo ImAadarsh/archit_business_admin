@@ -24,6 +24,25 @@
             </li>
         </ul>
         
+        <!-- Subscription Section -->
+        <p class="text-muted nav-heading mt-4 mb-1">
+            <span>Subscription</span>
+        </p>
+        <ul class="navbar-nav flex-fill w-100 mb-2">
+            <li class="nav-item">
+                <a href="subscription.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-credit-card fe-16"></i>
+                    <span class="ml-3 item-text">Plans & Pricing</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="subscription-management.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-settings fe-16"></i>
+                    <span class="ml-3 item-text">Manage Subscription</span>
+                </a>
+            </li>
+        </ul>
+        
         <!-- Business Management Section -->
         <p class="text-muted nav-heading mt-4 mb-1">
             <span>Business Management</span>

@@ -1,4 +1,9 @@
 <?php
+// Prevent multiple inclusions
+if (defined('CONNECT_LOADED')) {
+    return;
+}
+define('CONNECT_LOADED', true);
 
 $host = "82.180.142.204";
 $user = "u954141192_archit";
@@ -6,6 +11,7 @@ $password = "Endeavour@2023";
 $dbname = "u954141192_archit";
 $connect = mysqli_connect($host,$user,$password,$dbname);
 $uri = 'https://api.invoicemate.in/storage/app/';
+if (!function_exists('callAPI')) {
 function callAPI($method, $urlpoint, $data, $token){
     if (!isset($token)) {
         $token = "";
@@ -50,6 +56,8 @@ function callAPI($method, $urlpoint, $data, $token){
     curl_close($curl);
     return $result;
  }
+}
+if (!function_exists('callAPI1')) {
 function callAPI1($method, $urlpoint, $data, $token){
     if (!isset($token)) {
         $token = "";
@@ -95,5 +103,6 @@ function callAPI1($method, $urlpoint, $data, $token){
     curl_close($curl);
     return $result;
  }
+}
 
 ?>
