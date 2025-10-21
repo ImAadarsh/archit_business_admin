@@ -67,6 +67,14 @@ if ($_POST && isset($_POST['cf_status'])) {
                 // Set trial end date (e.g., 7 days from now)
                 $trialEndDate = date('Y-m-d H:i:s', strtotime('+7 days'));
                 
+                // Map Cashfree status to valid database values
+                $dbAuthStatus = 'pending'; // Default to pending
+                if ($cf_status === 'ACTIVE') {
+                    $dbAuthStatus = 'active';
+                } elseif ($cf_status === 'BANK_APPROVAL_PENDING') {
+                    $dbAuthStatus = 'pending'; // Map to pending for database constraint
+                }
+                
                 $sql = "UPDATE subscriptions SET 
                         status = ?, 
                         cashfree_subscription_id = ?,
@@ -76,7 +84,7 @@ if ($_POST && isset($_POST['cf_status'])) {
                         trial_ends_at = ?
                         WHERE id = ?";
                 $stmt = $connect->prepare($sql);
-                $stmt->bind_param("sssssi", $dbStatus, $cf_subscription_id, $cf_status, $payment_id, $trialEndDate, $db_subscription_id);
+                $stmt->bind_param("sssssi", $dbStatus, $cf_subscription_id, $dbAuthStatus, $payment_id, $trialEndDate, $db_subscription_id);
                 $stmt->execute();
                 $stmt->close();
                 
@@ -89,6 +97,7 @@ if ($_POST && isset($_POST['cf_status'])) {
             } else {
                 // Mandate not approved - keep as pending
                 $dbStatus = 'pending';
+                $dbAuthStatus = 'pending';
                 
                 $sql = "UPDATE subscriptions SET 
                         status = ?, 
@@ -98,7 +107,7 @@ if ($_POST && isset($_POST['cf_status'])) {
                         authorization_time = NOW()
                         WHERE id = ?";
                 $stmt = $connect->prepare($sql);
-                $stmt->bind_param("ssssi", $dbStatus, $cf_subscription_id, $cf_status, $payment_id, $db_subscription_id);
+                $stmt->bind_param("ssssi", $dbStatus, $cf_subscription_id, $dbAuthStatus, $payment_id, $db_subscription_id);
                 $stmt->execute();
                 $stmt->close();
             }
@@ -261,6 +270,8 @@ include("../../partials/header.php");
     echo "\nSubscription ID: " . ($subscription_id ?? 'NULL') . "\n";
     echo "CF Subscription ID: " . ($cf_subscription_id ?? 'NULL') . "\n";
     echo "Business ID: " . ($_SESSION['business_id'] ?? 'NULL') . "\n";
+    echo "CF Status: " . ($cf_status ?? 'NULL') . "\n";
+    echo "Mapped DB Auth Status: " . (($cf_status === 'ACTIVE') ? 'active' : (($cf_status === 'BANK_APPROVAL_PENDING') ? 'pending' : 'pending')) . "\n";
     
     // Debug database lookup
     if ($subscription_id) {
