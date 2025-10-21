@@ -55,9 +55,11 @@ function handleSubscriptionStatusChanged($data) {
     $cfSubscriptionId = $subscriptionDetails['cf_subscription_id'] ?? '';
     $subscriptionId = $subscriptionDetails['subscription_id'] ?? '';
     $status = $subscriptionDetails['subscription_status'] ?? '';
+    $authDetails = $data['authorization_details'] ?? [];
+    $authStatus = $authDetails['authorization_status'] ?? '';
     
     if ($cfSubscriptionId && $status) {
-        // Map Cashfree status to database status
+        // Map Cashfree status to database status (same logic as success.php)
         $dbStatus = 'trialing';
         if ($status === 'ACTIVE') {
             $dbStatus = 'active';
@@ -71,10 +73,29 @@ function handleSubscriptionStatusChanged($data) {
             $dbStatus = 'canceled';
         }
         
-        // Update subscription status
-        $sql = "UPDATE subscriptions SET status = ? WHERE razorpay_subscription_id = ?";
+        // Map authorization status (same logic as success.php)
+        $dbAuthStatus = 'active';
+        if ($authStatus === 'ACTIVE') {
+            $dbAuthStatus = 'active';
+        } elseif ($authStatus === 'BANK_APPROVAL_PENDING') {
+            $dbAuthStatus = 'active'; // Treat as active for trial purposes
+        } elseif ($authStatus === 'PENDING') {
+            $dbAuthStatus = 'pending';
+        } elseif ($authStatus === 'FAILED') {
+            $dbAuthStatus = 'failed';
+        }
+        
+        // Update subscription status with authorization details
+        $sql = "UPDATE subscriptions SET 
+                status = ?, 
+                cashfree_subscription_id = ?,
+                authorization_status = ?,
+                authorization_reference = ?,
+                authorization_time = NOW()
+                WHERE cashfree_subscription_id = ? OR razorpay_subscription_id = ?";
         $stmt = $connect->prepare($sql);
-        $stmt->bind_param("ss", $dbStatus, $cfSubscriptionId);
+        $authReference = $authDetails['authorization_reference'] ?? '';
+        $stmt->bind_param("ssssss", $dbStatus, $cfSubscriptionId, $dbAuthStatus, $authReference, $cfSubscriptionId, $cfSubscriptionId);
         $stmt->execute();
         $stmt->close();
         
@@ -82,13 +103,13 @@ function handleSubscriptionStatusChanged($data) {
         $sql = "UPDATE businessses b 
                 JOIN subscriptions s ON b.id = s.business_id 
                 SET b.subscription_status = ? 
-                WHERE s.razorpay_subscription_id = ?";
+                WHERE s.cashfree_subscription_id = ? OR s.razorpay_subscription_id = ?";
         $stmt = $connect->prepare($sql);
-        $stmt->bind_param("ss", $dbStatus, $cfSubscriptionId);
+        $stmt->bind_param("sss", $dbStatus, $cfSubscriptionId, $cfSubscriptionId);
         $stmt->execute();
         $stmt->close();
         
-        error_log("Subscription status updated: $cfSubscriptionId -> $dbStatus");
+        error_log("Subscription status updated: $cfSubscriptionId -> $dbStatus (auth: $dbAuthStatus)");
     }
 }
 
@@ -96,35 +117,82 @@ function handleSubscriptionAuthStatus($data) {
     global $connect;
     
     $cfSubscriptionId = $data['cf_subscription_id'] ?? '';
-    $authStatus = $data['authorization_details']['authorization_status'] ?? '';
+    $authDetails = $data['authorization_details'] ?? [];
+    $authStatus = $authDetails['authorization_status'] ?? '';
     $paymentId = $data['payment_id'] ?? '';
     $amount = $data['payment_amount'] ?? 0;
     $currency = $data['payment_currency'] ?? 'INR';
+    $authReference = $authDetails['authorization_reference'] ?? '';
     
     if ($cfSubscriptionId && $authStatus) {
-        // Get subscription details
+        // Get subscription details (check both cashfree and razorpay IDs)
         $sql = "SELECT s.*, sp.name as plan_name FROM subscriptions s 
                 JOIN subscription_plans sp ON s.plan_id = sp.id 
-                WHERE s.razorpay_subscription_id = ?";
+                WHERE s.cashfree_subscription_id = ? OR s.razorpay_subscription_id = ?";
         $stmt = $connect->prepare($sql);
-        $stmt->bind_param("s", $cfSubscriptionId);
+        $stmt->bind_param("ss", $cfSubscriptionId, $cfSubscriptionId);
         $stmt->execute();
         $result = $stmt->get_result();
         $subscription = $result->fetch_assoc();
         $stmt->close();
         
         if ($subscription) {
-            // Update subscription status based on auth status
-            $newStatus = ($authStatus === 'ACTIVE') ? 'active' : 'trialing';
+            // Map authorization status (same logic as success.php)
+            $dbAuthStatus = 'active';
+            if ($authStatus === 'ACTIVE') {
+                $dbAuthStatus = 'active';
+            } elseif ($authStatus === 'BANK_APPROVAL_PENDING') {
+                $dbAuthStatus = 'active'; // Treat as active for trial purposes
+            } elseif ($authStatus === 'PENDING') {
+                $dbAuthStatus = 'pending';
+            } elseif ($authStatus === 'FAILED') {
+                $dbAuthStatus = 'failed';
+            }
             
-            $sql = "UPDATE subscriptions SET status = ? WHERE razorpay_subscription_id = ?";
+            // Update subscription status based on auth status (same logic as success.php)
+            $newStatus = 'trialing'; // Start with trial for both ACTIVE and BANK_APPROVAL_PENDING
+            if ($authStatus === 'ACTIVE' || $authStatus === 'BANK_APPROVAL_PENDING') {
+                $newStatus = 'trialing';
+                // Set trial end date (e.g., 7 days from now)
+                $trialEndDate = date('Y-m-d H:i:s', strtotime('+7 days'));
+                
+                $sql = "UPDATE subscriptions SET 
+                        status = ?, 
+                        cashfree_subscription_id = ?,
+                        authorization_status = ?,
+                        authorization_reference = ?,
+                        authorization_time = NOW(),
+                        trial_ends_at = ?
+                        WHERE id = ?";
+                $stmt = $connect->prepare($sql);
+                $stmt->bind_param("sssssi", $newStatus, $cfSubscriptionId, $dbAuthStatus, $authReference, $trialEndDate, $subscription['id']);
+                $stmt->execute();
+                $stmt->close();
+            } else {
+                // Keep as pending for other statuses
+                $newStatus = 'pending';
+                $sql = "UPDATE subscriptions SET 
+                        status = ?, 
+                        cashfree_subscription_id = ?,
+                        authorization_status = ?,
+                        authorization_reference = ?,
+                        authorization_time = NOW()
+                        WHERE id = ?";
+                $stmt = $connect->prepare($sql);
+                $stmt->bind_param("ssssi", $newStatus, $cfSubscriptionId, $dbAuthStatus, $authReference, $subscription['id']);
+                $stmt->execute();
+                $stmt->close();
+            }
+            
+            // Update business subscription status
+            $sql = "UPDATE businessses SET subscription_status = ? WHERE id = ?";
             $stmt = $connect->prepare($sql);
-            $stmt->bind_param("ss", $newStatus, $cfSubscriptionId);
+            $stmt->bind_param("si", $newStatus, $subscription['business_id']);
             $stmt->execute();
             $stmt->close();
             
-            // Record authorization payment
-            if ($paymentId && $amount > 0) {
+            // Record authorization payment if successful
+            if (($authStatus === 'ACTIVE' || $authStatus === 'BANK_APPROVAL_PENDING') && $paymentId && $amount > 0) {
                 $sql = "INSERT INTO subscription_payments (
                     subscription_id, business_id, amount, currency, status,
                     razorpay_payment_id, paid_at, created_at, updated_at
@@ -142,7 +210,7 @@ function handleSubscriptionAuthStatus($data) {
                 $stmt->close();
             }
             
-            error_log("Subscription auth status updated: $cfSubscriptionId -> $newStatus");
+            error_log("Subscription auth status updated: $cfSubscriptionId -> $newStatus (auth: $dbAuthStatus)");
         }
     }
 }
@@ -156,12 +224,12 @@ function handleSubscriptionPaymentSuccess($data) {
     $currency = $data['payment_currency'] ?? 'INR';
     
     if ($cfSubscriptionId && $paymentId) {
-        // Get subscription details
+        // Get subscription details (check both cashfree and razorpay IDs)
         $sql = "SELECT s.*, sp.name as plan_name FROM subscriptions s 
                 JOIN subscription_plans sp ON s.plan_id = sp.id 
-                WHERE s.razorpay_subscription_id = ?";
+                WHERE s.cashfree_subscription_id = ? OR s.razorpay_subscription_id = ?";
         $stmt = $connect->prepare($sql);
-        $stmt->bind_param("s", $cfSubscriptionId);
+        $stmt->bind_param("ss", $cfSubscriptionId, $cfSubscriptionId);
         $stmt->execute();
         $result = $stmt->get_result();
         $subscription = $result->fetch_assoc();
@@ -207,12 +275,12 @@ function handleSubscriptionPaymentFailed($data) {
     $failureReason = $data['failure_details']['failure_reason'] ?? '';
     
     if ($cfSubscriptionId && $paymentId) {
-        // Get subscription details
+        // Get subscription details (check both cashfree and razorpay IDs)
         $sql = "SELECT s.*, sp.name as plan_name FROM subscriptions s 
                 JOIN subscription_plans sp ON s.plan_id = sp.id 
-                WHERE s.razorpay_subscription_id = ?";
+                WHERE s.cashfree_subscription_id = ? OR s.razorpay_subscription_id = ?";
         $stmt = $connect->prepare($sql);
-        $stmt->bind_param("s", $cfSubscriptionId);
+        $stmt->bind_param("ss", $cfSubscriptionId, $cfSubscriptionId);
         $stmt->execute();
         $result = $stmt->get_result();
         $subscription = $result->fetch_assoc();
@@ -249,10 +317,10 @@ function handleSubscriptionPaymentCancelled($data) {
     $paymentId = $data['payment_id'] ?? '';
     
     if ($cfSubscriptionId && $paymentId) {
-        // Get subscription details
-        $sql = "SELECT s.* FROM subscriptions s WHERE s.razorpay_subscription_id = ?";
+        // Get subscription details (check both cashfree and razorpay IDs)
+        $sql = "SELECT s.* FROM subscriptions s WHERE s.cashfree_subscription_id = ? OR s.razorpay_subscription_id = ?";
         $stmt = $connect->prepare($sql);
-        $stmt->bind_param("s", $cfSubscriptionId);
+        $stmt->bind_param("ss", $cfSubscriptionId, $cfSubscriptionId);
         $stmt->execute();
         $result = $stmt->get_result();
         $subscription = $result->fetch_assoc();

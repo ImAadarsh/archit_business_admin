@@ -262,16 +262,16 @@ include("../../partials/header.php");
 
 <body>
     <?php
-    echo "<pre>";
-    echo "POST Data:\n";
-    print_r($_POST);
-    echo "\nSession Data:\n";
-    print_r($_SESSION);
-    echo "\nSubscription ID: " . ($subscription_id ?? 'NULL') . "\n";
-    echo "CF Subscription ID: " . ($cf_subscription_id ?? 'NULL') . "\n";
-    echo "Business ID: " . ($_SESSION['business_id'] ?? 'NULL') . "\n";
-    echo "CF Status: " . ($cf_status ?? 'NULL') . "\n";
-    echo "Mapped DB Auth Status: " . (($cf_status === 'ACTIVE') ? 'active' : (($cf_status === 'BANK_APPROVAL_PENDING') ? 'active' : 'pending')) . "\n";
+    // echo "<pre>";
+    // echo "POST Data:\n";
+    // print_r($_POST);
+    // echo "\nSession Data:\n";
+    // print_r($_SESSION);
+    // echo "\nSubscription ID: " . ($subscription_id ?? 'NULL') . "\n";
+    // echo "CF Subscription ID: " . ($cf_subscription_id ?? 'NULL') . "\n";
+    // echo "Business ID: " . ($_SESSION['business_id'] ?? 'NULL') . "\n";
+    // echo "CF Status: " . ($cf_status ?? 'NULL') . "\n";
+    // echo "Mapped DB Auth Status: " . (($cf_status === 'ACTIVE') ? 'active' : (($cf_status === 'BANK_APPROVAL_PENDING') ? 'active' : 'pending')) . "\n";
     
     // Debug database lookup
     if ($subscription_id) {
@@ -281,8 +281,8 @@ include("../../partials/header.php");
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        echo "DB Subscription ID (by id): " . ($row['id'] ?? 'NULL') . "\n";
-        echo "DB Business ID (by id): " . ($row['business_id'] ?? 'NULL') . "\n";
+        // echo "DB Subscription ID (by id): " . ($row['id'] ?? 'NULL') . "\n";
+        // echo "DB Business ID (by id): " . ($row['business_id'] ?? 'NULL') . "\n";
         $stmt->close();
         
         $sql = "SELECT id, business_id FROM subscriptions WHERE razorpay_subscription_id = ?";
@@ -291,11 +291,11 @@ include("../../partials/header.php");
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        echo "DB Subscription ID (by razorpay_subscription_id): " . ($row['id'] ?? 'NULL') . "\n";
-        echo "DB Business ID (by razorpay_subscription_id): " . ($row['business_id'] ?? 'NULL') . "\n";
+        // echo "DB Subscription ID (by razorpay_subscription_id): " . ($row['id'] ?? 'NULL') . "\n";
+        // echo "DB Business ID (by razorpay_subscription_id): " . ($row['business_id'] ?? 'NULL') . "\n";
         $stmt->close();
     }
-    echo "</pre>";
+    // echo "</pre>";
     ?>
     <div class="success-container">
         <div class="success-card">
