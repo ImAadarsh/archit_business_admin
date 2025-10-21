@@ -68,11 +68,11 @@ if ($_POST && isset($_POST['cf_status'])) {
                 $trialEndDate = date('Y-m-d H:i:s', strtotime('+7 days'));
                 
                 // Map Cashfree status to valid database values
-                $dbAuthStatus = 'pending'; // Default to pending
+                $dbAuthStatus = 'active'; // Both ACTIVE and BANK_APPROVAL_PENDING should be active for trial
                 if ($cf_status === 'ACTIVE') {
                     $dbAuthStatus = 'active';
                 } elseif ($cf_status === 'BANK_APPROVAL_PENDING') {
-                    $dbAuthStatus = 'pending'; // Map to pending for database constraint
+                    $dbAuthStatus = 'active'; // Treat as active for trial purposes
                 }
                 
                 $sql = "UPDATE subscriptions SET 
@@ -271,7 +271,7 @@ include("../../partials/header.php");
     echo "CF Subscription ID: " . ($cf_subscription_id ?? 'NULL') . "\n";
     echo "Business ID: " . ($_SESSION['business_id'] ?? 'NULL') . "\n";
     echo "CF Status: " . ($cf_status ?? 'NULL') . "\n";
-    echo "Mapped DB Auth Status: " . (($cf_status === 'ACTIVE') ? 'active' : (($cf_status === 'BANK_APPROVAL_PENDING') ? 'pending' : 'pending')) . "\n";
+    echo "Mapped DB Auth Status: " . (($cf_status === 'ACTIVE') ? 'active' : (($cf_status === 'BANK_APPROVAL_PENDING') ? 'active' : 'pending')) . "\n";
     
     // Debug database lookup
     if ($subscription_id) {
