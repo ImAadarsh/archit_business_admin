@@ -34,38 +34,72 @@ if ($_POST && isset($_POST['cf_status'])) {
     
     // Update subscription in database with Cashfree data
     if ($cf_subscription_id && $subscription_id) {
-        // Update subscription status
-        $dbStatus = ($cf_status === 'ACTIVE') ? 'active' : 'trialing';
-        $sql = "UPDATE subscriptions SET 
-                status = ?, 
-                cashfree_subscription_id = ?,
-                authorization_status = ?,
-                authorization_reference = ?,
-                authorization_time = NOW()
-                WHERE id = ?";
-        $stmt = $connect->prepare($sql);
-        $stmt->bind_param("ssssi", $dbStatus, $cf_subscription_id, $cf_status, $payment_id, $subscription_id);
-        $stmt->execute();
-        $stmt->close();
+        // Get business_id first
+        $business_id = $_SESSION['business_id'] ?? null;
         
-        // Update business subscription status
-        $sql = "UPDATE businessses SET subscription_status = ? WHERE id = (SELECT business_id FROM subscriptions WHERE id = ?)";
-        $stmt = $connect->prepare($sql);
-        $stmt->bind_param("si", $dbStatus, $subscription_id);
-        $stmt->execute();
-        $stmt->close();
+        if (!$business_id) {
+            // Try to get business_id from subscription
+            $sql = "SELECT business_id FROM subscriptions WHERE id = ?";
+            $stmt = $connect->prepare($sql);
+            $stmt->bind_param("i", $subscription_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $business_id = $row['business_id'] ?? null;
+            $stmt->close();
+        }
+        
+        if ($business_id) {
+            // Update subscription status
+            $dbStatus = ($cf_status === 'ACTIVE') ? 'active' : 'trialing';
+            $sql = "UPDATE subscriptions SET 
+                    status = ?, 
+                    cashfree_subscription_id = ?,
+                    authorization_status = ?,
+                    authorization_reference = ?,
+                    authorization_time = NOW()
+                    WHERE id = ?";
+            $stmt = $connect->prepare($sql);
+            $stmt->bind_param("ssssi", $dbStatus, $cf_subscription_id, $cf_status, $payment_id, $subscription_id);
+            $stmt->execute();
+            $stmt->close();
+            
+            // Update business subscription status
+            $sql = "UPDATE businessses SET subscription_status = ? WHERE id = ?";
+            $stmt = $connect->prepare($sql);
+            $stmt->bind_param("si", $dbStatus, $business_id);
+            $stmt->execute();
+            $stmt->close();
+        }
         
         // Record authorization payment if successful
         if ($cf_status === 'ACTIVE' && $payment_id && $auth_amount > 0) {
-            $sql = "INSERT INTO subscription_payments (
-                subscription_id, business_id, amount, currency, status,
-                razorpay_payment_id, paid_at, created_at, updated_at
-            ) VALUES (?, (SELECT business_id FROM subscriptions WHERE id = ?), ?, 'INR', 'captured', ?, NOW(), NOW(), NOW())";
+            // Get business_id from session or subscription
+            $business_id = $_SESSION['business_id'] ?? null;
             
-            $stmt = $connect->prepare($sql);
-            $stmt->bind_param("iids", $subscription_id, $subscription_id, $auth_amount, $payment_id);
-            $stmt->execute();
-            $stmt->close();
+            if (!$business_id) {
+                // Try to get business_id from subscription
+                $sql = "SELECT business_id FROM subscriptions WHERE id = ?";
+                $stmt = $connect->prepare($sql);
+                $stmt->bind_param("i", $subscription_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                $business_id = $row['business_id'] ?? null;
+                $stmt->close();
+            }
+            
+            if ($business_id) {
+                $sql = "INSERT INTO subscription_payments (
+                    subscription_id, business_id, amount, currency, status,
+                    razorpay_payment_id, paid_at, created_at, updated_at
+                ) VALUES (?, ?, ?, 'INR', 'captured', ?, NOW(), NOW(), NOW())";
+                
+                $stmt = $connect->prepare($sql);
+                $stmt->bind_param("iids", $subscription_id, $business_id, $auth_amount, $payment_id);
+                $stmt->execute();
+                $stmt->close();
+            }
         }
     }
 }
@@ -200,7 +234,13 @@ include("../../partials/header.php");
 <body>
     <?php
     echo "<pre>";
+    echo "POST Data:\n";
     print_r($_POST);
+    echo "\nSession Data:\n";
+    print_r($_SESSION);
+    echo "\nSubscription ID: " . ($subscription_id ?? 'NULL') . "\n";
+    echo "CF Subscription ID: " . ($cf_subscription_id ?? 'NULL') . "\n";
+    echo "Business ID: " . ($_SESSION['business_id'] ?? 'NULL') . "\n";
     echo "</pre>";
     ?>
     <div class="success-container">
