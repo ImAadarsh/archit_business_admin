@@ -218,7 +218,6 @@ include 'admin/aside.php';
                                                 <th>Status</th>
                                                 <th>Start Date</th>
                                                 <th>End Date</th>
-                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -252,23 +251,6 @@ include 'admin/aside.php';
                                                         }
                                                         ?>
                                                     </td>
-                                                    <td>
-                                                        <?php if ($row['status'] == 'active'): ?>
-                                                            <form method="POST" style="display: inline;">
-                                                                <input type="hidden" name="subscription_id" value="<?php echo $row['id']; ?>">
-                                                                <button type="submit" name="action" value="pause" class="btn btn-sm btn-warning">
-                                                                    Pause
-                                                                </button>
-                                                            </form>
-                                                        <?php elseif ($row['status'] == 'paused'): ?>
-                                                            <form method="POST" style="display: inline;">
-                                                                <input type="hidden" name="subscription_id" value="<?php echo $row['id']; ?>">
-                                                                <button type="submit" name="action" value="resume" class="btn btn-sm btn-success">
-                                                                    Resume
-                                                                </button>
-                                                            </form>
-                                                        <?php endif; ?>
-                                                    </td>
                                                 </tr>
                                             <?php endwhile; ?>
                                         </tbody>
@@ -293,7 +275,7 @@ include 'admin/aside.php';
                                                 <i class="fas fa-file-invoice fa-3x text-success mb-3"></i>
                                                 <h5>Billing History</h5>
                                                 <p class="text-muted">View your payment history and invoices</p>
-                                                <a href="invoices.php" class="btn btn-outline-success">View Invoices</a>
+                                                <a href="billing-history.php" class="btn btn-outline-success">View Billing History</a>
                                             </div>
                                         </div>
                                     </div>

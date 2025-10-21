@@ -41,6 +41,12 @@
                     <span class="ml-3 item-text">Manage Subscription</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="billing-history.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-file-text fe-16"></i>
+                    <span class="ml-3 item-text">Billing History</span>
+                </a>
+            </li>
         </ul>
         
         <!-- Business Management Section -->
