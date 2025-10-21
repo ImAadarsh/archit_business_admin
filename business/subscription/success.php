@@ -23,7 +23,7 @@ if ($_POST && isset($_POST['cf_status'])) {
     $message = $_POST['cf_message'] ?? '';
     
     // Set status based on Cashfree response
-    if ($cf_status === 'ACTIVE' && $checkout_status === 'SUCCESS') {
+    if (($cf_status === 'ACTIVE' || $cf_status === 'BANK_APPROVAL_PENDING') && $checkout_status === 'SUCCESS') {
         $status = 'success';
     } elseif ($cf_status === 'ACTIVE' && $checkout_status !== 'SUCCESS') {
         $status = 'pending';
@@ -51,8 +51,8 @@ if ($_POST && isset($_POST['cf_status'])) {
         
         if ($business_id) {
             // Update subscription status based on authorization
-            if ($cf_status === 'ACTIVE') {
-                // Mandate approved - activate trial or subscription
+            if ($cf_status === 'ACTIVE' || $cf_status === 'BANK_APPROVAL_PENDING') {
+                // Mandate approved or pending bank approval - activate trial
                 $dbStatus = 'trialing'; // Start with trial
                 
                 // Set trial end date (e.g., 7 days from now)
@@ -96,7 +96,7 @@ if ($_POST && isset($_POST['cf_status'])) {
         }
         
         // Record authorization payment if successful
-        if ($cf_status === 'ACTIVE' && $payment_id && $auth_amount > 0) {
+        if (($cf_status === 'ACTIVE' || $cf_status === 'BANK_APPROVAL_PENDING') && $payment_id && $auth_amount > 0) {
             // Get business_id from session or subscription
             $business_id = $_SESSION['business_id'] ?? null;
             
@@ -272,13 +272,19 @@ include("../../partials/header.php");
                 <!-- Success Case -->
                 <div class="success-icon">✅</div>
                 <h2>Subscription Authorized Successfully!</h2>
-                <p>Your subscription has been authorized and is now active.</p>
+                <?php if ($cf_status === 'BANK_APPROVAL_PENDING'): ?>
+                    <p>Your subscription has been authorized and is now active. Your bank approval is pending and will be processed shortly.</p>
+                <?php else: ?>
+                    <p>Your subscription has been authorized and is now active.</p>
+                <?php endif; ?>
                 
                 <div class="mt-4">
                     <strong>Subscription ID:</strong> <?php echo htmlspecialchars($subscription_id ?: 'N/A'); ?><br>
                     <strong>Cashfree ID:</strong> <?php echo htmlspecialchars($cf_subscription_id ?: 'N/A'); ?><br>
                     <strong>Status:</strong> 
-                    <span class="status-badge status-active">Active</span><br>
+                    <span class="status-badge status-<?php echo ($cf_status === 'BANK_APPROVAL_PENDING') ? 'pending' : 'active'; ?>">
+                        <?php echo ($cf_status === 'BANK_APPROVAL_PENDING') ? 'Bank Approval Pending' : 'Active'; ?>
+                    </span><br>
                     <?php if (isset($_POST['cf_authAmount'])): ?>
                         <strong>Authorization Amount:</strong> ₹<?php echo htmlspecialchars($_POST['cf_authAmount']); ?><br>
                     <?php endif; ?>

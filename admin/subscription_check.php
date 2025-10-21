@@ -98,8 +98,8 @@ function isTrialApproved($businessId) {
     $stmt->close();
     
     if ($subscription) {
-        // Trial is approved if authorization status is ACTIVE
-        return $subscription['authorization_status'] === 'ACTIVE';
+        // Trial is approved if authorization status is ACTIVE or BANK_APPROVAL_PENDING
+        return $subscription['authorization_status'] === 'ACTIVE' || $subscription['authorization_status'] === 'BANK_APPROVAL_PENDING';
     }
     
     return false;
