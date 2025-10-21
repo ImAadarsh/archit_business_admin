@@ -3,11 +3,69 @@ session_start();
 include("../../admin/connect.php");
 include("../../admin/cashfree_config.php");
 
-// Get subscription details from URL parameters or session
+// Get subscription details from URL parameters, session, or Cashfree POST data
 $subscription_id = $_GET['subscription_id'] ?? $_SESSION['checkout_subscription_id'] ?? $_SESSION['subscription_id'] ?? '';
 $cf_subscription_id = $_GET['cf_subscription_id'] ?? $_SESSION['cf_subscription_id'] ?? '';
 $status = $_GET['status'] ?? 'success';
 $error = $_GET['error'] ?? '';
+
+// Handle Cashfree return data (POST from authorization)
+if ($_POST && isset($_POST['cf_status'])) {
+    $cf_status = $_POST['cf_status'] ?? '';
+    $cf_subscription_id = $_POST['cf_subscriptionId'] ?? $cf_subscription_id;
+    $subscription_id = $_POST['cf_subReferenceId'] ?? $subscription_id;
+    $payment_id = $_POST['cf_subscriptionPaymentId'] ?? '';
+    $auth_amount = $_POST['cf_authAmount'] ?? 0;
+    $checkout_status = $_POST['cf_checkoutStatus'] ?? '';
+    $message = $_POST['cf_message'] ?? '';
+    
+    // Set status based on Cashfree response
+    if ($cf_status === 'ACTIVE' && $checkout_status === 'SUCCESS') {
+        $status = 'success';
+    } elseif ($cf_status === 'ACTIVE' && $checkout_status !== 'SUCCESS') {
+        $status = 'pending';
+    } else {
+        $status = 'failed';
+        $error = $message ?: 'Authorization failed';
+    }
+    
+    // Update subscription in database with Cashfree data
+    if ($cf_subscription_id && $subscription_id) {
+        // Update subscription status
+        $dbStatus = ($cf_status === 'ACTIVE') ? 'active' : 'trialing';
+        $sql = "UPDATE subscriptions SET 
+                status = ?, 
+                cashfree_subscription_id = ?,
+                authorization_status = ?,
+                authorization_reference = ?,
+                authorization_time = NOW()
+                WHERE id = ?";
+        $stmt = $connect->prepare($sql);
+        $stmt->bind_param("ssssi", $dbStatus, $cf_subscription_id, $cf_status, $payment_id, $subscription_id);
+        $stmt->execute();
+        $stmt->close();
+        
+        // Update business subscription status
+        $sql = "UPDATE businessses SET subscription_status = ? WHERE id = (SELECT business_id FROM subscriptions WHERE id = ?)";
+        $stmt = $connect->prepare($sql);
+        $stmt->bind_param("si", $dbStatus, $subscription_id);
+        $stmt->execute();
+        $stmt->close();
+        
+        // Record authorization payment if successful
+        if ($cf_status === 'ACTIVE' && $payment_id && $auth_amount > 0) {
+            $sql = "INSERT INTO subscription_payments (
+                subscription_id, business_id, amount, currency, status,
+                razorpay_payment_id, paid_at, created_at, updated_at
+            ) VALUES (?, (SELECT business_id FROM subscriptions WHERE id = ?), ?, 'INR', 'captured', ?, NOW(), NOW(), NOW())";
+            
+            $stmt = $connect->prepare($sql);
+            $stmt->bind_param("iids", $subscription_id, $subscription_id, $auth_amount, $payment_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+}
 
 // If we have subscription details, fetch the latest status from Cashfree
 if ($cf_subscription_id) {
@@ -130,27 +188,44 @@ include("../../partials/header.php");
     color: white;
     text-decoration: none;
 }
+
+.mt-4 {
+    margin-top: 1.5rem;
+}
 </style>
 
 <body>
-    <?php 
-    echo print_r($_POST);
-    echo print_r($_GET);
-    echo print_r($_SESSION);
-    echo print_r($_REQUEST);
-    echo print_r($_SERVER);
-    echo print_r($_ENV);
-    echo print_r($_FILES);
-    echo print_r($_COOKIE);
-    echo print_r($_SERVER);
-    ?>
     <div class="success-container">
         <div class="success-card">
-            <?php if ($status === 'success' && $subscriptionData && !isset($subscriptionData['error'])): ?>
+            <?php if ($status === 'success'): ?>
                 <!-- Success Case -->
                 <div class="success-icon">✅</div>
                 <h2>Subscription Authorized Successfully!</h2>
                 <p>Your subscription has been authorized and is now active.</p>
+                
+                <div class="mt-4">
+                    <strong>Subscription ID:</strong> <?php echo htmlspecialchars($subscription_id ?: 'N/A'); ?><br>
+                    <strong>Cashfree ID:</strong> <?php echo htmlspecialchars($cf_subscription_id ?: 'N/A'); ?><br>
+                    <strong>Status:</strong> 
+                    <span class="status-badge status-active">Active</span><br>
+                    <?php if (isset($_POST['cf_authAmount'])): ?>
+                        <strong>Authorization Amount:</strong> ₹<?php echo htmlspecialchars($_POST['cf_authAmount']); ?><br>
+                    <?php endif; ?>
+                    <?php if (isset($_POST['cf_mode'])): ?>
+                        <strong>Payment Method:</strong> <?php echo htmlspecialchars($_POST['cf_mode']); ?><br>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="../../dashboard.php" class="btn btn-primary">Go to Dashboard</a>
+                    <a href="../../subscription-management.php" class="btn btn-secondary">Manage Subscription</a>
+                </div>
+                
+            <?php elseif ($status === 'success' && $subscriptionData && !isset($subscriptionData['error'])): ?>
+                <!-- Success Case (fallback) -->
+                <div class="success-icon">✅</div>
+                <h2>Subscription Created Successfully!</h2>
+                <p>Your subscription has been set up and is ready to use.</p>
             <?php elseif ($status === 'failed'): ?>
                 <!-- Failed Case -->
                 <div class="success-icon" style="color: #dc3545;">❌</div>
