@@ -22,6 +22,7 @@ $year = isset($_GET['year']) ? intval($_GET['year']) : null;
 $week_start = isset($_GET['week_start']) ? $_GET['week_start'] : null;
 $week_end = isset($_GET['week_end']) ? $_GET['week_end'] : null;
 $purchase_at = isset($_GET['purchase_at']) ? floatval($_GET['purchase_at']) : 100;
+$gst_rate = isset($_GET['gst_rate']) ? $_GET['gst_rate'] : null; // can be numeric or 'all'
 $amount_min = isset($_GET['amount_min']) ? floatval($_GET['amount_min']) : null;
 $amount_max = isset($_GET['amount_max']) ? floatval($_GET['amount_max']) : null;
 
@@ -94,14 +95,22 @@ if ($location_id) {
     $types .= "i";
 }
 
+// GST filter (default: all). If provided and not 'all', filter by exact GST rate
+if ($gst_rate !== null && $gst_rate !== '' && strtolower((string)$gst_rate) !== 'all') {
+    $where_clauses[] = "i.gst_rate = ?";
+    // Accept numeric gst rate (int/float) as string; bind as double
+    $params[] = is_numeric($gst_rate) ? (float)$gst_rate : $gst_rate;
+    $types .= is_numeric($gst_rate) ? 'd' : 's';
+}
+
 $where_clause = implode(" AND ", $where_clauses);
 
-$sql = "SELECT p.name AS product_name, i.price_of_one, SUM(i.quantity) AS total_quantity, SUM(i.price_of_all) AS total_sales
+$sql = "SELECT p.name AS product_name, i.price_of_one, i.gst_rate, SUM(i.quantity) AS total_quantity, SUM(i.price_of_all) AS total_sales
         FROM items i
         JOIN products p ON i.product_id = p.id
         JOIN invoices inv ON i.invoice_id = inv.id
         WHERE $where_clause
-        GROUP BY i.product_id, i.price_of_one
+        GROUP BY i.product_id, i.price_of_one, i.gst_rate
         ORDER BY i.price_of_one";
 
 // Prepare and execute the query
@@ -120,6 +129,7 @@ while ($row = $result->fetch_assoc()) {
     $data[] = [
         "Product Name" => $row['product_name'],
         "Price per Item" => number_format($adjustedPrice, 2),
+        "GST Percent" => isset($row['gst_rate']) ? $row['gst_rate'] : '',
         "Total Quantity" => $row['total_quantity'],
         "Total" => number_format($adjustedTotal, 2)
     ];
