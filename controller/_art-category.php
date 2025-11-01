@@ -34,12 +34,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Execute the statement
     if ($stmt->execute()) {
         // Success
-        $_SESSION['success'] = "Art Category added successfully!";
+        $_SESSION['success'] = "Product Category added successfully!";
         header("Location: ../art-category-view.php");
         exit();
     } else {
         // Error
-        $_SESSION['error'] = "Error adding art category: " . $connect->error;
+        $_SESSION['error'] = "Error adding Product Category: " . $connect->error;
         header("Location: ../art-category.php");
         exit();
     }
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
     $check_stmt->close();
 } else {
-    // If not POST request, redirect to art category page
+    // If not POST request, redirect to Product Category page
     header("Location: ../art-category.php");
     exit();
 }

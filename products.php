@@ -54,7 +54,7 @@ include 'admin/aside.php';
                                                 <th>HSN Code</th>
                                                 <th>Price</th>
                                                 <th>Product Type</th>
-                                                <th>Art Category</th>
+                                                <th>Product Category</th>
                                                 <th>itemCode</th>
                                                 <th>Images</th>
                                                 <th>Location</th>

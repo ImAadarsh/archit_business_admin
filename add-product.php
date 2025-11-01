@@ -58,7 +58,7 @@ include 'admin/aside.php';
                                     </div>
                                     
                                     <div class="form-group mb-3">
-                                        <label for="art_category_id">Art Category *</label>
+                                        <label for="art_category_id">Product Category *</label>
                                         <select id="art_category_id" class="form-control" name="art_category_id" required disabled>
                                             <option value="">First select a Product Type</option>
                                         </select>
@@ -147,7 +147,7 @@ include 'admin/aside.php';
             </div> <!-- .container-fluid -->
 
             <script>
-            // Store all art categories data
+            // Store all Product Categories data
             const allArtCategories = <?php 
                 $art_cat_sql = "SELECT pc.id, pc.name, pc.category_id, c.name as category_name 
                                FROM product_category pc 
@@ -182,14 +182,14 @@ include 'admin/aside.php';
                     document.getElementById('location_id').value = locationId;
                 }
                 
-                // Update Art Category dropdown based on selected Product Type
+                // Update Product Category dropdown based on selected Product Type
                 updateArtCategories(this.value);
             });
             
-            // Function to update Art Categories based on Product Type
+            // Function to update Product Categories based on Product Type
             function updateArtCategories(categoryId) {
                 const artCategorySelect = document.getElementById('art_category_id');
-                artCategorySelect.innerHTML = '<option value="">Choose Art Category</option>';
+                artCategorySelect.innerHTML = '<option value="">Choose Product Category</option>';
                 
                 if (categoryId) {
                     const filteredCategories = allArtCategories.filter(art => art.category_id == categoryId);
@@ -204,7 +204,7 @@ include 'admin/aside.php';
                         });
                         artCategorySelect.disabled = false;
                     } else {
-                        artCategorySelect.innerHTML = '<option value="">No Art Categories found for this Product Type</option>';
+                        artCategorySelect.innerHTML = '<option value="">No Product Categories found for this Product Type</option>';
                         artCategorySelect.disabled = true;
                     }
                 } else {
@@ -212,11 +212,11 @@ include 'admin/aside.php';
                     artCategorySelect.disabled = true;
                 }
                 
-                // Clear Product Name when Art Category changes
+                // Clear Product Name when Product Category changes
                 document.getElementById('name').value = '';
             }
             
-            // Auto-populate Product Name when Art Category is selected
+            // Auto-populate Product Name when Product Category is selected
             document.getElementById('art_category_id').addEventListener('change', function() {
                 const selectedOption = this.options[this.selectedIndex];
                 const artCategoryName = selectedOption.getAttribute('data-name');

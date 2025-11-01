@@ -18,8 +18,8 @@ include 'admin/aside.php';
                     <div class="col-12">
                         <div class="card shadow mb-4">
                             <div class="card-header">
-                                <strong class="card-title">Art Categories</strong>
-                                <a href="art-category.php" class="btn btn-primary float-right">Add New Art Category</a>
+                                <strong class="card-title">Product Categories</strong>
+                                <a href="art-category.php" class="btn btn-primary float-right">Add New Product Category</a>
                             </div>
                             <div class="card-body">
                                 <?php if(isset($_SESSION['success'])): ?>
@@ -76,12 +76,12 @@ include 'admin/aside.php';
                                                     echo "<td>" . date('d M Y, h:i A', strtotime($row['created_at'])) . "</td>";
                                                     echo "<td>
                                                             <a href='edit-art-category.php?id=" . $row['id'] . "' class='btn btn-sm btn-info'>Edit</a>
-                                                            <a href='controller/_delete-art-category.php?id=" . $row['id'] . "' class='btn btn-sm btn-danger' onclick='return confirm(\"Are you sure you want to delete this art category?\")'>Delete</a>
+                                                            <a href='controller/_delete-art-category.php?id=" . $row['id'] . "' class='btn btn-sm btn-danger' onclick='return confirm(\"Are you sure you want to delete this Product Category?\")'>Delete</a>
                                                           </td>";
                                                     echo "</tr>";
                                                 }
                                             } else {
-                                                echo "<tr><td colspan='5' class='text-center'>No art categories found</td></tr>";
+                                                echo "<tr><td colspan='5' class='text-center'>No Product Categories found</td></tr>";
                                             }
                                             ?>
                                         </tbody>

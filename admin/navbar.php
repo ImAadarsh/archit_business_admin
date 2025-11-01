@@ -38,8 +38,13 @@ $logo = $business['logo'] ? $uri . $business['logo'] : 'assets/images/invoice_ma
                 </span>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                <a class="dropdown-item" href="dashboard.php">Dashboard</a>
-                <a class="dropdown-item" href="admin/logout.php">Logout</a>
+                <a class="dropdown-item" href="dashboard.php"><i class="fe fe-home"></i> Dashboard</a>
+                <a class="dropdown-item" href="profile.php"><i class="fe fe-briefcase"></i> Business Profile</a>
+                <?php if (isset($_SESSION['userid'])): ?>
+                <a class="dropdown-item" href="team-edit.php?id=<?php echo $_SESSION['userid']; ?>"><i class="fe fe-user"></i> User Profile</a>
+                <?php endif; ?>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="admin/logout.php"><i class="fe fe-log-out"></i> Logout</a>
 
             </div>
         </li>

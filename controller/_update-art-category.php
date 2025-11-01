@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
     
-    // Verify that the art category exists and belongs to a valid category
+    // Verify that the Product Category exists and belongs to a valid category
     $verify_sql = "SELECT pc.id FROM product_category pc 
                    LEFT JOIN categories c ON pc.category_id = c.id 
                    WHERE pc.id = ? AND c.business_id = ?";
@@ -45,20 +45,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Execute the statement
         if ($update_stmt->execute()) {
             // Success
-            $_SESSION['success'] = "Art Category updated successfully!";
+            $_SESSION['success'] = "Product Category updated successfully!";
             header("Location: ../art-category-view.php");
             exit();
         } else {
             // Error
-            $_SESSION['error'] = "Error updating art category: " . $connect->error;
+            $_SESSION['error'] = "Error updating Product Category: " . $connect->error;
             header("Location: ../edit-art-category.php?id=" . $id);
             exit();
         }
         
         $update_stmt->close();
     } else {
-        // Art category not found or doesn't belong to the current business
-        $_SESSION['error'] = "Art Category not found or you don't have permission to update it.";
+        // Product Category not found or doesn't belong to the current business
+        $_SESSION['error'] = "Product Category not found or you don't have permission to update it.";
         header("Location: ../art-category-view.php");
         exit();
     }
@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $check_stmt->close();
     $verify_stmt->close();
 } else {
-    // If not POST request, redirect to art categories page
+    // If not POST request, redirect to Product Categories page
     header("Location: ../art-category-view.php");
     exit();
 }

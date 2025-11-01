@@ -101,6 +101,7 @@ include 'admin/aside.php';
                 <div class="row align-items-center">
                     <?php
                     $dashboard_items = [
+                        ["profile.php", "fe-briefcase", "Business Profile"],
                         ["locations.php", "fe-home", "My Locations"],
                         ["team.php", "fe-star", "My Team"],
                         ["users.php", "fe-users", "My Customers"],

@@ -16,19 +16,19 @@ include 'admin/aside.php';
 
                 <div class="card shadow mb-4">
                     <a href="art-category-view.php">
-                        <button type="button" class="btn btn-primary">View Art Categories</button>
+                        <button type="button" class="btn btn-primary">View Product Categories</button>
                     </a>
                     <div class="card-header">
-                        <strong class="card-title">Add Art Category</strong>
+                        <strong class="card-title">Add Product Category</strong>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-12">
                                 <form role="form" action="controller/_art-category.php" method="POST">
                                     <div class="form-group mb-3">
-                                        <label for="name">Art Category Name</label>
+                                        <label for="name">Product Category Name</label>
                                         <input type="text" id="name" class="form-control"
-                                            placeholder="Art Category Name" name="name" required>
+                                            placeholder="Product Category Name" name="name" required>
                                     </div>
 
                                     <div class="form-group mb-3">

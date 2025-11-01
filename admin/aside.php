@@ -143,13 +143,13 @@
             <li class="nav-item">
                 <a href="art-category.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-package fe-16"></i>
-                    <span class="ml-3 item-text">Add Art Category</span>
+                    <span class="ml-3 item-text">Add Product Category</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="art-category-view.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-image fe-16"></i>
-                    <span class="ml-3 item-text">View Art Categories</span>
+                    <span class="ml-3 item-text">View Product Categories</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -184,11 +184,18 @@
         </p>
         <ul class="navbar-nav flex-fill w-100 mb-2">
             <li class="nav-item">
+                <a href="profile.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-briefcase fe-16"></i>
+                    <span class="ml-3 item-text">Business Profile</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="admin/logout.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-log-out fe-16"></i>
                     <span class="ml-3 item-text">Logout</span>
                 </a>
             </li>
         </ul>
+        
     </nav>
 </aside>

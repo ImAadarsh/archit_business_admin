@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['id'])) {
     $art_category_id = (int)$_GET['id'];
     $business_id = $_SESSION['business_id'];
     
-    // Verify that the art category belongs to the current business
+    // Verify that the Product Category belongs to the current business
     $check_sql = "SELECT pc.id FROM product_category pc 
                    LEFT JOIN categories c ON pc.category_id = c.id 
                    WHERE pc.id = ? AND c.business_id = ?";
@@ -16,20 +16,20 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['id'])) {
     $check_result = $check_stmt->get_result();
     
     if ($check_result->num_rows > 0) {
-        // Delete the art category
+        // Delete the Product Category
         $delete_sql = "DELETE FROM product_category WHERE id = ?";
         $delete_stmt = $connect->prepare($delete_sql);
         $delete_stmt->bind_param("i", $art_category_id);
         
         if ($delete_stmt->execute()) {
-            $_SESSION['success'] = "Art Category deleted successfully!";
+            $_SESSION['success'] = "Product Category deleted successfully!";
         } else {
-            $_SESSION['error'] = "Error deleting art category: " . $connect->error;
+            $_SESSION['error'] = "Error deleting Product Category: " . $connect->error;
         }
         
         $delete_stmt->close();
     } else {
-        $_SESSION['error'] = "Art Category not found or you don't have permission to delete it.";
+        $_SESSION['error'] = "Product Category not found or you don't have permission to delete it.";
     }
     
     $check_stmt->close();

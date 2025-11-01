@@ -5,7 +5,7 @@ include 'admin/header.php';
 
 // Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error'] = "Art Category ID is required.";
+    $_SESSION['error'] = "Product Category ID is required.";
     header("Location: art-category-view.php");
     exit();
 }
@@ -13,7 +13,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $id = $_GET['id'];
 $business_id = $_SESSION['business_id'];
 
-// Fetch art category details
+// Fetch Product Category details
 $sql = "SELECT pc.*, c.name as category_name 
         FROM product_category pc 
         LEFT JOIN categories c ON pc.category_id = c.id 
@@ -24,7 +24,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows == 0) {
-    $_SESSION['error'] = "Art Category not found or you don't have permission to edit it.";
+    $_SESSION['error'] = "Product Category not found or you don't have permission to edit it.";
     header("Location: art-category-view.php");
     exit();
 }
@@ -44,10 +44,10 @@ include 'admin/aside.php';
             <div class="container-fluid">
                 <div class="card shadow mb-4">
                     <a href="art-category-view.php">
-                        <button type="button" class="btn btn-primary">Back to Art Categories</button>
+                        <button type="button" class="btn btn-primary">Back to Product Categories</button>
                     </a>
                     <div class="card-header">
-                        <strong class="card-title">Edit Art Category</strong>
+                        <strong class="card-title">Edit Product Category</strong>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -57,9 +57,9 @@ include 'admin/aside.php';
                                     <input type="hidden" name="business_id" value="<?php echo $business_id; ?>">
                                     
                                     <div class="form-group mb-3">
-                                        <label for="name">Art Category Name</label>
+                                        <label for="name">Product Category Name</label>
                                         <input required type="text" id="name" class="form-control"
-                                            placeholder="Art Category Name" name="name" value="<?php echo htmlspecialchars($art_category['name']); ?>">
+                                            placeholder="Product Category Name" name="name" value="<?php echo htmlspecialchars($art_category['name']); ?>">
                                     </div>
                                     
                                     <div class="form-group mb-3">
@@ -78,7 +78,7 @@ include 'admin/aside.php';
                                     </div>
                                     
                                     <div class="form-group mb-3">
-                                        <input type="submit" class="btn btn-primary" value="Update Art Category">
+                                        <input type="submit" class="btn btn-primary" value="Update Product Category">
                                     </div>
                                 </form>
                             </div> <!-- /.col -->
