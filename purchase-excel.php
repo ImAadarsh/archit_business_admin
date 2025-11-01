@@ -35,30 +35,60 @@ header('Expires: 0');
 
 // Output the CSV data
 $output = fopen('php://output', 'w');
-fputcsv($output, array('Invoice Number','Date','Customer Name', 'GST/Adhaar Number', 'Amount', 'DGST Amount','CGST Amount','IGST Amount', 'Total Amount'));
+fputcsv($output, array('Invoice Number', 'Date', 'Customer Name', 'GST/Adhaar Number', 'State', 'GST Rate', 'Amount', 'DGST Amount', 'CGST Amount', 'IGST Amount', 'Total Amount'));
 
 $temp = 0;
+
 while ($row = mysqli_fetch_assoc($result)) {
     $temp++;
-    $temp_gst = (isset($row['total_dgst']) ? floatval($row['total_dgst']) : 0) +
-                (isset($row['total_cgst']) ? floatval($row['total_cgst']) : 0) +
-                (isset($row['total_igst']) ? floatval($row['total_igst']) : 0);
     
-    $total_amount = isset($row['total_amount']) ? floatval($row['total_amount']) : 0;
-    $temp_amount_wgst = $total_amount - $temp_gst;
+    // Calculate row-level amounts (per GST rate)
+    $row_gst_amount = isset($row['gst_group_tax']) ? floatval($row['gst_group_tax']) : 0;
+    $row_sale_amount = isset($row['gst_group_amount']) ? floatval($row['gst_group_amount']) : 0;
+    $row_total = $row_sale_amount + $row_gst_amount;
+    
+    // Calculate individual GST components (proportional to this GST rate group)
+    $dgst_amount = isset($row['total_dgst']) ? floatval($row['total_dgst']) : 0;
+    $cgst_amount = isset($row['total_cgst']) ? floatval($row['total_cgst']) : 0;
+    $igst_amount = isset($row['total_igst']) ? floatval($row['total_igst']) : 0;
+    $total_invoice_gst = $dgst_amount + $cgst_amount + $igst_amount;
+    
+    // Proportionally distribute GST components for this GST rate group
+    if ($total_invoice_gst > 0) {
+        $proportion = $row_gst_amount / $total_invoice_gst;
+        $dgst_for_row = $dgst_amount * $proportion;
+        $cgst_for_row = $cgst_amount * $proportion;
+        $igst_for_row = $igst_amount * $proportion;
+    } else {
+        $dgst_for_row = 0;
+        $cgst_for_row = 0;
+        $igst_for_row = 0;
+    }
     
     $invoice_date = isset($row['invoice_date']) ? strtotime($row['invoice_date']) : time();
+    
+    // Convert decimal GST rate to percentage (0.05 -> 5, 0.18 -> 18)
+    $gst_rate_display = 'N/A';
+    if (isset($row['gst_rate']) && $row['gst_rate'] !== null) {
+        $gst_val = $row['gst_rate'];
+        if ($gst_val < 1) {
+            $gst_val = $gst_val * 100;
+        }
+        $gst_rate_display = round($gst_val) . '%';
+    }
     
     fputcsv($output, array(
         isset($row['serial_no']) ? $row['serial_no'] : 'N/A',
         date('d M Y', $invoice_date),
         isset($row['name']) ? $row['name'] : 'N/A',
         isset($row['doc_no']) ? $row['doc_no'] : 'N/A',
-        number_format($temp_amount_wgst, 2),
-        isset($row['total_dgst']) ? $row['total_dgst'] : 'N/A',
-        isset($row['total_cgst']) ? $row['total_cgst'] : 'N/A',
-        isset($row['total_igst']) ? $row['total_igst'] : 'N/A',
-        number_format($total_amount, 2),
+        isset($row['customer_state']) ? $row['customer_state'] : 'N/A',
+        $gst_rate_display,
+        number_format($row_sale_amount, 2),
+        number_format($dgst_for_row, 2),
+        number_format($cgst_for_row, 2),
+        number_format($igst_for_row, 2),
+        number_format($row_total, 2),
     ));
 }
 

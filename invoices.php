@@ -2,6 +2,13 @@
 // Include access control at the very top
 include 'admin/access_control.php';
 include 'admin/header.php';
+
+// Initialize filter variables from GET parameters (for form persistence)
+$invoice_type = isset($_GET['invoice_type']) ? $_GET['invoice_type'] : '';
+$location_id = isset($_GET['location_id']) ? $_GET['location_id'] : '';
+$amount_min = isset($_GET['amount_min']) ? $_GET['amount_min'] : '';
+$amount_max = isset($_GET['amount_max']) ? $_GET['amount_max'] : '';
+$date_range = isset($_GET['date_range']) ? $_GET['date_range'] : 'all';
 ?>
 <body class="vertical light">
     <div class="wrapper">
@@ -21,42 +28,49 @@ include 'admin/header.php';
         <label for="invoice_type">Invoice Type</label>
         <select id="invoice_type" class="form-control" name="invoice_type">
             <option value="">All</option>
-            <option value="normal">Normal</option>
-            <option value="performa">Performa</option>
+            <option value="normal" <?php echo ($invoice_type == 'normal') ? 'selected' : ''; ?>>Normal</option>
+            <option value="performa" <?php echo ($invoice_type == 'performa') ? 'selected' : ''; ?>>Performa</option>
         </select>
     </div>
     <div class="form-group mb-3">
-        <label for="invoice_type">Business Location</label>
-        <select id="invoice_type" class="form-control" name="invoice_type">
+        <label for="location_id">Business Location</label>
+        <select id="location_id" class="form-control" name="location_id">
             <option value="">All</option>
-            <option value="normal">Normal</option>
-            <option value="performa">Performa</option>
+            <?php
+            $b_id = $_SESSION['business_id'];
+            $sql_loc = "SELECT * FROM locations WHERE business_id=$b_id";
+            $results_loc = $connect->query($sql_loc);
+            while($final_loc = $results_loc->fetch_assoc()){
+                $selected = ($location_id == $final_loc['id']) ? 'selected' : '';
+            ?>
+                <option value="<?php echo $final_loc['id'] ?>" <?php echo $selected; ?>><?php echo $final_loc['location_name'] ?></option>
+            <?php } ?>
         </select>
     </div>
     <div class="form-group mb-3">
         <label for="amount_min">Minimum Amount</label>
-        <input type="number" id="amount_min" class="form-control" name="amount_min">
+        <input type="number" id="amount_min" class="form-control" name="amount_min" value="<?php echo htmlspecialchars($amount_min); ?>">
     </div>
     <div class="form-group mb-3">
         <label for="amount_max">Maximum Amount</label>
-        <input type="number" id="amount_max" class="form-control" name="amount_max">
+        <input type="number" id="amount_max" class="form-control" name="amount_max" value="<?php echo htmlspecialchars($amount_max); ?>">
     </div>
     <div class="form-group mb-3">
         <label for="date_range">Date Range</label>
         <select onchange="showHideCustomRange()" name="date_range" id="date_range" class="form-control">
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="yesterday">Yesterday</option>
-            <option value="this_week">This week</option>
-            <option value="this_month">This month</option>
-            <option value="custom">Custom range</option>
+            <option value="all" <?php echo ($date_range == 'all') ? 'selected' : ''; ?>>All Time</option>
+            <option value="today" <?php echo ($date_range == 'today') ? 'selected' : ''; ?>>Today</option>
+            <option value="yesterday" <?php echo ($date_range == 'yesterday') ? 'selected' : ''; ?>>Yesterday</option>
+            <option value="this_week" <?php echo ($date_range == 'this_week') ? 'selected' : ''; ?>>This week</option>
+            <option value="this_month" <?php echo ($date_range == 'this_month') ? 'selected' : ''; ?>>This month</option>
+            <option value="custom" <?php echo ($date_range == 'custom') ? 'selected' : ''; ?>>Custom range</option>
         </select>
     </div>
-    <div id="custom_range" style="display:none;">
+    <div id="custom_range" style="display:<?php echo ($date_range == 'custom') ? 'block' : 'none'; ?>;">
         <label for="start_date">Start date:</label>
-        <input class="form-control" type="date" name="start_date" id="start_date">
+        <input class="form-control" type="date" name="start_date" id="start_date" value="<?php echo isset($_GET['start_date']) ? htmlspecialchars($_GET['start_date']) : ''; ?>">
         <label for="end_date">End date:</label>
-        <input class="form-control" type="date" name="end_date" id="end_date">
+        <input class="form-control" type="date" name="end_date" id="end_date" value="<?php echo isset($_GET['end_date']) ? htmlspecialchars($_GET['end_date']) : ''; ?>">
     </div>
     <div class="form-group mb-3">
         <input type="submit" name="filter" id="example-placeholder" class="btn btn-primary" value="Filter">
@@ -67,11 +81,6 @@ include 'admin/header.php';
                                     $b_id = $_SESSION['business_id'];
                                     
                                     if(isset($_GET['filter'])){
-                                        $invoice_type = $_GET['invoice_type'];
-                                        $amount_min = $_GET['amount_min'];
-                                        $amount_max = $_GET['amount_max'];
-                                        $date_range = $_GET['date_range'];
-                                    
                                         $where_clauses = ["business_id = $b_id", "is_completed = 1"];
                                     
                                         if($invoice_type !== '') {
@@ -84,7 +93,7 @@ include 'admin/header.php';
                                             $where_clauses[] = "total_amount <= '$amount_max'";
                                         }
                                         if($location_id !== '') {
-                                            $where_clauses[] = "location_id <= '$location_id'";
+                                            $where_clauses[] = "location_id = '$location_id'";
                                         }
                                     
                                         switch ($date_range) {

@@ -12,7 +12,7 @@ include 'admin/session.php';
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" href="favicon.ico">
-    <title>Archit Art Gallery | Admin Dashboard</title>
+    <title>InvoiceMate | Admin Dashboard</title>
     <!-- Simple bar CSS -->
     <link rel="stylesheet" href="css/simplebar.css">
     <!-- Fonts CSS -->

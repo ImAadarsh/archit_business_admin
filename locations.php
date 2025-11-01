@@ -40,6 +40,7 @@ include 'admin/aside.php';
             <th>Owner Name</th>
             <th>Location Name</th>
             <th>Location Address</th>
+            <th>State</th>
             <th>Email</th>
             <th>Phone</th>
             <th>Alternate Phone</th>
@@ -63,6 +64,7 @@ $bid = $_SESSION['business_id'];
                 <td><?php echo $final['owner_name'] ?></td>
                 <td><?php echo $final['location_name'] ?></td>
                 <td><?php echo $final['address'] ?></td>
+                <td><?php echo $final['state'] ?></td>
                 <td><?php echo $final['email'] ?></td>
                 <td><?php echo $final['phone'] ?></td>
                 <td><?php echo $final['alternate_phone'] ?></td>

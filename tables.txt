@@ -1,0 +1,5 @@
+`invoices`(`id`, `serial_no`, `name`, `mobile_number`, `customer_type`, `doc_type`, `doc_no`, `business_id`, `location_id`, `payment_mode`, `billing_address_id`, `shipping_address_id`, `type`, `is_completed`, `invoice_date`, `total_dgst`, `total_cgst`, `total_igst`, `total_gst`, `total_amount`, `full_paid`, `total_paid`, `is_cancelled`, `updated_at`, `created_at`) 
+
+ `items`(`id`, `product_id`, `category_id`, `quantity`, `price_of_all`, `is_gst`, `price_of_one`, `dgst`, `igst`, `cgst`, `invoice_id`, `gst_rate`, `created_at`, `updated_at`) 
+
+  `addres`(`id`, `invoice_id`, `type`, `address_1`, `address_2`, `city`, `state`, `pincode`, `created_at`, `updated_at`) 

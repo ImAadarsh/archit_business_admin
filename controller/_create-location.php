@@ -8,6 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $location_name = $_POST['location_name'];
     $address = $_POST['address'];
+    $state = $_POST['state'];
     $phone = $_POST['phone'];
     $alternate_phone = $_POST['alternate_phone'] ?? '';
     
@@ -15,11 +16,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $current_timestamp = date('Y-m-d H:i:s');
     
     // Prepare SQL statement
-    $sql = "INSERT INTO locations (business_id, email, location_name, address, phone, alternate_phone, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)";
+    $sql = "INSERT INTO locations (business_id, email, location_name, address, state, phone, alternate_phone, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)";
     
     // Prepare and bind parameters
     $stmt = $connect->prepare($sql);
-    $stmt->bind_param("isssssss", $business_id, $email, $location_name, $address, $phone, $alternate_phone, $current_timestamp, $current_timestamp);
+    $stmt->bind_param("issssssss", $business_id, $email, $location_name, $address, $state, $phone, $alternate_phone, $current_timestamp, $current_timestamp);
     
     // Execute the statement
     if ($stmt->execute()) {

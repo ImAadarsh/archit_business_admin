@@ -72,6 +72,49 @@ include 'admin/aside.php';
                                     </div>
                                     
                                     <div class="form-group mb-3">
+                                        <label for="state">State</label>
+                                        <select required id="state" class="form-control" name="state">
+                                            <option value="">Select State</option>
+                                            <option value="Andhra Pradesh" <?php echo ($location['state'] == 'Andhra Pradesh') ? 'selected' : ''; ?>>Andhra Pradesh</option>
+                                            <option value="Arunachal Pradesh" <?php echo ($location['state'] == 'Arunachal Pradesh') ? 'selected' : ''; ?>>Arunachal Pradesh</option>
+                                            <option value="Assam" <?php echo ($location['state'] == 'Assam') ? 'selected' : ''; ?>>Assam</option>
+                                            <option value="Bihar" <?php echo ($location['state'] == 'Bihar') ? 'selected' : ''; ?>>Bihar</option>
+                                            <option value="Chhattisgarh" <?php echo ($location['state'] == 'Chhattisgarh') ? 'selected' : ''; ?>>Chhattisgarh</option>
+                                            <option value="Goa" <?php echo ($location['state'] == 'Goa') ? 'selected' : ''; ?>>Goa</option>
+                                            <option value="Gujarat" <?php echo ($location['state'] == 'Gujarat') ? 'selected' : ''; ?>>Gujarat</option>
+                                            <option value="Haryana" <?php echo ($location['state'] == 'Haryana') ? 'selected' : ''; ?>>Haryana</option>
+                                            <option value="Himachal Pradesh" <?php echo ($location['state'] == 'Himachal Pradesh') ? 'selected' : ''; ?>>Himachal Pradesh</option>
+                                            <option value="Jharkhand" <?php echo ($location['state'] == 'Jharkhand') ? 'selected' : ''; ?>>Jharkhand</option>
+                                            <option value="Karnataka" <?php echo ($location['state'] == 'Karnataka') ? 'selected' : ''; ?>>Karnataka</option>
+                                            <option value="Kerala" <?php echo ($location['state'] == 'Kerala') ? 'selected' : ''; ?>>Kerala</option>
+                                            <option value="Madhya Pradesh" <?php echo ($location['state'] == 'Madhya Pradesh') ? 'selected' : ''; ?>>Madhya Pradesh</option>
+                                            <option value="Maharashtra" <?php echo ($location['state'] == 'Maharashtra') ? 'selected' : ''; ?>>Maharashtra</option>
+                                            <option value="Manipur" <?php echo ($location['state'] == 'Manipur') ? 'selected' : ''; ?>>Manipur</option>
+                                            <option value="Meghalaya" <?php echo ($location['state'] == 'Meghalaya') ? 'selected' : ''; ?>>Meghalaya</option>
+                                            <option value="Mizoram" <?php echo ($location['state'] == 'Mizoram') ? 'selected' : ''; ?>>Mizoram</option>
+                                            <option value="Nagaland" <?php echo ($location['state'] == 'Nagaland') ? 'selected' : ''; ?>>Nagaland</option>
+                                            <option value="Odisha" <?php echo ($location['state'] == 'Odisha') ? 'selected' : ''; ?>>Odisha</option>
+                                            <option value="Punjab" <?php echo ($location['state'] == 'Punjab') ? 'selected' : ''; ?>>Punjab</option>
+                                            <option value="Rajasthan" <?php echo ($location['state'] == 'Rajasthan') ? 'selected' : ''; ?>>Rajasthan</option>
+                                            <option value="Sikkim" <?php echo ($location['state'] == 'Sikkim') ? 'selected' : ''; ?>>Sikkim</option>
+                                            <option value="Tamil Nadu" <?php echo ($location['state'] == 'Tamil Nadu') ? 'selected' : ''; ?>>Tamil Nadu</option>
+                                            <option value="Telangana" <?php echo ($location['state'] == 'Telangana') ? 'selected' : ''; ?>>Telangana</option>
+                                            <option value="Tripura" <?php echo ($location['state'] == 'Tripura') ? 'selected' : ''; ?>>Tripura</option>
+                                            <option value="Uttar Pradesh" <?php echo ($location['state'] == 'Uttar Pradesh') ? 'selected' : ''; ?>>Uttar Pradesh</option>
+                                            <option value="Uttarakhand" <?php echo ($location['state'] == 'Uttarakhand') ? 'selected' : ''; ?>>Uttarakhand</option>
+                                            <option value="West Bengal" <?php echo ($location['state'] == 'West Bengal') ? 'selected' : ''; ?>>West Bengal</option>
+                                            <option value="Andaman and Nicobar Islands" <?php echo ($location['state'] == 'Andaman and Nicobar Islands') ? 'selected' : ''; ?>>Andaman and Nicobar Islands</option>
+                                            <option value="Chandigarh" <?php echo ($location['state'] == 'Chandigarh') ? 'selected' : ''; ?>>Chandigarh</option>
+                                            <option value="Dadra and Nagar Haveli and Daman and Diu" <?php echo ($location['state'] == 'Dadra and Nagar Haveli and Daman and Diu') ? 'selected' : ''; ?>>Dadra and Nagar Haveli and Daman and Diu</option>
+                                            <option value="Delhi" <?php echo ($location['state'] == 'Delhi') ? 'selected' : ''; ?>>Delhi</option>
+                                            <option value="Jammu and Kashmir" <?php echo ($location['state'] == 'Jammu and Kashmir') ? 'selected' : ''; ?>>Jammu and Kashmir</option>
+                                            <option value="Ladakh" <?php echo ($location['state'] == 'Ladakh') ? 'selected' : ''; ?>>Ladakh</option>
+                                            <option value="Lakshadweep" <?php echo ($location['state'] == 'Lakshadweep') ? 'selected' : ''; ?>>Lakshadweep</option>
+                                            <option value="Puducherry" <?php echo ($location['state'] == 'Puducherry') ? 'selected' : ''; ?>>Puducherry</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
                                         <label for="phone">Phone</label>
                                         <input required type="tel" id="phone" class="form-control"
                                             placeholder="Phone" name="phone" value="<?php echo htmlspecialchars($location['phone']); ?>">

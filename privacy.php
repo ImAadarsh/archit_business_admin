@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Document | Archit Art Gallery</title>
+    <title>Privacy Document | InvoiceMate</title>
 </head>
 <body>
     <p>
     Here's a draft privacy policy for your app. Please review it carefully and make any necessary adjustments to ensure it accurately reflects your data practices:
-Privacy Policy for Archit Art Gallery Business Admin
+Privacy Policy for InvoiceMate Business Admin
 Last updated: 04-07-2024
-Archit Art Gallery ("we", "our", or "us") operates the Archit Art Gallery Business Admin app (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service.
+InvoiceMate ("we", "our", or "us") operates the InvoiceMate Business Admin app (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service.
 
 Information Collection and Use
 
@@ -45,7 +45,7 @@ Data Disclosure
 We may disclose your Personal Data in the good faith belief that such action is necessary to:
 
 Comply with a legal obligation
-Protect and defend the rights or property of Archit Art Gallery
+Protect and defend the rights or property of InvoiceMate
 Prevent or investigate possible wrongdoing in connection with the Service
 Protect the personal safety of users of the Service or the public
 Protect against legal liability

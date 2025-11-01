@@ -3,6 +3,13 @@
 include 'admin/access_control.php';
 include 'admin/header.php';
 $b_id = $_SESSION['business_id'];
+
+// Initialize filter variables from GET parameters (for form persistence)
+$location_id = isset($_GET['location_id']) ? $_GET['location_id'] : '';
+$price_min = isset($_GET['price_min']) ? $_GET['price_min'] : '';
+$price_max = isset($_GET['price_max']) ? $_GET['price_max'] : '';
+$date_range = isset($_GET['date_range']) ? $_GET['date_range'] : 'all';
+$gst_rate = isset($_GET['gst_rate']) ? $_GET['gst_rate'] : '';
 ?>
 <body class="vertical light">
     <div class="wrapper">
@@ -28,43 +35,54 @@ include 'admin/aside.php';
                     <option value="">All</option>
                     <?php
                                         // echo $sql;
-                                        $sql = "SELECT * FROM locations where business_id=$b_id";
-                                        $results = $connect->query($sql);
-                                        while($final=$results->fetch_assoc()){?>
-                                        <option value="<?php echo $final['id'] ?>"><?php echo $final['location_name'] ?></option>
+                                        $sql_loc = "SELECT * FROM locations where business_id=$b_id";
+                                        $results_loc = $connect->query($sql_loc);
+                                        while($final_loc=$results_loc->fetch_assoc()){
+                                            $selected = ($location_id == $final_loc['id']) ? 'selected' : '';
+                                        ?>
+                                        <option value="<?php echo $final_loc['id'] ?>" <?php echo $selected; ?>><?php echo $final_loc['location_name'] ?></option>
 
                                         <?php } ?>
                 </select>
 
         </div>
-  <div class="col-md-3 mb-3">
+  <div class="col-md-2 mb-3">
       <label for="price_min">Minimum Price</label>
-      <input type="number" id="price_min" class="form-control" name="price_min">
+      <input type="number" id="price_min" class="form-control" name="price_min" value="<?php echo htmlspecialchars($price_min); ?>">
     </div>
-    <div class="col-md-3 mb-3">
+    <div class="col-md-2 mb-3">
       <label for="price_max">Maximum Price</label>
-      <input type="number" id="price_max" class="form-control" name="price_max">
+      <input type="number" id="price_max" class="form-control" name="price_max" value="<?php echo htmlspecialchars($price_max); ?>">
+    </div>
+    <div class="col-md-2 mb-3">
+      <label for="gst_rate">GST Rate</label>
+      <select id="gst_rate" class="form-control" name="gst_rate">
+        <option value="">All</option>
+        <option value="5" <?php echo ($gst_rate == '5') ? 'selected' : ''; ?>>5%</option>
+        <option value="12" <?php echo ($gst_rate == '12') ? 'selected' : ''; ?>>12%</option>
+        <option value="18" <?php echo ($gst_rate == '18') ? 'selected' : ''; ?>>18%</option>
+      </select>
     </div>
     <div class="col-md-3 mb-3">
       <label for="date_range">Date Range</label>
       <select onchange="showHideCustomRange()" name="date_range" id="date_range" class="form-control">
-        <option value="all">All Time</option>
-        <option value="today">Today</option>
-        <option value="yesterday">Yesterday</option>
-        <option value="this_week">This week</option>
-        <option value="this_month">This month</option>
-        <option value="custom">Custom range</option>
+        <option value="all" <?php echo ($date_range == 'all') ? 'selected' : ''; ?>>All Time</option>
+        <option value="today" <?php echo ($date_range == 'today') ? 'selected' : ''; ?>>Today</option>
+        <option value="yesterday" <?php echo ($date_range == 'yesterday') ? 'selected' : ''; ?>>Yesterday</option>
+        <option value="this_week" <?php echo ($date_range == 'this_week') ? 'selected' : ''; ?>>This week</option>
+        <option value="this_month" <?php echo ($date_range == 'this_month') ? 'selected' : ''; ?>>This month</option>
+        <option value="custom" <?php echo ($date_range == 'custom') ? 'selected' : ''; ?>>Custom range</option>
       </select>
     </div>
-    <div class="col-md-6 mb-3" id="custom_range" style="display:none;">
+    <div class="col-md-6 mb-3" id="custom_range" style="display:<?php echo ($date_range == 'custom') ? 'block' : 'none'; ?>;">
       <div class="row">
         <div class="col-md-6">
           <label for="start_date">Start date:</label>
-          <input class="form-control" type="date" name="start_date" id="start_date">
+          <input class="form-control" type="date" name="start_date" id="start_date" value="<?php echo isset($_GET['start_date']) ? htmlspecialchars($_GET['start_date']) : ''; ?>">
         </div>
         <div class="col-md-6">
           <label for="end_date">End date:</label>
-          <input class="form-control" type="date" name="end_date" id="end_date">
+          <input class="form-control" type="date" name="end_date" id="end_date" value="<?php echo isset($_GET['end_date']) ? htmlspecialchars($_GET['end_date']) : ''; ?>">
         </div>
       </div>
     </div>
@@ -101,11 +119,6 @@ include 'admin/aside.php';
 
 
 if(isset($_GET['filter'])) {
-    $price_min = $_GET['price_min'];
-    $price_max = $_GET['price_max'];
-    $date_range = $_GET['date_range'];
-    $location_id = $_GET['location_id'];
-
     $where_clauses = ["inv.business_id = $b_id", "inv.is_completed = 1"];
     $where_clauses[] = "inv.type = 'normal'";
 
@@ -117,6 +130,9 @@ if(isset($_GET['filter'])) {
     }
     if($location_id !== '') {
         $where_clauses[] = "inv.location_id = '$location_id'";
+    }
+    if($gst_rate !== '') {
+        $where_clauses[] = "i.gst_rate = '$gst_rate'";
     }
 
     switch ($date_range) {
@@ -140,20 +156,20 @@ if(isset($_GET['filter'])) {
     }
 
     $where_clause = implode(" AND ", $where_clauses);
-    $sql = "SELECT p.name AS product_name, i.price_of_one, SUM(i.quantity) AS total_quantity, SUM(i.price_of_all) AS total_sales
+    $sql = "SELECT p.name AS product_name, i.price_of_one, i.gst_rate, SUM(i.quantity) AS total_quantity, SUM(i.price_of_all) AS total_sales
             FROM items i
             JOIN products p ON i.product_id = p.id
             JOIN invoices inv ON i.invoice_id = inv.id
             WHERE $where_clause
-            GROUP BY i.product_id, i.price_of_one
+            GROUP BY i.product_id, i.price_of_one, i.gst_rate
             ORDER BY i.price_of_one";
 } else {
-    $sql = "SELECT p.name AS product_name, i.price_of_one, SUM(i.quantity) AS total_quantity, SUM(i.price_of_all) AS total_sales
+    $sql = "SELECT p.name AS product_name, i.price_of_one, i.gst_rate, SUM(i.quantity) AS total_quantity, SUM(i.price_of_all) AS total_sales
             FROM items i
             JOIN products p ON i.product_id = p.id
             JOIN invoices inv ON i.invoice_id = inv.id
             WHERE inv.business_id = '$b_id' AND inv.is_completed = 1 AND inv.type = 'normal'
-            GROUP BY i.product_id, i.price_of_one
+            GROUP BY i.product_id, i.price_of_one, i.gst_rate
             ORDER BY i.price_of_one";
 }
 // echo $sql;
@@ -179,6 +195,7 @@ if(isset($_GET['filter'])) {
                                     <thead>
                                         <tr>
                                             <th>Product Name</th>
+                                            <th>GST Rate</th>
                                             <th>Price per Item</th>
                                             <th>Total Quantity Sold</th>
                                             <th>Total</th>
@@ -199,6 +216,18 @@ while($row = $results->fetch_assoc()) {
     ?>
     <tr>
         <td><?php echo $row['product_name']; ?></td>
+        <td class="gst-rate"><strong><?php 
+            if (isset($row['gst_rate']) && $row['gst_rate'] !== null) {
+                // Convert decimal to percentage (0.05 -> 5, 0.18 -> 18)
+                $gst_display = $row['gst_rate'];
+                if ($gst_display < 1) {
+                    $gst_display = $gst_display * 100;
+                }
+                echo round($gst_display) . '%';
+            } else {
+                echo 'N/A';
+            }
+        ?></strong></td>
         <td class="price-per-item" data-original="<?php echo $row['price_of_one']; ?>">₹<?php echo $row['price_of_one']; ?></td>
         <td><?php echo $row['total_quantity']; ?></td>
         <td class="total" data-quantity="<?php echo $row['total_quantity']; ?>">₹<?php echo $row['price_of_one'] * $row['total_quantity']; ?></td>

@@ -9,6 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $location_name = $_POST['location_name'];
     $address = $_POST['address'];
+    $state = $_POST['state'];
     $phone = $_POST['phone'];
     $alternate_phone = $_POST['alternate_phone'] ?? '';
     $is_active = $_POST['is_active'];
@@ -25,11 +26,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($check_result->num_rows > 0) {
         // Prepare SQL statement for update
-        $update_sql = "UPDATE locations SET email = ?, location_name = ?, address = ?, phone = ?, alternate_phone = ?, is_active = ?, updated_at = ? WHERE id = ? AND business_id = ?";
+        $update_sql = "UPDATE locations SET email = ?, location_name = ?, address = ?, state = ?, phone = ?, alternate_phone = ?, is_active = ?, updated_at = ? WHERE id = ? AND business_id = ?";
         
         // Prepare and bind parameters
         $update_stmt = $connect->prepare($update_sql);
-        $update_stmt->bind_param("sssssissi", $email, $location_name, $address, $phone, $alternate_phone, $is_active, $current_timestamp, $id, $business_id);
+        $update_stmt->bind_param("ssssssissi", $email, $location_name, $address, $state, $phone, $alternate_phone, $is_active, $current_timestamp, $id, $business_id);
         
         // Execute the statement
         if ($update_stmt->execute()) {
