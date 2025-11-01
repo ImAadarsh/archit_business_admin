@@ -21,7 +21,7 @@ if (isset($_POST['login'])) {
     if($response['message']){
         echo '<script>alert("'.$response['message'].'")</script>';
     }  
-if ($response['user']['role']=='admin') {
+if ($response['user']['role']=='admin' || $response['user']['role']=='superadmin') {
     $_SESSION['email'] =  $response['user']['email'];
     $_SESSION['name'] = $response['user']['name'];
     $_SESSION['phone'] = $response['user']['phone'];
