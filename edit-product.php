@@ -116,6 +116,15 @@ include 'admin/aside.php';
                                             <input type="number" step="0.01" id="width" class="form-control" placeholder="Width" name="width" value="<?php echo $product['width']; ?>">
                                         </div>
                                     </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="orientation">Orientation</label>
+                                        <select id="orientation" class="form-control" name="orientation">
+                                            <option value="">Choose Orientation</option>
+                                            <option value="horizontal" <?php echo (isset($product['orientation']) && $product['orientation'] == 'horizontal') ? 'selected' : ''; ?>>Horizontal</option>
+                                            <option value="vertical" <?php echo (isset($product['orientation']) && $product['orientation'] == 'vertical') ? 'selected' : ''; ?>>Vertical</option>
+                                        </select>
+                                    </div>
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
                                             <label for="artist_name">Artist Name</label>
@@ -156,7 +165,7 @@ include 'admin/aside.php';
                                                 while($image = $image_result->fetch_assoc()) {
                                                     echo '<div class="col-md-3 mb-2">';
                                                     echo '<div class="position-relative">';
-                                                    echo '<img src="' . $image['image'] . '" class="img-fluid rounded" style="max-height: 100px;">';
+                                                    echo '<img src="'. $uri. $image['image'] . '" class="img-fluid rounded" style="max-height: 100px;">';
                                                     echo '<div class="position-absolute top-0 end-0">';
                                                     echo '<input type="checkbox" name="delete_image_ids[]" value="' . $image['id'] . '" class="form-check-input">';
                                                     echo '</div>';

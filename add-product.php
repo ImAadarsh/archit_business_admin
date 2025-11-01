@@ -91,6 +91,15 @@ include 'admin/aside.php';
                                             <input type="number" step="0.01" id="width" class="form-control" placeholder="Width" name="width">
                                         </div>
                                     </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="orientation">Orientation</label>
+                                        <select id="orientation" class="form-control" name="orientation">
+                                            <option value="">Choose Orientation</option>
+                                            <option value="horizontal">Horizontal</option>
+                                            <option value="vertical">Vertical</option>
+                                        </select>
+                                    </div>
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
                                             <label for="artist_name">Artist Name</label>

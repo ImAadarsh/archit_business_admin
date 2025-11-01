@@ -16,6 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         "item_code" => isset($_POST['item_code']) ? $_POST['item_code'] : null,
         "height" => isset($_POST['height']) && $_POST['height'] !== '' ? $_POST['height'] : null,
         "width" => isset($_POST['width']) && $_POST['width'] !== '' ? $_POST['width'] : null,
+        "orientation" => isset($_POST['orientation']) && $_POST['orientation'] !== '' ? $_POST['orientation'] : null,
         "artist_name" => isset($_POST['artist_name']) ? $_POST['artist_name'] : null,
         "quantity" => isset($_POST['quantity']) && $_POST['quantity'] !== '' ? $_POST['quantity'] : null,
         "is_framed" => isset($_POST['is_framed']) ? 1 : 0,

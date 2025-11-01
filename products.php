@@ -56,6 +56,8 @@ include 'admin/aside.php';
                                                 <th>Product Type</th>
                                                 <th>Product Category</th>
                                                 <th>itemCode</th>
+                                                <th>Dimensions</th>
+                                                <th>Orientation</th>
                                                 <th>Images</th>
                                                 <th>Location</th>
                                                 <th>Created At</th>
@@ -79,6 +81,18 @@ include 'admin/aside.php';
                                             
                                             if ($result->num_rows > 0) {
                                                 while($row = $result->fetch_assoc()) {
+                                                    // Format dimensions
+                                                    $dimensions = '';
+                                                    if (!empty($row['height']) && !empty($row['width'])) {
+                                                        $dimensions = $row['height'] . '" x ' . $row['width'] . '"';
+                                                    } elseif (!empty($row['height'])) {
+                                                        $dimensions = 'H: ' . $row['height'] . '"';
+                                                    } elseif (!empty($row['width'])) {
+                                                        $dimensions = 'W: ' . $row['width'] . '"';
+                                                    } else {
+                                                        $dimensions = '-';
+                                                    }
+                                                    
                                                     echo "<tr>";
                                                     echo "<td>" . $row['id'] . "</td>";
                                                     echo "<td>" . $row['name'] . "</td>";
@@ -87,6 +101,8 @@ include 'admin/aside.php';
                                                     echo "<td>" . ($row['category_name'] ?? '-') . "</td>";
                                                     echo "<td>" . ($row['art_category_name'] ?? '-') . "</td>";
                                                     echo "<td>" . ($row['item_code'] ?? '-') . "</td>";
+                                                    echo "<td>" . $dimensions . "</td>";
+                                                    echo "<td>" . (ucfirst($row['orientation'] ?? '-')) . "</td>";
                                                     echo "<td>" . (int)$row['images_count'] . "</td>";
                                                     echo "<td>" . $row['location_name'] . "</td>";
                                                     echo "<td>" . date('d M Y, h:i A', strtotime($row['created_at'])) . "</td>";
@@ -98,7 +114,7 @@ include 'admin/aside.php';
                                                     echo "</tr>";
                                                 }
                                             } else {
-                                                echo "<tr><td colspan='11' class='text-center'>No products found</td></tr>";
+                                                echo "<tr><td colspan='14' class='text-center'>No products found</td></tr>";
                                             }
                                             ?>
                                         </tbody>
