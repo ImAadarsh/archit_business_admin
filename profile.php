@@ -58,20 +58,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_business'])) {
     $alternate_phone = $_POST['alternate_phone'];
     $primary_location_id = $_POST['primary_location_id'];
     
-    // Handle logo upload
+    // Handle logo upload via API
     $logo_path = $business_data['logo'];
     if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = '../storage/app/public/business_logos/';
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-        
-        $file_extension = pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION);
-        $new_filename = 'business_' . $business_id . '_' . time() . '.' . $file_extension;
-        $upload_path = $upload_dir . $new_filename;
-        
-        if (move_uploaded_file($_FILES['logo']['tmp_name'], $upload_path)) {
-            $logo_path = 'public/business_logos/' . $new_filename;
+        // Validate file size (max 5MB)
+        $max_file_size = 5 * 1024 * 1024; // 5MB in bytes
+        if ($_FILES['logo']['size'] > $max_file_size) {
+            $error_message = "File size too large. Maximum allowed size is 5MB.";
+        } else {
+            // Validate file type
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+            $file_type = $_FILES['logo']['type'];
+            
+            if (!in_array($file_type, $allowed_types)) {
+                $error_message = "Invalid file type. Only JPG, PNG, GIF, WEBP, and SVG files are allowed.";
+            } else {
+                // Upload file via API
+                $file_tmp = $_FILES['logo']['tmp_name'];
+                $file_name = $_FILES['logo']['name'];
+                $file_extension = pathinfo($file_name, PATHINFO_EXTENSION);
+                $new_filename = 'business_' . $business_id . '_' . time() . '.' . $file_extension;
+                
+                // Create CURLFile for upload
+                $cfile = new CURLFile($file_tmp, $file_type, $new_filename);
+                
+                // Prepare API data
+                $upload_data = array(
+                    'file' => $cfile,
+                    'folder' => 'business_logos',
+                    'business_id' => $business_id
+                );
+                
+                // Call API to upload file
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, 'https://api.invoicemate.in/public/api/upload-business-logo');
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $upload_data);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                
+                $response = curl_exec($ch);
+                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                
+                if ($http_code == 200 || $http_code == 201) {
+                    $result = json_decode($response, true);
+                    if (isset($result['path'])) {
+                        $logo_path = $result['path'];
+                        $success_message = "Logo uploaded successfully!";
+                    } else {
+                        $error_message = "Failed to get logo path from API response.";
+                    }
+                } else {
+                    $error_message = "Failed to upload logo to server. Please try again.";
+                }
+            }
         }
     }
     
@@ -98,22 +139,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_business'])) {
         $business_id
     );
     
-    if ($update_stmt->execute()) {
-        $success_message = "Business profile updated successfully!";
-        // Refresh business data
-        $stmt = $connect->prepare("SELECT b.*, l.location_name as primary_location_name 
-                                    FROM businessses b 
-                                    LEFT JOIN locations l ON b.primary_location_id = l.id 
-                                    WHERE b.id = ?");
-        $stmt->bind_param("i", $business_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $business_data = $result->fetch_assoc();
-        $stmt->close();
-    } else {
-        $error_message = "Error updating business profile: " . $update_stmt->error;
+    if (!isset($error_message)) {
+        if ($update_stmt->execute()) {
+            if (!isset($success_message)) {
+                $success_message = "Business profile updated successfully!";
+            }
+            // Refresh business data
+            $stmt = $connect->prepare("SELECT b.*, l.location_name as primary_location_name 
+                                        FROM businessses b 
+                                        LEFT JOIN locations l ON b.primary_location_id = l.id 
+                                        WHERE b.id = ?");
+            $stmt->bind_param("i", $business_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $business_data = $result->fetch_assoc();
+            $stmt->close();
+        } else {
+            $error_message = "Error updating business profile: " . $update_stmt->error;
+        }
+        $update_stmt->close();
     }
-    $update_stmt->close();
 }
 ?>
 <body class="vertical light">
@@ -295,8 +340,8 @@ include 'admin/aside.php';
                                 <div class="col-md-12">
                                     <div class="form-group mb-3">
                                         <label for="logo">Upload New Logo</label>
-                                        <input type="file" class="form-control-file" id="logo" name="logo" accept="image/*">
-                                        <small class="form-text text-muted">Upload a new logo to replace the current one (JPG, PNG, GIF - Max 2MB)</small>
+                                        <input type="file" class="form-control-file" id="logo" name="logo" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml">
+                                        <small class="form-text text-muted">Upload a new logo to replace the current one (JPG, PNG, GIF, WEBP, SVG - Max 5MB)</small>
                                     </div>
                                 </div>
                             </div>
