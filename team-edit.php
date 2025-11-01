@@ -62,7 +62,7 @@ include 'admin/aside.php';
                                         <label for="custom-select">User Type</label>
                                         <select required name="role" class="custom-select" id="custom-select">
                                             <option>Choose the User Type</option>
-                                            <option value="admin" <?php echo ($user_data && $user_data['role'] == 'admin') ? 'selected' : ''; ?>>Admin</option>
+                                            <option value="admin" <?php echo ($user_data && $user_data['role'] == 'admin' || $user_data['role'] == 'superadmin') ? 'selected' : ''; ?>>Admin</option>
                                             <option value="sales" <?php echo ($user_data && $user_data['role'] == 'sales') ? 'selected' : ''; ?>>Salesman</option>
                                         </select>
                                     </div>
