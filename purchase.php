@@ -19,7 +19,7 @@ $amount_min = isset($_GET['amount_min']) ? $_GET['amount_min'] : '';
 $amount_max = isset($_GET['amount_max']) ? $_GET['amount_max'] : '';
 $date_range = isset($_GET['date_range']) ? $_GET['date_range'] : 'all';
 $location_id = isset($_GET['location_id']) ? $_GET['location_id'] : '';
-$gst_rate = isset($_GET['gst_rate']) ? $_GET['gst_rate'] : '';
+$gst_rate = isset($_GET['gst_rate']) ? $_GET['gst_rate'] : array(); // Array for multiple selections
 ?>
         <main role="main" class="main-content">
             <div class="container-fluid">
@@ -70,15 +70,29 @@ $gst_rate = isset($_GET['gst_rate']) ? $_GET['gst_rate'] : '';
         </div>
         <div class="col-md-2">
             <div class="form-group">
-                <label for="gst_rate">GST Rate</label>
-                <select id="gst_rate" class="form-control" name="gst_rate">
-                    <option value="">All</option>
-                    <!-- <option value="0" <?php echo ($gst_rate === '0') ? 'selected' : ''; ?>>0%</option> -->
-                    <option value="5" <?php echo ($gst_rate == '5') ? 'selected' : ''; ?>>5%</option>
-                    <option value="12" <?php echo ($gst_rate == '12') ? 'selected' : ''; ?>>12%</option>
-                    <option value="18" <?php echo ($gst_rate == '18') ? 'selected' : ''; ?>>18%</option>
-                    <!-- <option value="28" <?php echo ($gst_rate == '28') ? 'selected' : ''; ?>>28%</option> -->
-                </select>
+                <label for="gst_rate_dropdown">GST Rate</label>
+                <div class="dropdown" id="gst_rate_dropdown">
+                    <button class="btn btn-secondary dropdown-toggle form-control text-left" type="button" id="gstDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span id="gst_selection_text">Select GST Rate</span>
+                    </button>
+                    <div class="dropdown-menu checkbox-dropdown" aria-labelledby="gstDropdownButton" onclick="event.stopPropagation();">
+                        <div class="dropdown-item">
+                            <label class="mb-0">
+                                <input type="checkbox" name="gst_rate[]" value="5" <?php echo (is_array($gst_rate) && in_array('5', $gst_rate)) ? 'checked' : ''; ?> class="gst-checkbox"> 5%
+                            </label>
+                        </div>
+                        <div class="dropdown-item">
+                            <label class="mb-0">
+                                <input type="checkbox" name="gst_rate[]" value="12" <?php echo (is_array($gst_rate) && in_array('12', $gst_rate)) ? 'checked' : ''; ?> class="gst-checkbox"> 12%
+                            </label>
+                        </div>
+                        <div class="dropdown-item">
+                            <label class="mb-0">
+                                <input type="checkbox" name="gst_rate[]" value="18" <?php echo (is_array($gst_rate) && in_array('18', $gst_rate)) ? 'checked' : ''; ?> class="gst-checkbox"> 18%
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-2">
@@ -153,8 +167,21 @@ if(isset($_GET['filter'])) {
     if($location_id !== '') {
         $where_clauses[] = "inv.location_id = '$location_id'";
     }
-    if($gst_rate !== '') {
-        $where_clauses[] = "items.gst_rate = '$gst_rate'";
+    if(!empty($gst_rate) && is_array($gst_rate)) {
+        // Try both decimal (0.05, 0.12, 0.18) and whole number (5, 12, 18) formats
+        $gst_conditions = array();
+        foreach($gst_rate as $rate) {
+            $rate_val = floatval($rate);
+            $decimal_val = $rate_val < 1 ? $rate_val : ($rate_val / 100);
+            $whole_val = $rate_val < 1 ? ($rate_val * 100) : $rate_val;
+            $gst_conditions[] = "items.gst_rate = $decimal_val OR items.gst_rate = $whole_val";
+        }
+        if(!empty($gst_conditions)) {
+            $where_clauses[] = "(" . implode(" OR ", $gst_conditions) . ")";
+        }
+        // Debug output
+        echo "<!-- DEBUG GST Rates: " . htmlspecialchars(print_r($gst_rate, true)) . " -->";
+        echo "<!-- DEBUG GST Conditions: " . htmlspecialchars(implode(" OR ", $gst_conditions)) . " -->";
     }
 
 
@@ -189,10 +216,12 @@ if(isset($_GET['filter'])) {
                    SUM(items.dgst + items.cgst + items.igst) as gst_group_tax
             FROM invoices inv
             LEFT JOIN addres addr ON inv.billing_address_id = addr.id AND addr.type = 'billing'
-            LEFT JOIN items ON inv.id = items.invoice_id
+            INNER JOIN items ON inv.id = items.invoice_id
             WHERE $where_clause
             GROUP BY inv.id, items.gst_rate
             ORDER BY inv.id DESC, items.gst_rate";
+    // Debug: Display the generated SQL
+    echo "<!-- DEBUG SQL Query: " . htmlspecialchars($sql) . " -->";
 } else {
     // Query groups by invoice_id and gst_rate to properly distribute amounts
     // If an invoice has items with 2 different GST rates (e.g., 5% and 18%), 
@@ -204,7 +233,7 @@ if(isset($_GET['filter'])) {
                    SUM(items.dgst + items.cgst + items.igst) as gst_group_tax
             FROM invoices inv
             LEFT JOIN addres addr ON inv.billing_address_id = addr.id AND addr.type = 'billing'
-            LEFT JOIN items ON inv.id = items.invoice_id
+            INNER JOIN items ON inv.id = items.invoice_id
             WHERE inv.business_id = '$b_id' AND inv.is_completed = 1
             GROUP BY inv.id, items.gst_rate
             ORDER BY inv.id DESC, items.gst_rate";
@@ -227,7 +256,14 @@ if(isset($_GET['filter'])) {
                 <input type="hidden" name="payment_mode" value="<?php echo $payment_type; ?>">
                 <input type="hidden" name="min_amount" value="<?php echo $amount_min; ?>">
                 <input type="hidden" name="max_amount" value="<?php echo $amount_max; ?>">
-                <input type="hidden" name="gst_rate" value="<?php echo $gst_rate; ?>">
+                <?php 
+                // Pass multiple GST rates as separate hidden inputs
+                if (is_array($gst_rate)) {
+                    foreach ($gst_rate as $rate) {
+                        echo '<input type="hidden" name="gst_rate[]" value="' . htmlspecialchars($rate) . '">';
+                    }
+                }
+                ?>
                 <?php
                 if ($date_range != 'all' && $date_range != '') {
                     switch ($date_range) {
@@ -680,7 +716,85 @@ document.getElementById('selectedForm').addEventListener('submit', function(e) {
         alert('Please select at least one item.');
     }
 });
+
+// GST Rate Checkbox Dropdown functionality
+document.addEventListener('DOMContentLoaded', function() {
+    function updateGSTSelection() {
+        const checkboxes = document.querySelectorAll('.gst-checkbox:checked');
+        const selectionText = document.getElementById('gst_selection_text');
+        
+        if (checkboxes.length === 0) {
+            selectionText.textContent = 'Select GST Rate';
+        } else if (checkboxes.length === 1) {
+            selectionText.textContent = checkboxes[0].value + '%';
+        } else {
+            const values = Array.from(checkboxes).map(cb => cb.value + '%').join(', ');
+            selectionText.textContent = values;
+        }
+    }
+    
+    // Update on checkbox change
+    document.querySelectorAll('.gst-checkbox').forEach(function(checkbox) {
+        checkbox.addEventListener('change', updateGSTSelection);
+    });
+    
+    // Initial update on page load
+    updateGSTSelection();
+    
+    // Prevent dropdown from closing when clicking inside
+    document.querySelector('.checkbox-dropdown').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
 </script>
+
+<style>
+.checkbox-dropdown {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+}
+
+.checkbox-dropdown .dropdown-item {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.checkbox-dropdown .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.checkbox-dropdown label {
+    cursor: pointer;
+    user-select: none;
+    width: 100%;
+}
+
+.checkbox-dropdown input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+#gstDropdownButton {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    color: #495057;
+}
+
+#gstDropdownButton:hover,
+#gstDropdownButton:focus {
+    background-color: #e9ecef;
+    border-color: #80bdff;
+}
+
+#gst_selection_text {
+    display: inline-block;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+</style>
 
     <?php include "admin/footer.php"; ?>
 </body>
