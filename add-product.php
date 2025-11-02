@@ -125,6 +125,13 @@ include 'admin/aside.php';
                                         </div>
                                     </div>
                                     <div class="form-group mb-3">
+                                        <label for="is_customizable">Is Customizable?</label>
+                                        <select id="is_customizable" class="form-control" name="is_customizable">
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-3">
                                         <label for="images">Product Images</label>
                                         <input type="file" id="images" class="form-control" name="images[]" accept="image/*" multiple>
                                     </div>

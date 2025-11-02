@@ -149,6 +149,13 @@ include 'admin/aside.php';
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="form-group mb-3">
+                                        <label for="is_customizable">Is Customizable?</label>
+                                        <select id="is_customizable" class="form-control" name="is_customizable">
+                                            <option value="0" <?php echo (isset($product['is_customizable']) && $product['is_customizable'] == 0) ? 'selected' : ''; ?>>No</option>
+                                            <option value="1" <?php echo (isset($product['is_customizable']) && $product['is_customizable'] == 1) ? 'selected' : ''; ?>>Yes</option>
+                                        </select>
+                                    </div>
                                     
                                     <!-- Existing Images Section -->
                                     <div class="form-group mb-3">

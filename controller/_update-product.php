@@ -22,6 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         "quantity" => isset($_POST['quantity']) && $_POST['quantity'] !== '' ? $_POST['quantity'] : null,
         "is_framed" => isset($_POST['is_framed']) ? 1 : 0,
         "is_include_gst" => isset($_POST['is_include_gst']) ? 1 : 0,
+        "is_customizable" => isset($_POST['is_customizable']) ? (int)$_POST['is_customizable'] : 0,
     );
 
     // Add image deletion IDs if any
