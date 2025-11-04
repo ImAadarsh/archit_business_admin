@@ -1,0 +1,54 @@
+{
+    "timestamp": "2025-11-03 16:46:58",
+    "product_id": "124",
+    "product_name": "Madhubani Paintings",
+    "image_url": "https:\/\/api.invoicemate.in\/storage\/app\/public\/product_images\/product_124_1755487359_68a29c7f8e8c5.jpg",
+    "dimensions": "36.00 x 24.00",
+    "is_framed": false,
+    "prompts": [
+        {
+            "type": "living_room",
+            "result": {
+                "success": false,
+                "error": "AI Image Generation API not configured",
+                "prompt": "Create a photorealistic mockup showing this artwork 'Madhubani Paintings' displayed on a clean white wall in a modern living room. The artwork measures 36.00 x 24.00 cm. The artwork is frameless (canvas style). The scene should include: a comfortable beige sofa in the corner, wooden floor with visible grain, a green potted plant, and natural lighting from a window. The artwork should be centered on the wall at eye level. Professional interior photography style, warm ambient lighting, 8K quality.",
+                "original_image_url": "https:\/\/api.invoicemate.in\/storage\/app\/public\/product_images\/product_124_1755487359_68a29c7f8e8c5.jpg",
+                "mockup_type": "living_room",
+                "instructions": "Use this prompt with DALL-E 3, Stable Diffusion, or similar service"
+            }
+        },
+        {
+            "type": "gallery",
+            "result": {
+                "success": false,
+                "error": "AI Image Generation API not configured",
+                "prompt": "Create a photorealistic mockup showing this artwork 'Madhubani Paintings' displayed in a contemporary art gallery. The artwork measures 36.00 x 24.00 cm. The artwork is frameless (canvas style). The scene should include: pristine white walls, polished concrete floor, track lighting overhead creating subtle spotlights on the artwork, a minimalist gray bench in the distance. The artwork should be professionally mounted at gallery height. Clean, professional gallery aesthetic, even lighting, museum quality, 8K.",
+                "original_image_url": "https:\/\/api.invoicemate.in\/storage\/app\/public\/product_images\/product_124_1755487359_68a29c7f8e8c5.jpg",
+                "mockup_type": "gallery",
+                "instructions": "Use this prompt with DALL-E 3, Stable Diffusion, or similar service"
+            }
+        },
+        {
+            "type": "office",
+            "result": {
+                "success": false,
+                "error": "AI Image Generation API not configured",
+                "prompt": "Create a photorealistic mockup showing this artwork 'Madhubani Paintings' displayed on a light gray wall in a modern professional office. The artwork measures 36.00 x 24.00 cm. The artwork is frameless (canvas style). The scene should include: a wooden desk with a laptop, office chair, contemporary desk lamp, and gray carpet flooring. The artwork should be positioned above or behind the desk area. Professional corporate interior, natural and ambient lighting, clean and organized, 8K quality.",
+                "original_image_url": "https:\/\/api.invoicemate.in\/storage\/app\/public\/product_images\/product_124_1755487359_68a29c7f8e8c5.jpg",
+                "mockup_type": "office",
+                "instructions": "Use this prompt with DALL-E 3, Stable Diffusion, or similar service"
+            }
+        },
+        {
+            "type": "bedroom",
+            "result": {
+                "success": false,
+                "error": "AI Image Generation API not configured",
+                "prompt": "Create a photorealistic mockup showing this artwork 'Madhubani Paintings' displayed on a warm beige wall in a contemporary bedroom. The artwork measures 36.00 x 24.00 cm. The artwork is frameless (canvas style). The scene should include: an upholstered headboard with tufted details, a wooden nightstand with a soft table lamp, and carpeted floor. The artwork should be centered above the headboard. Cozy bedroom ambiance, warm lighting from the lamp, intimate and inviting atmosphere, 8K quality.",
+                "original_image_url": "https:\/\/api.invoicemate.in\/storage\/app\/public\/product_images\/product_124_1755487359_68a29c7f8e8c5.jpg",
+                "mockup_type": "bedroom",
+                "instructions": "Use this prompt with DALL-E 3, Stable Diffusion, or similar service"
+            }
+        }
+    ]
+}

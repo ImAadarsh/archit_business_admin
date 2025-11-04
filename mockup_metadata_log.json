@@ -1,0 +1,266 @@
+[
+    {
+        "timestamp": "2025-11-03 16:39:11",
+        "product_id": "154",
+        "mockup_type": "Living Room Setting",
+        "metadata": {
+            "mockup_type": "Living Room Setting",
+            "product_name": "Madhubani Paintings",
+            "description": "Traditional Madhubani art featuring vibrant colors and intricate patterns. Hand-painted by local artisans from Bihar, India.",
+            "suitable_for": "Living Room, Bedroom, Office, Art Gallery",
+            "artist_name": "Artist Community",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_154_1762187951_6908daafc0bd8.jpg"
+    },
+    {
+        "timestamp": "2025-11-03 16:39:11",
+        "product_id": "154",
+        "mockup_type": "Art Gallery Display",
+        "metadata": {
+            "mockup_type": "Art Gallery Display",
+            "product_name": "Madhubani Paintings",
+            "description": "Traditional Madhubani art featuring vibrant colors and intricate patterns. Hand-painted by local artisans from Bihar, India.",
+            "suitable_for": "Living Room, Bedroom, Office, Art Gallery",
+            "artist_name": "Artist Community",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_154_1762187952_6908dab00e9b8.jpg"
+    },
+    {
+        "timestamp": "2025-11-03 16:39:12",
+        "product_id": "154",
+        "mockup_type": "Office Environment",
+        "metadata": {
+            "mockup_type": "Office Environment",
+            "product_name": "Madhubani Paintings",
+            "description": "Traditional Madhubani art featuring vibrant colors and intricate patterns. Hand-painted by local artisans from Bihar, India.",
+            "suitable_for": "Living Room, Bedroom, Office, Art Gallery",
+            "artist_name": "Artist Community",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_154_1762187952_6908dab045d9f.jpg"
+    },
+    {
+        "timestamp": "2025-11-03 16:39:12",
+        "product_id": "154",
+        "mockup_type": "Bedroom Decor",
+        "metadata": {
+            "mockup_type": "Bedroom Decor",
+            "product_name": "Madhubani Paintings",
+            "description": "Traditional Madhubani art featuring vibrant colors and intricate patterns. Hand-painted by local artisans from Bihar, India.",
+            "suitable_for": "Living Room, Bedroom, Office, Art Gallery",
+            "artist_name": "Artist Community",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_154_1762187952_6908dab087a39.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:50:05",
+        "product_id": "124",
+        "mockup_type": "Living Room Setting",
+        "metadata": {
+            "mockup_type": "Living Room Setting",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257005_6909e86d60366.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:50:05",
+        "product_id": "124",
+        "mockup_type": "Art Gallery Display",
+        "metadata": {
+            "mockup_type": "Art Gallery Display",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257005_6909e86dedae8.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:50:06",
+        "product_id": "124",
+        "mockup_type": "Office Environment",
+        "metadata": {
+            "mockup_type": "Office Environment",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257006_6909e86ec13b5.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:50:08",
+        "product_id": "124",
+        "mockup_type": "Bedroom Decor",
+        "metadata": {
+            "mockup_type": "Bedroom Decor",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257008_6909e8705b222.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:51:41",
+        "product_id": "124",
+        "mockup_type": "Living Room Setting",
+        "metadata": {
+            "mockup_type": "Living Room Setting",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257101_6909e8cda77f0.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:51:42",
+        "product_id": "124",
+        "mockup_type": "Art Gallery Display",
+        "metadata": {
+            "mockup_type": "Art Gallery Display",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257102_6909e8ce22046.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:51:42",
+        "product_id": "124",
+        "mockup_type": "Office Environment",
+        "metadata": {
+            "mockup_type": "Office Environment",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257102_6909e8ce9260c.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:51:43",
+        "product_id": "124",
+        "mockup_type": "Bedroom Decor",
+        "metadata": {
+            "mockup_type": "Bedroom Decor",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257103_6909e8cf0d73a.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:53:10",
+        "product_id": "124",
+        "mockup_type": "Living Room Setting",
+        "metadata": {
+            "mockup_type": "Living Room Setting",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257190_6909e9261b9a3.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:53:10",
+        "product_id": "124",
+        "mockup_type": "Art Gallery Display",
+        "metadata": {
+            "mockup_type": "Art Gallery Display",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257190_6909e92683e81.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:53:11",
+        "product_id": "124",
+        "mockup_type": "Office Environment",
+        "metadata": {
+            "mockup_type": "Office Environment",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257191_6909e9271acc5.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:53:11",
+        "product_id": "124",
+        "mockup_type": "Bedroom Decor",
+        "metadata": {
+            "mockup_type": "Bedroom Decor",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257191_6909e927ab098.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:54:58",
+        "product_id": "124",
+        "mockup_type": "Living Room Setting",
+        "metadata": {
+            "mockup_type": "Living Room Setting",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257298_6909e9927f95b.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:54:58",
+        "product_id": "124",
+        "mockup_type": "Art Gallery Display",
+        "metadata": {
+            "mockup_type": "Art Gallery Display",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257298_6909e992e912c.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:54:59",
+        "product_id": "124",
+        "mockup_type": "Office Environment",
+        "metadata": {
+            "mockup_type": "Office Environment",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257299_6909e99376260.jpg"
+    },
+    {
+        "timestamp": "2025-11-04 11:54:59",
+        "product_id": "124",
+        "mockup_type": "Bedroom Decor",
+        "metadata": {
+            "mockup_type": "Bedroom Decor",
+            "product_name": "Madhubani Paintings",
+            "suitable_for": "home, office, gallery",
+            "artist_name": "Unknown",
+            "dimensions": "36.00 x 24.00"
+        },
+        "image_path": "public\/product_images\/product_124_1762257299_6909e993e21b7.jpg"
+    }
+]
