@@ -344,7 +344,7 @@ function createMockupWithGeminiAPI($apiKey, $artworkPath, $mockupType, $outputPa
     
     // Check if framed
     $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
-    $frameInfo = $isFramed ? "This artwork has a frame." : "This is a frameless artwork (canvas or unframed print).";
+    $frameInfo = $isFramed ? "This artwork has a frame. Make sure the Same frame is visible in the mockup. and also remove the black croners from the frame." : "This is a frameless artwork (canvas or unframed print).";
     
     // Build comprehensive prompt for each room type
     $prompts = [
