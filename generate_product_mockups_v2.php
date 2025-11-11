@@ -216,9 +216,7 @@ function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo
         'living_room' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic living room mockup that complements the artwork. {$dimensions} {$frameInfo} The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, a contemporary sofa whose upholstery reflects one of the accent colors from the artwork, curated decor such as a potted plant, coffee table edge, or throw blanket that echoes the palette. Keep lighting natural and directional to highlight the artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork exactly as provided and compose the room so all styling decisions feel intentionally inspired by the artwork.",
         
         'dining_room' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic dining room mockup that feels custom-designed around the artwork. {$dimensions} {$frameInfo} Compose the scene with a warm neutral wall tuned to complement the art, a natural wood dining table with at least four upholstered chairs whose fabrics pick up secondary colors from the artwork, and a contemporary pendant light or chandelier centered above the table. Style the tabletop with dinnerware or minimalist centerpieces that mirror the artwork's hues. Include glimpses of a sideboard or cabinet styled with accessories influenced by the art. Hang the artwork centered above the sideboard or table at proper height. Use soft ambient lighting with gentle shadows. The artwork itself must remain unchanged—only integrate it seamlessly into this tailored dining environment.",
-        
-        'gallery' => "Analyze the artwork to understand its scale, color balance, and focal energy. Create a photorealistic minimalist gallery mockup that showcases the piece as a star exhibit. {$dimensions} {$frameInfo} Use pristine white walls and a polished concrete or subtle gray floor. Adjust the intensity and angle of track lighting to highlight the artwork's key tones. Optionally include a modern bench or sculpture whose materials or accent colors relate to the artwork. Keep the artwork centered with gallery-standard spacing. Do not alter the artwork—only embed it authentically within this refined gallery presentation with professional lighting that echoes the mood of the piece.",
-        
+                
         'office' => "Study the artwork's palette and atmosphere. Design a contemporary office mockup that integrates the piece as a focal point. {$dimensions} {$frameInfo} The scene should include light neutral walls whose undertone complements the artwork, a modern desk with technology (laptop, monitor) arranged neatly, and accessories such as notebooks, lamp, or plant whose colors and materials mirror elements from the artwork. Ensure the artwork is centered above the desk at an ergonomic viewing height with realistic shadowing. Preserve the artwork exactly—only style the office environment to look professionally curated around it with cohesive color accents and balanced lighting.",
         
         'bedroom' => "Evaluate the artwork's color story, mood, and texture. Create a photorealistic serene bedroom mockup inspired by these qualities. {$dimensions} {$frameInfo} Feature a softly toned wall that harmonizes with the art, an upholstered headboard or bed linens that pick up secondary colors from the piece, and a wooden nightstand with lighting that reinforces the artwork's ambiance (warm for cozy scenes, cooler for calm minimalism). Include decor elements—pillows, throws, plants—that subtly reference the artwork. Position the artwork centered above the headboard with realistic shadows. Keep the artwork untouched and ensure the entire bedroom styling feels intentionally derived from the artwork's design language."
@@ -352,14 +350,12 @@ function createMockupWithGeminiAPI($apiKey, $artworkPath, $mockupType, $outputPa
         
         'dining_room' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic dining room mockup that feels custom-designed around the artwork. {$dimensions} {$frameInfo} Compose the scene with a warm neutral wall tuned to complement the art, a natural wood dining table with at least four upholstered chairs whose fabrics pick up secondary colors from the artwork, and a contemporary pendant light or chandelier centered above the table. Style the tabletop with dinnerware or minimalist centerpieces that mirror the artwork's hues. Include glimpses of a sideboard or cabinet styled with accessories influenced by the art. Hang the artwork centered above the sideboard or table at proper height. Use soft ambient lighting with gentle shadows. The artwork itself must remain unchanged—only integrate it seamlessly into this tailored dining environment.",
         
-        'gallery' => "Analyze the artwork to understand its scale, color balance, and focal energy. Create a photorealistic minimalist gallery mockup that showcases the piece as a star exhibit. {$dimensions} {$frameInfo} Use pristine white walls and a polished concrete or subtle gray floor. Adjust the intensity and angle of track lighting to highlight the artwork's key tones. Optionally include a modern bench or sculpture whose materials or accent colors relate to the artwork. Keep the artwork centered with gallery-standard spacing. Do not alter the artwork—only embed it authentically within this refined gallery presentation with professional lighting that echoes the mood of the piece.",
-        
         'office' => "Study the artwork's palette and atmosphere. Design a contemporary office mockup that integrates the piece as a focal point. {$dimensions} {$frameInfo} The scene should include light neutral walls whose undertone complements the artwork, a modern desk with technology (laptop, monitor) arranged neatly, and accessories such as notebooks, lamp, or plant whose colors and materials mirror elements from the artwork. Ensure the artwork is centered above the desk at an ergonomic viewing height with realistic shadowing. Preserve the artwork exactly—only style the office environment to look professionally curated around it with cohesive color accents and balanced lighting.",
         
         'bedroom' => "Evaluate the artwork's color story, mood, and texture. Create a photorealistic serene bedroom mockup inspired by these qualities. {$dimensions} {$frameInfo} Feature a softly toned wall that harmonizes with the art, an upholstered headboard or bed linens that pick up secondary colors from the piece, and a wooden nightstand with lighting that reinforces the artwork's ambiance (warm for cozy scenes, cooler for calm minimalism). Include decor elements—pillows, throws, plants—that subtly reference the artwork. Position the artwork centered above the headboard with realistic shadows. Keep the artwork untouched and ensure the entire bedroom styling feels intentionally derived from the artwork's design language."
     ];
     
-    $prompt = $prompts[$mockupType] ?? $prompts['gallery'];
+    $prompt = $prompts[$mockupType] ?? $prompts['living_room'];
     
     // Call Gemini Image Generation API (using image generation model)
     // Note: Use gemini-2.5-flash-image for image generation capabilities
@@ -449,7 +445,6 @@ function uploadImageToProduct($productId, $imagePath, $mockupType, $productInfo,
     $mockupDescriptions = [
         'living_room' => 'Living Room Setting',
         'dining_room' => 'Dining Room Setting',
-        'gallery' => 'Art Gallery Display',
         'office' => 'Office Environment',
         'bedroom' => 'Bedroom Decor'
     ];
@@ -634,7 +629,7 @@ $productInfo = [
     'name' => $aiProductName,  // Use AI-generated name
     'original_name' => $product['name'],  // Keep original for reference
     'description' => $aiProductDescription,  // Use AI-generated description
-    'suitable_for' => $product['suitable_for'] ?? 'home, office, gallery',
+    'suitable_for' => $product['suitable_for'] ?? 'home, office, dining, bedroom',
     'width' => $product['width'] ?? null,
     'height' => $product['height'] ?? null,
     'orientation' => $product['orientation'] ?? null,
@@ -653,8 +648,8 @@ logMessage("  - AI Description: " . substr($productInfo['description'] ?? 'N/A',
 logMessage("  - Suitable For: {$productInfo['suitable_for']}");
 logMessage("");
 
-// Always generate all standard mockup types
-$mockupTypes = ['living_room', 'dining_room', 'gallery', 'office', 'bedroom'];
+// Always generate all standard mockup types (gallery mockups removed)
+$mockupTypes = ['living_room', 'dining_room', 'office', 'bedroom'];
 logMessage("Generating mockup types: " . implode(', ', $mockupTypes));
 logMessage("");
 
