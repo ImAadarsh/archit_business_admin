@@ -479,8 +479,9 @@ $online = 0;
             
             // Calculate row-level amounts (per GST rate)
             $row_gst_amount = isset($final['gst_group_tax']) ? floatval($final['gst_group_tax']) : 0;
-            $row_sale_amount = isset($final['gst_group_amount']) ? floatval($final['gst_group_amount']) : 0;
-            $row_total = $row_sale_amount + $row_gst_amount;
+            $row_gross_amount = isset($final['gst_group_amount']) ? floatval($final['gst_group_amount']) : 0; // Includes GST
+            $row_sale_amount = max($row_gross_amount - $row_gst_amount, 0); // Exclude GST for Sale Amount column
+            $row_total = $row_gross_amount; // Total amount should include GST
             
             $date = isset($final['invoice_date']) ? strtotime($final['invoice_date']) : time();
             $last_invoice_id = $current_invoice_id;
