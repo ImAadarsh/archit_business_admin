@@ -68,16 +68,92 @@ function downloadImage($imageUrl, $destinationPath) {
     return false;
 }
 
+// Resize image before sending to AI to reduce payload/cost
+function resizeImageForAI($sourcePath, $maxDim = 1024) {
+    if (!file_exists($sourcePath)) {
+        logMessage("  ERROR: resizeImageForAI missing file {$sourcePath}");
+        return false;
+    }
+
+    $imageInfo = @getimagesize($sourcePath);
+    if (!$imageInfo) {
+        logMessage("  ERROR: Unable to read image info for {$sourcePath}");
+        return false;
+    }
+
+    list($width, $height, $type) = $imageInfo;
+
+    if ($width <= $maxDim && $height <= $maxDim) {
+        return file_get_contents($sourcePath);
+    }
+
+    switch ($type) {
+        case IMAGETYPE_JPEG:
+            $src = imagecreatefromjpeg($sourcePath);
+            break;
+        case IMAGETYPE_PNG:
+            if (!function_exists('imagecreatefrompng')) {
+                logMessage("  ERROR: PNG support missing in GD");
+                return false;
+            }
+            $src = imagecreatefrompng($sourcePath);
+            break;
+        case IMAGETYPE_WEBP:
+            if (!function_exists('imagecreatefromwebp')) {
+                logMessage("  ERROR: WEBP support missing in GD");
+                return false;
+            }
+            $src = imagecreatefromwebp($sourcePath);
+            break;
+        default:
+            logMessage("  WARNING: Unsupported image type ({$type}), using original data");
+            return file_get_contents($sourcePath);
+    }
+
+    if (!$src) {
+        logMessage("  ERROR: Failed to create GD resource for {$sourcePath}");
+        return false;
+    }
+
+    $ratio = $width / $height;
+    if ($ratio > 1) {
+        $newWidth = $maxDim;
+        $newHeight = (int) round($maxDim / $ratio);
+    } else {
+        $newWidth = (int) round($maxDim * $ratio);
+        $newHeight = $maxDim;
+    }
+
+    $dst = imagecreatetruecolor($newWidth, $newHeight);
+    if ($type === IMAGETYPE_PNG || $type === IMAGETYPE_WEBP) {
+        $white = imagecolorallocate($dst, 255, 255, 255);
+        imagefill($dst, 0, 0, $white);
+    }
+
+    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+    ob_start();
+    imagejpeg($dst, null, 85);
+    $data = ob_get_clean();
+
+    imagedestroy($src);
+    imagedestroy($dst);
+
+    return $data;
+}
+
 // Function to generate AI product name and description using Gemini
-function generateAIProductNameAndDescription($apiKey, $artworkPath) {
-    // Read and encode the artwork image
-    $imageData = file_get_contents($artworkPath);
-    if (!$imageData) {
-        logMessage("  ERROR: Could not read artwork file for name generation");
+function generateAIProductNameAndDescription($apiKey, $artworkPath, $artworkData = null) {
+    if ($artworkData === null) {
+        $artworkData = file_get_contents($artworkPath);
+    }
+
+    if (!$artworkData) {
+        logMessage("  ERROR: Could not load artwork data for name generation");
         return null;
     }
-    
-    $imageBase64 = base64_encode($imageData);
+
+    $imageBase64 = base64_encode($artworkData);
     
     // Prompt for generating product name and description
     $prompt = "Analyze this artwork and generate:
@@ -119,7 +195,7 @@ DESCRIPTION: A striking contemporary piece featuring bold geometric shapes and v
         ]
     ];
     
-    $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}");
+    $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key={$apiKey}");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
@@ -190,17 +266,20 @@ DESCRIPTION: A striking contemporary piece featuring bold geometric shapes and v
 }
 
 // Function to create multiple mockups in parallel using Gemini Image Generation API
-function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo, $productId) {
+function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo, $productId, $artworkData = null) {
     global $TEMP_DIR;
     
     // Read and encode the artwork image once
-    $imageData = file_get_contents($artworkPath);
-    if (!$imageData) {
-        logMessage("  ERROR: Could not read artwork file");
+    if ($artworkData === null) {
+        $artworkData = file_get_contents($artworkPath);
+    }
+
+    if (!$artworkData) {
+        logMessage("  ERROR: Could not load artwork data");
         return [];
     }
-    
-    $imageBase64 = base64_encode($imageData);
+
+    $imageBase64 = base64_encode($artworkData);
     
     // Get dimensions and frame info
     $dimensions = "";
@@ -324,15 +403,17 @@ function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo
 }
 
 // Function to create mockup using Gemini Image Generation API
-function createMockupWithGeminiAPI($apiKey, $artworkPath, $mockupType, $outputPath, $productInfo, $aiAnalysis = null) {
-    // Read and encode the artwork image
-    $imageData = file_get_contents($artworkPath);
-    if (!$imageData) {
-        logMessage("  ERROR: Could not read artwork file");
+function createMockupWithGeminiAPI($apiKey, $artworkPath, $mockupType, $outputPath, $productInfo, $aiAnalysis = null, $artworkData = null) {
+    if ($artworkData === null) {
+        $artworkData = file_get_contents($artworkPath);
+    }
+
+    if (!$artworkData) {
+        logMessage("  ERROR: Could not load artwork data");
         return false;
     }
     
-    $imageBase64 = base64_encode($imageData);
+    $imageBase64 = base64_encode($artworkData);
     
     // Get dimensions
     $dimensions = "";
@@ -604,9 +685,19 @@ if (!downloadImage($imageUrl, $originalImagePath)) {
 logMessage("Artwork downloaded successfully to: {$originalImagePath}");
 logMessage("");
 
+// Step 3.25: Resize artwork once for all AI calls
+logMessage("Optimizing artwork for AI payload...");
+$optimizedArtworkData = resizeImageForAI($originalImagePath, 1024);
+if (!$optimizedArtworkData) {
+    logMessage("ERROR: Failed to optimize artwork for AI usage");
+    exit;
+}
+logMessage("Artwork optimized (max dimension 1024px) for AI requests.");
+logMessage("");
+
 // Step 3.5: Generate AI product name (3-5 words) and description
 logMessage("Generating AI-based product name and description...");
-$aiGenerated = generateAIProductNameAndDescription($GEMINI_API_KEY, $originalImagePath);
+$aiGenerated = generateAIProductNameAndDescription($GEMINI_API_KEY, $originalImagePath, $optimizedArtworkData);
 if ($aiGenerated && isset($aiGenerated['name']) && isset($aiGenerated['description'])) {
     logMessage("✓ AI Product Name Generated: {$aiGenerated['name']}");
     logMessage("✓ AI Product Description Generated:");
@@ -657,7 +748,7 @@ logMessage("");
 logMessage("Generating all 4 mockup images in parallel...");
 $startTime = time();
 
-$results = createMockupsParallel($GEMINI_API_KEY, $originalImagePath, $mockupTypes, $productInfo, $product['id']);
+$results = createMockupsParallel($GEMINI_API_KEY, $originalImagePath, $mockupTypes, $productInfo, $product['id'], $optimizedArtworkData);
 
 $elapsedTime = time() - $startTime;
 logMessage("");
