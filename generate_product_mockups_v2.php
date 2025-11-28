@@ -1020,32 +1020,41 @@ if (file_exists($originalImagePath)) {
     @unlink($originalImagePath);
 }
 
-// Step 8: Mark product as processed
+// Step 8: Mark product as processed ONLY if at least one mockup was successfully uploaded
 logMessage("");
-logMessage("Marking product as processed...");
-
-// Reconnect to database (process takes ~2 mins, connection may have timed out)
-@mysqli_close($connect);
-$connect = mysqli_connect($host, $user, $password, $dbname);
-
-if (!$connect) {
-    logMessage("✗ Failed to reconnect to database");
-} else {
-    $updateQuery = "UPDATE products SET is_processed = 1, updated_at = NOW() WHERE id = ?";
-    $stmt = mysqli_prepare($connect, $updateQuery);
+if ($uploadedCount > 0) {
+    logMessage("Marking product as processed (at least one mockup uploaded successfully)...");
     
-    if ($stmt === false) {
-        logMessage("✗ Failed to prepare statement: " . mysqli_error($connect));
+    // Reconnect to database (process takes ~2 mins, connection may have timed out)
+    @mysqli_close($connect);
+    $connect = mysqli_connect($host, $user, $password, $dbname);
+    
+    if (!$connect) {
+        logMessage("✗ Failed to reconnect to database");
     } else {
-        mysqli_stmt_bind_param($stmt, "i", $product['id']);
+        $updateQuery = "UPDATE products SET is_processed = 1, updated_at = NOW() WHERE id = ?";
+        $stmt = mysqli_prepare($connect, $updateQuery);
         
-        if (mysqli_stmt_execute($stmt)) {
-            logMessage("✓ Product marked as processed successfully!");
+        if ($stmt === false) {
+            logMessage("✗ Failed to prepare statement: " . mysqli_error($connect));
         } else {
-            logMessage("✗ Failed to execute update: " . mysqli_error($connect));
+            mysqli_stmt_bind_param($stmt, "i", $product['id']);
+            
+            if (mysqli_stmt_execute($stmt)) {
+                logMessage("✓ Product marked as processed successfully!");
+            } else {
+                logMessage("✗ Failed to execute update: " . mysqli_error($connect));
+            }
+            mysqli_stmt_close($stmt);
         }
-        mysqli_stmt_close($stmt);
     }
+} else {
+    logMessage("⚠ Product NOT marked as processed - no mockups were successfully uploaded");
+    logMessage("⚠ Product will remain available for processing in the next run");
+    
+    // Reconnect to database to ensure connection is closed properly
+    @mysqli_close($connect);
+    $connect = mysqli_connect($host, $user, $password, $dbname);
 }
 
 // Summary
@@ -1055,7 +1064,7 @@ logMessage("Product ID: {$product['id']}");
 logMessage("Product Name: {$product['name']}");
 logMessage("Mockups Generated: {$mockupsGenerated}");
 logMessage("Mockups Uploaded: {$uploadedCount}");
-logMessage("Status: Marked as processed");
+logMessage("Status: " . ($uploadedCount > 0 ? "Marked as processed" : "NOT processed - will retry in next run"));
 logMessage("");
 logMessage("Temp Directory Location: {$TEMP_DIR}");
 
@@ -1069,6 +1078,7 @@ echo "<li>Product ID: {$product['id']}</li>";
 echo "<li>Product Name: {$product['name']}</li>";
 echo "<li>Mockups Generated: <span class='" . ($mockupsGenerated > 0 ? "success" : "error") . "'>{$mockupsGenerated}</span></li>";
 echo "<li>Mockups Uploaded: <span class='" . ($uploadedCount > 0 ? "success" : "error") . "'>{$uploadedCount}</span></li>";
+echo "<li>Status: <span class='" . ($uploadedCount > 0 ? "success" : "error") . "'>" . ($uploadedCount > 0 ? "Processed" : "NOT Processed - Will Retry") . "</span></li>";
 echo "</ul>";
 echo "<p><a href='generate_product_mockups_v2.php'>Process Next Product</a></p>";
 echo "</body></html>";
