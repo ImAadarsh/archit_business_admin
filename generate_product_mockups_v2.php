@@ -399,7 +399,7 @@ function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo
     }
     
     $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
-    $frameInfo = $isFramed ? "This artwork has a frame. Make sure the Same frame is visible in the mockup. and also remove the black croners from the frame." : "This is a frameless artwork (canvas or unframed print).";
+    $frameInfo = $isFramed ? "This artwork has a frame. Make sure the Same frame is visible in the mockup. and also remove the black croners from the frame." : "This is a frameless artwork (canvas or unframed print). Also make sure the artwork is not cropped or cut off and do not change the orientation of the artwork by your own.";
     
     // Check if vertical orientation
     $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
