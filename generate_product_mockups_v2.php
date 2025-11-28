@@ -13,13 +13,93 @@ if (!$GEMINI_API_KEY) {
     die("GEMINI_API_KEY is required");
 }
 
-// Use system temp directory which is always writable
-$TEMP_DIR = sys_get_temp_dir() . '/product_mockups/';
-$LOG_FILE = sys_get_temp_dir() . '/mockup_generations_log.txt';
+// Helper function to create directory with proper permissions
+function createWritableDir($path) {
+    $parentDir = dirname($path);
+    
+    // Check if parent is writable
+    if (!is_writable($parentDir) && file_exists($parentDir)) {
+        return false;
+    }
+    
+    // Create parent directories if needed
+    if (!file_exists($parentDir)) {
+        $oldUmask = umask(0);
+        $result = @mkdir($parentDir, 0777, true);
+        umask($oldUmask);
+        if (!$result) {
+            return false;
+        }
+        // Try to set permissions explicitly
+        @chmod($parentDir, 0777);
+    }
+    
+    // Create the final directory
+    if (!file_exists($path)) {
+        $oldUmask = umask(0);
+        $result = @mkdir($path, 0777, true);
+        umask($oldUmask);
+        if (!$result) {
+            return false;
+        }
+        // Try to set permissions explicitly
+        @chmod($path, 0777);
+    }
+    
+    // Verify it's writable
+    return is_writable($path);
+}
 
-// Create temp directory if it doesn't exist
-if (!file_exists($TEMP_DIR)) {
-    @mkdir($TEMP_DIR, 0777, true);
+// Try multiple temp directory locations (project directory preferred)
+$tempDirOptions = [
+    __DIR__ . '/temp/product_mockups/',  // Project directory (preferred)
+    __DIR__ . '/tmp/product_mockups/',   // Alternative project location
+    __DIR__ . '/product_mockups_temp/',  // Direct in business folder
+];
+
+$TEMP_DIR = null;
+foreach ($tempDirOptions as $tempOption) {
+    if (createWritableDir($tempOption)) {
+        $TEMP_DIR = $tempOption;
+        break;
+    }
+}
+
+// Final check - if still no directory, die with helpful message
+if (!$TEMP_DIR) {
+    $error = error_get_last();
+    $currentUser = function_exists('posix_getpwuid') && function_exists('posix_geteuid') 
+        ? posix_getpwuid(posix_geteuid())['name'] 
+        : 'unknown';
+    
+    die("FATAL ERROR: Cannot create or write to temp directory.\n" .
+        "Current user: {$currentUser}\n" .
+        "Tried locations:\n" .
+        "  - " . __DIR__ . "/temp/product_mockups/\n" .
+        "  - " . __DIR__ . "/tmp/product_mockups/\n" .
+        "  - " . __DIR__ . "/product_mockups_temp/\n" .
+        "Error: " . ($error ? $error['message'] : 'Unknown error') . "\n\n" .
+        "SOLUTION: Please run this command in terminal:\n" .
+        "  mkdir -p " . __DIR__ . "/temp/product_mockups\n" .
+        "  chmod -R 777 " . __DIR__ . "/temp\n");
+}
+
+// Set log file location (same directory as temp)
+$LOG_FILE = dirname($TEMP_DIR) . '/mockup_generations_log.txt';
+
+// Final verification
+if (!is_writable($TEMP_DIR)) {
+    // Try one more time to fix permissions
+    @chmod($TEMP_DIR, 0777);
+    @chmod(dirname($TEMP_DIR), 0777);
+    
+    if (!is_writable($TEMP_DIR)) {
+        die("FATAL ERROR: Temp directory is not writable: {$TEMP_DIR}\n" .
+            "Permissions: " . substr(sprintf('%o', fileperms($TEMP_DIR)), -4) . "\n" .
+            "Parent permissions: " . substr(sprintf('%o', fileperms(dirname($TEMP_DIR))), -4) . "\n\n" .
+            "SOLUTION: Run this command:\n" .
+            "  chmod -R 777 " . dirname($TEMP_DIR) . "\n");
+    }
 }
 
 // Function to log messages
@@ -40,8 +120,25 @@ function downloadImage($imageUrl, $destinationPath) {
     // Ensure directory exists
     $dir = dirname($destinationPath);
     if (!file_exists($dir)) {
-        @mkdir($dir, 0777, true);
+        $mkdirResult = @mkdir($dir, 0777, true);
+        if (!$mkdirResult) {
+            $error = error_get_last();
+            logMessage("ERROR: Failed to create directory: {$dir}");
+            logMessage("ERROR: Directory error: " . ($error ? $error['message'] : 'Unknown error'));
+            return false;
+        }
+        logMessage("  Created directory: {$dir}");
     }
+    
+    // Check if directory is writable
+    if (!is_writable($dir)) {
+        logMessage("ERROR: Directory is not writable: {$dir}");
+        logMessage("ERROR: Directory permissions: " . substr(sprintf('%o', fileperms($dir)), -4));
+        return false;
+    }
+    
+    logMessage("  Downloading from: {$imageUrl}");
+    logMessage("  Saving to: {$destinationPath}");
     
     $ch = curl_init($imageUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -56,15 +153,29 @@ function downloadImage($imageUrl, $destinationPath) {
     curl_close($ch);
     
     if ($httpCode === 200 && $imageData && strlen($imageData) > 0) {
-        $result = @file_put_contents($destinationPath, $imageData);
+        logMessage("  Downloaded " . strlen($imageData) . " bytes");
+        
+        // Try to write the file
+        $result = file_put_contents($destinationPath, $imageData);
         if ($result !== false) {
+            logMessage("  Successfully wrote {$result} bytes to file");
             return true;
         }
+        
+        // Get detailed error information
+        $error = error_get_last();
         logMessage("ERROR: Failed to write image to: {$destinationPath}");
+        logMessage("ERROR: Write error: " . ($error ? $error['message'] : 'Unknown error'));
+        logMessage("ERROR: File exists: " . (file_exists($destinationPath) ? 'Yes' : 'No'));
+        logMessage("ERROR: Directory writable: " . (is_writable($dir) ? 'Yes' : 'No'));
+        logMessage("ERROR: Disk free space: " . (disk_free_space($dir) !== false ? number_format(disk_free_space($dir)) . ' bytes' : 'Unknown'));
         return false;
     }
     
     logMessage("ERROR: Failed to download image. HTTP Code: {$httpCode}, Error: {$error}");
+    if ($httpCode !== 200) {
+        logMessage("ERROR: Response data: " . substr($imageData, 0, 200));
+    }
     return false;
 }
 
@@ -195,7 +306,7 @@ DESCRIPTION: A striking contemporary piece featuring bold geometric shapes and v
         ]
     ];
     
-    $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key={$apiKey}");
+    $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-001:generateContent?key={$apiKey}");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
@@ -290,16 +401,31 @@ function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo
     $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
     $frameInfo = $isFramed ? "This artwork has a frame. Make sure the Same frame is visible in the mockup. and also remove the black croners from the frame." : "This is a frameless artwork (canvas or unframed print).";
     
-    // Build prompts for each room type
-    $prompts = [
-        'living_room' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic living room mockup that complements the artwork. {$dimensions} {$frameInfo} The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, a contemporary sofa whose upholstery reflects one of the accent colors from the artwork, curated decor such as a potted plant, coffee table edge, or throw blanket that echoes the palette. Keep lighting natural and directional to highlight the artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork exactly as provided and compose the room so all styling decisions feel intentionally inspired by the artwork.",
-        
-        'dining_room' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic dining room mockup that feels custom-designed around the artwork. {$dimensions} {$frameInfo} Compose the scene with a warm neutral wall tuned to complement the art, a natural wood dining table with at least four upholstered chairs whose fabrics pick up secondary colors from the artwork, and a contemporary pendant light or chandelier centered above the table. Style the tabletop with dinnerware or minimalist centerpieces that mirror the artwork's hues. Include glimpses of a sideboard or cabinet styled with accessories influenced by the art. Hang the artwork centered above the sideboard or table at proper height. Use soft ambient lighting with gentle shadows. The artwork itself must remain unchanged—only integrate it seamlessly into this tailored dining environment.",
-                
-        'office' => "Study the artwork's palette and atmosphere. Design a contemporary office mockup that integrates the piece as a focal point. {$dimensions} {$frameInfo} The scene should include light neutral walls whose undertone complements the artwork, a modern desk with technology (laptop, monitor) arranged neatly, and accessories such as notebooks, lamp, or plant whose colors and materials mirror elements from the artwork. Ensure the artwork is centered above the desk at an ergonomic viewing height with realistic shadowing. Preserve the artwork exactly—only style the office environment to look professionally curated around it with cohesive color accents and balanced lighting.",
-        
-        'bedroom' => "Evaluate the artwork's color story, mood, and texture. Create a photorealistic serene bedroom mockup inspired by these qualities. {$dimensions} {$frameInfo} Feature a softly toned wall that harmonizes with the art, an upholstered headboard or bed linens that pick up secondary colors from the piece, and a wooden nightstand with lighting that reinforces the artwork's ambiance (warm for cozy scenes, cooler for calm minimalism). Include decor elements—pillows, throws, plants—that subtly reference the artwork. Position the artwork centered above the headboard with realistic shadows. Keep the artwork untouched and ensure the entire bedroom styling feels intentionally derived from the artwork's design language."
-    ];
+    // Check if vertical orientation
+    $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
+    
+    // Build prompts for each room type - different prompts for vertical images
+    if ($isVertical) {
+        // Vertical-specific prompts with corridor/staircase/entryway themes
+        $prompts = [
+            'corridor' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic mockup featuring a modern corridor with clean lines and minimalistic decor, featuring a tall vertical painting on the wall. {$dimensions} {$frameInfo} The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, curated decor such as a potted plant or minimalist furniture that echoes the palette. Keep lighting natural and directional to highlight the vertical artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork exactly as provided and compose the corridor so all styling decisions feel intentionally inspired by the artwork.",
+            
+            'staircase' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic mockup featuring an elegant staircase area with warm lighting, showcasing a vertical painting that complements the ambiance. {$dimensions} {$frameInfo} Compose the scene with a warm neutral wall tuned to complement the art, elegant staircase with wooden or marble steps, and warm ambient lighting that highlights the vertical artwork. Include decorative elements such as plants or artwork accessories that mirror the artwork's hues. Hang the vertical artwork centered on the wall at proper height, taking advantage of the vertical space. Use soft ambient lighting with gentle shadows. The artwork itself must remain unchanged—only integrate it seamlessly into this tailored staircase environment.",
+            
+            'entryway' => "Study the artwork's palette and atmosphere. Design a contemporary mockup featuring a stylish entryway with high ceilings, where a vertical painting adds character to the space. {$dimensions} {$frameInfo} The scene should include light neutral walls whose undertone complements the artwork, a modern entryway with high ceilings, and accessories such as plants, lighting fixtures, or decorative elements whose colors and materials mirror elements from the artwork. Ensure the vertical artwork is centered on the wall at an ergonomic viewing height with realistic shadowing, taking advantage of the vertical space. Preserve the artwork exactly—only style the entryway environment to look professionally curated around it with cohesive color accents and balanced lighting."
+        ];
+    } else {
+        // Standard horizontal/landscape prompts
+        $prompts = [
+            'living_room' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic living room mockup that complements the artwork. {$dimensions} {$frameInfo} The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, a contemporary sofa whose upholstery reflects one of the accent colors from the artwork, curated decor such as a potted plant, coffee table edge, or throw blanket that echoes the palette. Keep lighting natural and directional to highlight the artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork exactly as provided and compose the room so all styling decisions feel intentionally inspired by the artwork.",
+            
+            'dining_room' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic dining room mockup that feels custom-designed around the artwork. {$dimensions} {$frameInfo} Compose the scene with a warm neutral wall tuned to complement the art, a natural wood dining table with at least four upholstered chairs whose fabrics pick up secondary colors from the artwork, and a contemporary pendant light or chandelier centered above the table. Style the tabletop with dinnerware or minimalist centerpieces that mirror the artwork's hues. Include glimpses of a sideboard or cabinet styled with accessories influenced by the art. Hang the artwork centered above the sideboard or table at proper height. Use soft ambient lighting with gentle shadows. The artwork itself must remain unchanged—only integrate it seamlessly into this tailored dining environment.",
+                    
+            'office' => "Study the artwork's palette and atmosphere. Design a contemporary office mockup that integrates the piece as a focal point. {$dimensions} {$frameInfo} The scene should include light neutral walls whose undertone complements the artwork, a modern desk with technology (laptop, monitor) arranged neatly, and accessories such as notebooks, lamp, or plant whose colors and materials mirror elements from the artwork. Ensure the artwork is centered above the desk at an ergonomic viewing height with realistic shadowing. Preserve the artwork exactly—only style the office environment to look professionally curated around it with cohesive color accents and balanced lighting.",
+            
+            'bedroom' => "Evaluate the artwork's color story, mood, and texture. Create a photorealistic serene bedroom mockup inspired by these qualities. {$dimensions} {$frameInfo} Feature a softly toned wall that harmonizes with the art, an upholstered headboard or bed linens that pick up secondary colors from the piece, and a wooden nightstand with lighting that reinforces the artwork's ambiance (warm for cozy scenes, cooler for calm minimalism). Include decor elements—pillows, throws, plants—that subtly reference the artwork. Position the artwork centered above the headboard with realistic shadows. Keep the artwork untouched and ensure the entire bedroom styling feels intentionally derived from the artwork's design language."
+        ];
+    }
     
     $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=" . $apiKey;
     
@@ -309,7 +435,9 @@ function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo
     $mockupData = [];
     
     foreach ($mockupTypes as $mockupType) {
-        $prompt = $prompts[$mockupType] ?? $prompts['living_room'];
+        // Get default prompt based on orientation
+        $defaultPrompt = $isVertical ? ($prompts['corridor'] ?? '') : ($prompts['living_room'] ?? '');
+        $prompt = $prompts[$mockupType] ?? $defaultPrompt;
         $outputPath = $TEMP_DIR . "mockup_{$productId}_{$mockupType}_" . time() . "_" . uniqid() . ".jpg";
         
         $requestBody = [
@@ -390,6 +518,24 @@ function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo
             }
         } else {
             logMessage("  ✗ {$mockupType} failed (HTTP {$httpCode})");
+            
+            // Log full response for debugging (especially for 429 rate limit errors)
+            if ($result) {
+                $errorResponse = json_decode($result, true);
+                if ($errorResponse) {
+                    logMessage("  ===== {$mockupType} Error Response =====");
+                    logMessage("  " . json_encode($errorResponse, JSON_PRETTY_PRINT));
+                    logMessage("  ===== END Error Response =====");
+                } else {
+                    logMessage("  Raw Response (first 500 chars): " . substr($result, 0, 500));
+                }
+            } else {
+                $curlError = curl_error($ch);
+                if ($curlError) {
+                    logMessage("  CURL Error: {$curlError}");
+                }
+            }
+            
             $results[] = ['type' => $mockupType, 'success' => false];
         }
         
@@ -425,18 +571,35 @@ function createMockupWithGeminiAPI($apiKey, $artworkPath, $mockupType, $outputPa
     $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
     $frameInfo = $isFramed ? "This artwork has a frame. Make sure the Same frame is visible in the mockup. and also remove the black croners from the frame. Also Check the orientation of the artwork is according to the correct viewing angle of the artwork." : "This is a frameless artwork (canvas or unframed print).";
     
-    // Build comprehensive prompt for each room type
-    $prompts = [
-        'living_room' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic living room mockup that complements the artwork. {$dimensions} {$frameInfo} The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, a contemporary sofa whose upholstery reflects one of the accent colors from the artwork, curated decor such as a potted plant, coffee table edge, or throw blanket that echoes the palette. Keep lighting natural and directional to highlight the artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork exactly as provided and compose the room so all styling decisions feel intentionally inspired by the artwork.",
-        
-        'dining_room' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic dining room mockup that feels custom-designed around the artwork. {$dimensions} {$frameInfo} Compose the scene with a warm neutral wall tuned to complement the art, a natural wood dining table with at least four upholstered chairs whose fabrics pick up secondary colors from the artwork, and a contemporary pendant light or chandelier centered above the table. Style the tabletop with dinnerware or minimalist centerpieces that mirror the artwork's hues. Include glimpses of a sideboard or cabinet styled with accessories influenced by the art. Hang the artwork centered above the sideboard or table at proper height. Use soft ambient lighting with gentle shadows. The artwork itself must remain unchanged—only integrate it seamlessly into this tailored dining environment.",
-        
-        'office' => "Study the artwork's palette and atmosphere. Design a contemporary office mockup that integrates the piece as a focal point. {$dimensions} {$frameInfo} The scene should include light neutral walls whose undertone complements the artwork, a modern desk with technology (laptop, monitor) arranged neatly, and accessories such as notebooks, lamp, or plant whose colors and materials mirror elements from the artwork. Ensure the artwork is centered above the desk at an ergonomic viewing height with realistic shadowing. Preserve the artwork exactly—only style the office environment to look professionally curated around it with cohesive color accents and balanced lighting.",
-        
-        'bedroom' => "Evaluate the artwork's color story, mood, and texture. Create a photorealistic serene bedroom mockup inspired by these qualities. {$dimensions} {$frameInfo} Feature a softly toned wall that harmonizes with the art, an upholstered headboard or bed linens that pick up secondary colors from the piece, and a wooden nightstand with lighting that reinforces the artwork's ambiance (warm for cozy scenes, cooler for calm minimalism). Include decor elements—pillows, throws, plants—that subtly reference the artwork. Position the artwork centered above the headboard with realistic shadows. Keep the artwork untouched and ensure the entire bedroom styling feels intentionally derived from the artwork's design language."
-    ];
+    // Check if vertical orientation
+    $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
     
-    $prompt = $prompts[$mockupType] ?? $prompts['living_room'];
+    // Build comprehensive prompt for each room type - different prompts for vertical images
+    if ($isVertical) {
+        // Vertical-specific prompts with corridor/staircase/entryway themes
+        $prompts = [
+            'corridor' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic mockup featuring a modern corridor with clean lines and minimalistic decor, featuring a tall vertical painting on the wall. {$dimensions} {$frameInfo} The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, curated decor such as a potted plant or minimalist furniture that echoes the palette. Keep lighting natural and directional to highlight the vertical artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork exactly as provided and compose the corridor so all styling decisions feel intentionally inspired by the artwork.",
+            
+            'staircase' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic mockup featuring an elegant staircase area with warm lighting, showcasing a vertical painting that complements the ambiance. {$dimensions} {$frameInfo} Compose the scene with a warm neutral wall tuned to complement the art, elegant staircase with wooden or marble steps, and warm ambient lighting that highlights the vertical artwork. Include decorative elements such as plants or artwork accessories that mirror the artwork's hues. Hang the vertical artwork centered on the wall at proper height, taking advantage of the vertical space. Use soft ambient lighting with gentle shadows. The artwork itself must remain unchanged—only integrate it seamlessly into this tailored staircase environment.",
+            
+            'entryway' => "Study the artwork's palette and atmosphere. Design a contemporary mockup featuring a stylish entryway with high ceilings, where a vertical painting adds character to the space. {$dimensions} {$frameInfo} The scene should include light neutral walls whose undertone complements the artwork, a modern entryway with high ceilings, and accessories such as plants, lighting fixtures, or decorative elements whose colors and materials mirror elements from the artwork. Ensure the vertical artwork is centered on the wall at an ergonomic viewing height with realistic shadowing, taking advantage of the vertical space. Preserve the artwork exactly—only style the entryway environment to look professionally curated around it with cohesive color accents and balanced lighting."
+        ];
+    } else {
+        // Standard horizontal/landscape prompts
+        $prompts = [
+            'living_room' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic living room mockup that complements the artwork. {$dimensions} {$frameInfo} The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, a contemporary sofa whose upholstery reflects one of the accent colors from the artwork, curated decor such as a potted plant, coffee table edge, or throw blanket that echoes the palette. Keep lighting natural and directional to highlight the artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork exactly as provided and compose the room so all styling decisions feel intentionally inspired by the artwork.",
+            
+            'dining_room' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic dining room mockup that feels custom-designed around the artwork. {$dimensions} {$frameInfo} Compose the scene with a warm neutral wall tuned to complement the art, a natural wood dining table with at least four upholstered chairs whose fabrics pick up secondary colors from the artwork, and a contemporary pendant light or chandelier centered above the table. Style the tabletop with dinnerware or minimalist centerpieces that mirror the artwork's hues. Include glimpses of a sideboard or cabinet styled with accessories influenced by the art. Hang the artwork centered above the sideboard or table at proper height. Use soft ambient lighting with gentle shadows. The artwork itself must remain unchanged—only integrate it seamlessly into this tailored dining environment.",
+            
+            'office' => "Study the artwork's palette and atmosphere. Design a contemporary office mockup that integrates the piece as a focal point. {$dimensions} {$frameInfo} The scene should include light neutral walls whose undertone complements the artwork, a modern desk with technology (laptop, monitor) arranged neatly, and accessories such as notebooks, lamp, or plant whose colors and materials mirror elements from the artwork. Ensure the artwork is centered above the desk at an ergonomic viewing height with realistic shadowing. Preserve the artwork exactly—only style the office environment to look professionally curated around it with cohesive color accents and balanced lighting.",
+            
+            'bedroom' => "Evaluate the artwork's color story, mood, and texture. Create a photorealistic serene bedroom mockup inspired by these qualities. {$dimensions} {$frameInfo} Feature a softly toned wall that harmonizes with the art, an upholstered headboard or bed linens that pick up secondary colors from the piece, and a wooden nightstand with lighting that reinforces the artwork's ambiance (warm for cozy scenes, cooler for calm minimalism). Include decor elements—pillows, throws, plants—that subtly reference the artwork. Position the artwork centered above the headboard with realistic shadows. Keep the artwork untouched and ensure the entire bedroom styling feels intentionally derived from the artwork's design language."
+        ];
+    }
+    
+    // Get default prompt based on orientation
+    $defaultPrompt = $isVertical ? ($prompts['corridor'] ?? '') : ($prompts['living_room'] ?? '');
+    $prompt = $prompts[$mockupType] ?? $defaultPrompt;
     
     // Call Gemini Image Generation API (using image generation model)
     // Note: Use gemini-2.5-flash-image for image generation capabilities
@@ -527,7 +690,10 @@ function uploadImageToProduct($productId, $imagePath, $mockupType, $productInfo,
         'living_room' => 'Living Room Setting',
         'dining_room' => 'Dining Room Setting',
         'office' => 'Office Environment',
-        'bedroom' => 'Bedroom Decor'
+        'bedroom' => 'Bedroom Decor',
+        'corridor' => 'Modern Corridor Setting',
+        'staircase' => 'Elegant Staircase Setting',
+        'entryway' => 'Stylish Entryway Setting'
     ];
     
     $mockupDesc = $mockupDescriptions[$mockupType] ?? 'Room Mockup';
@@ -737,15 +903,24 @@ logMessage("  - Dimensions: " . ($productInfo['width'] ? "{$productInfo['width']
 logMessage("  - Framed: " . ($productInfo['is_framed'] == 1 ? "Yes" : "No"));
 logMessage("  - AI Description: " . substr($productInfo['description'] ?? 'N/A', 0, 100) . "...");
 logMessage("  - Suitable For: {$productInfo['suitable_for']}");
+logMessage("  - Orientation: " . ($productInfo['orientation'] ?? 'Not specified'));
 logMessage("");
 
-// Always generate all standard mockup types (gallery mockups removed)
-$mockupTypes = ['living_room', 'dining_room', 'office', 'bedroom'];
+// Determine mockup types based on orientation
+$isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
+if ($isVertical) {
+    $mockupTypes = ['corridor', 'staircase', 'entryway'];
+    logMessage("Vertical artwork detected - generating vertical-specific mockups");
+} else {
+    $mockupTypes = ['living_room', 'dining_room', 'office', 'bedroom'];
+    logMessage("Horizontal/landscape artwork - generating standard room mockups");
+}
 logMessage("Generating mockup types: " . implode(', ', $mockupTypes));
 logMessage("");
 
 // Step 5: Generate mockup images (ALL IN PARALLEL!)
-logMessage("Generating all 4 mockup images in parallel...");
+$mockupCount = count($mockupTypes);
+logMessage("Generating all {$mockupCount} mockup images in parallel...");
 $startTime = time();
 
 $results = createMockupsParallel($GEMINI_API_KEY, $originalImagePath, $mockupTypes, $productInfo, $product['id'], $optimizedArtworkData);

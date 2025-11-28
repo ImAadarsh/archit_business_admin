@@ -1,0 +1,1020 @@
+[2025-11-28 05:21:24] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:21:24] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:21:24] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:21:24] 
+[2025-11-28 05:21:24] No unprocessed products found.
+[2025-11-28 05:21:55] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:21:55] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:21:55] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:21:55] 
+[2025-11-28 05:21:55] No unprocessed products found.
+[2025-11-28 05:21:57] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:21:57] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:21:57] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:21:57] 
+[2025-11-28 05:21:57] No unprocessed products found.
+[2025-11-28 05:21:58] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:21:58] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:21:58] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:21:58] 
+[2025-11-28 05:21:58] No unprocessed products found.
+[2025-11-28 05:22:20] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:22:20] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:22:20] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:22:20] 
+[2025-11-28 05:22:20] Processing Product ID: 534
+[2025-11-28 05:22:20] Product Name: Abstract
+[2025-11-28 05:22:20] Description: N/A
+[2025-11-28 05:22:20] 
+[2025-11-28 05:22:20] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:22:20] 
+[2025-11-28 05:22:20] Downloading artwork...
+[2025-11-28 05:22:20]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:22:20]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:22:21]   Downloaded 3581316 bytes
+[2025-11-28 05:22:21]   Successfully wrote 3581316 bytes to file
+[2025-11-28 05:22:21] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:22:21] 
+[2025-11-28 05:22:21] Optimizing artwork for AI payload...
+[2025-11-28 05:22:21] Artwork optimized (max dimension 1024px) for AI requests.
+[2025-11-28 05:22:21] 
+[2025-11-28 05:22:21] Generating AI-based product name and description...
+[2025-11-28 05:22:23]   WARNING: Could not generate AI product name and description (HTTP 404)
+[2025-11-28 05:22:23]   API Error: {
+    "error": {
+        "code": 404,
+        "message": "models\/gemini-1.5-flash-8b is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+        "status": "NOT_FOUND"
+    }
+}
+[2025-11-28 05:22:23] ⚠ Using original product data
+[2025-11-28 05:22:23] 
+[2025-11-28 05:22:23] Product Info:
+[2025-11-28 05:22:23]   - AI Generated Name: Abstract
+[2025-11-28 05:22:23]   - Original Name: Abstract
+[2025-11-28 05:22:23]   - Dimensions: 45.00 x 45.00
+[2025-11-28 05:22:23]   - Framed: Yes
+[2025-11-28 05:22:23]   - AI Description: ...
+[2025-11-28 05:22:23]   - Suitable For: home, office, dining, bedroom
+[2025-11-28 05:22:23] 
+[2025-11-28 05:22:23] Generating mockup types: living_room, dining_room, office, bedroom
+[2025-11-28 05:22:23] 
+[2025-11-28 05:22:23] Generating all 4 mockup images in parallel...
+[2025-11-28 05:22:24]   ✗ living_room failed (HTTP 429)
+[2025-11-28 05:22:24]   ✗ dining_room failed (HTTP 429)
+[2025-11-28 05:22:24]   ✗ office failed (HTTP 429)
+[2025-11-28 05:22:24]   ✗ bedroom failed (HTTP 429)
+[2025-11-28 05:22:24] 
+[2025-11-28 05:22:24] ✓ All mockups generated in 1 seconds!
+[2025-11-28 05:22:24] 
+[2025-11-28 05:22:24] Total mockups generated: 0
+[2025-11-28 05:22:24] 
+[2025-11-28 05:22:24] No mockups were generated to upload.
+[2025-11-28 05:22:24] 
+[2025-11-28 05:22:24] Marking product as processed...
+[2025-11-28 05:22:25] ✓ Product marked as processed successfully!
+[2025-11-28 05:22:25] 
+[2025-11-28 05:22:25] === Processing Complete ===
+[2025-11-28 05:22:25] Product ID: 534
+[2025-11-28 05:22:25] Product Name: Abstract
+[2025-11-28 05:22:25] Mockups Generated: 0
+[2025-11-28 05:22:25] Mockups Uploaded: 0
+[2025-11-28 05:22:25] Status: Marked as processed
+[2025-11-28 05:22:25] 
+[2025-11-28 05:22:25] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:25:34] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:25:34] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:25:34] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:25:34] 
+[2025-11-28 05:25:34] No unprocessed products found.
+[2025-11-28 05:25:45] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:25:45] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:25:45] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:25:45] 
+[2025-11-28 05:25:45] Processing Product ID: 534
+[2025-11-28 05:25:45] Product Name: Abstract
+[2025-11-28 05:25:45] Description: N/A
+[2025-11-28 05:25:45] 
+[2025-11-28 05:25:45] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:25:45] 
+[2025-11-28 05:25:45] Downloading artwork...
+[2025-11-28 05:25:45]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:25:45]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:25:46]   Downloaded 3581316 bytes
+[2025-11-28 05:25:46]   Successfully wrote 3581316 bytes to file
+[2025-11-28 05:25:46] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:25:46] 
+[2025-11-28 05:25:46] Optimizing artwork for AI payload...
+[2025-11-28 05:25:46] Artwork optimized (max dimension 1024px) for AI requests.
+[2025-11-28 05:25:46] 
+[2025-11-28 05:25:46] Generating AI-based product name and description...
+[2025-11-28 05:25:49]   ===== DEBUG: AI Generated Response =====
+[2025-11-28 05:25:49] NAME: Landscape Painting with Silver
+DESCRIPTION: A framed impressionistic painting of a landscape with a body of water, trees, and possibly figures.
+• Silver foil background for a reflective effect.
+• Framed in a sleek black frame.
+• Adds a touch of nature and serenity.
+[2025-11-28 05:25:49]   ===== END DEBUG =====
+[2025-11-28 05:25:49]   DEBUG: Extracted Name: Landscape Painting with Silver
+[2025-11-28 05:25:49]   DEBUG: Extracted Description: A framed impressionistic painting of a landscape with a body of water, trees, and possibly figures.
+...
+[2025-11-28 05:25:49] ✓ AI Product Name Generated: Landscape Painting with Silver
+[2025-11-28 05:25:49] ✓ AI Product Description Generated:
+[2025-11-28 05:25:49]    A framed impressionistic painting of a landscape with a body of water, trees, and possibly figures.
+[2025-11-28 05:25:49]    • Silver foil background for a reflective effect.
+[2025-11-28 05:25:49]    • Framed in a sleek black frame.
+[2025-11-28 05:25:49]    • Adds a touch of nature and serenity.
+[2025-11-28 05:25:49] 
+[2025-11-28 05:25:49] Product Info:
+[2025-11-28 05:25:49]   - AI Generated Name: Landscape Painting with Silver
+[2025-11-28 05:25:49]   - Original Name: Abstract
+[2025-11-28 05:25:49]   - Dimensions: 45.00 x 45.00
+[2025-11-28 05:25:49]   - Framed: Yes
+[2025-11-28 05:25:49]   - AI Description: A framed impressionistic painting of a landscape with a body of water, trees, and possibly figures.
+...
+[2025-11-28 05:25:49]   - Suitable For: home, office, dining, bedroom
+[2025-11-28 05:25:49] 
+[2025-11-28 05:25:49] Generating mockup types: living_room, dining_room, office, bedroom
+[2025-11-28 05:25:49] 
+[2025-11-28 05:25:49] Generating all 4 mockup images in parallel...
+[2025-11-28 05:25:51]   ✗ living_room failed (HTTP 429)
+[2025-11-28 05:25:51]   ✗ dining_room failed (HTTP 429)
+[2025-11-28 05:25:51]   ✗ office failed (HTTP 429)
+[2025-11-28 05:25:51]   ✗ bedroom failed (HTTP 429)
+[2025-11-28 05:25:51] 
+[2025-11-28 05:25:51] ✓ All mockups generated in 2 seconds!
+[2025-11-28 05:25:51] 
+[2025-11-28 05:25:51] Total mockups generated: 0
+[2025-11-28 05:25:51] 
+[2025-11-28 05:25:51] No mockups were generated to upload.
+[2025-11-28 05:25:51] 
+[2025-11-28 05:25:51] Marking product as processed...
+[2025-11-28 05:25:51] ✓ Product marked as processed successfully!
+[2025-11-28 05:25:51] 
+[2025-11-28 05:25:51] === Processing Complete ===
+[2025-11-28 05:25:51] Product ID: 534
+[2025-11-28 05:25:51] Product Name: Abstract
+[2025-11-28 05:25:51] Mockups Generated: 0
+[2025-11-28 05:25:51] Mockups Uploaded: 0
+[2025-11-28 05:25:51] Status: Marked as processed
+[2025-11-28 05:25:51] 
+[2025-11-28 05:25:51] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:27:07] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:27:07] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:27:07] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:27:07] 
+[2025-11-28 05:27:07] No unprocessed products found.
+[2025-11-28 05:27:19] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:27:19] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:27:19] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:27:19] 
+[2025-11-28 05:27:19] Processing Product ID: 534
+[2025-11-28 05:27:19] Product Name: Abstract
+[2025-11-28 05:27:19] Description: N/A
+[2025-11-28 05:27:19] 
+[2025-11-28 05:27:19] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:27:19] 
+[2025-11-28 05:27:19] Downloading artwork...
+[2025-11-28 05:27:19]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:27:19]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:27:20]   Downloaded 3581316 bytes
+[2025-11-28 05:27:20]   Successfully wrote 3581316 bytes to file
+[2025-11-28 05:27:20] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:27:20] 
+[2025-11-28 05:27:20] Optimizing artwork for AI payload...
+[2025-11-28 05:27:20] Artwork optimized (max dimension 1024px) for AI requests.
+[2025-11-28 05:27:20] 
+[2025-11-28 05:27:20] Generating AI-based product name and description...
+[2025-11-28 05:27:23]   ===== DEBUG: AI Generated Response =====
+[2025-11-28 05:27:23] NAME: Lakeside Landscape Painting
+
+DESCRIPTION: This framed artwork depicts a tranquil lakeside scene with impressionistic brushstrokes and soft colors.
+• Features a serene landscape with trees and water.
+• Comes in a black frame, ready to hang.
+• Adds a touch of nature-inspired beauty to any room.
+[2025-11-28 05:27:23]   ===== END DEBUG =====
+[2025-11-28 05:27:23]   DEBUG: Extracted Name: Lakeside Landscape Painting
+[2025-11-28 05:27:23]   DEBUG: Extracted Description: This framed artwork depicts a tranquil lakeside scene with impressionistic brushstrokes and soft col...
+[2025-11-28 05:27:23] ✓ AI Product Name Generated: Lakeside Landscape Painting
+[2025-11-28 05:27:23] ✓ AI Product Description Generated:
+[2025-11-28 05:27:23]    This framed artwork depicts a tranquil lakeside scene with impressionistic brushstrokes and soft colors.
+[2025-11-28 05:27:23]    • Features a serene landscape with trees and water.
+[2025-11-28 05:27:23]    • Comes in a black frame, ready to hang.
+[2025-11-28 05:27:23]    • Adds a touch of nature-inspired beauty to any room.
+[2025-11-28 05:27:23] 
+[2025-11-28 05:27:23] Product Info:
+[2025-11-28 05:27:23]   - AI Generated Name: Lakeside Landscape Painting
+[2025-11-28 05:27:23]   - Original Name: Abstract
+[2025-11-28 05:27:23]   - Dimensions: 45.00 x 45.00
+[2025-11-28 05:27:23]   - Framed: Yes
+[2025-11-28 05:27:23]   - AI Description: This framed artwork depicts a tranquil lakeside scene with impressionistic brushstrokes and soft col...
+[2025-11-28 05:27:23]   - Suitable For: home, office, dining, bedroom
+[2025-11-28 05:27:23] 
+[2025-11-28 05:27:23] Generating mockup types: living_room, dining_room, office, bedroom
+[2025-11-28 05:27:23] 
+[2025-11-28 05:27:23] Generating all 4 mockup images in parallel...
+[2025-11-28 05:27:24]   ✗ living_room failed (HTTP 429)
+[2025-11-28 05:27:24]   ===== living_room Error Response =====
+[2025-11-28 05:27:24]   {
+    "error": {
+        "code": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\nPlease retry in 35.173644784s.",
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+            {
+                "@type": "type.googleapis.com\/google.rpc.Help",
+                "links": [
+                    {
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                "violations": [
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                            "model": "gemini-2.5-flash-preview-image",
+                            "location": "global"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "model": "gemini-2.5-flash-preview-image",
+                            "location": "global"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                "retryDelay": "35s"
+            }
+        ]
+    }
+}
+[2025-11-28 05:27:24]   ===== END Error Response =====
+[2025-11-28 05:27:24]   ✗ dining_room failed (HTTP 429)
+[2025-11-28 05:27:24]   ===== dining_room Error Response =====
+[2025-11-28 05:27:24]   {
+    "error": {
+        "code": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\nPlease retry in 35.159014756s.",
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+            {
+                "@type": "type.googleapis.com\/google.rpc.Help",
+                "links": [
+                    {
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                "violations": [
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "model": "gemini-2.5-flash-preview-image",
+                            "location": "global"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                "retryDelay": "35s"
+            }
+        ]
+    }
+}
+[2025-11-28 05:27:24]   ===== END Error Response =====
+[2025-11-28 05:27:24]   ✗ office failed (HTTP 429)
+[2025-11-28 05:27:24]   ===== office Error Response =====
+[2025-11-28 05:27:24]   {
+    "error": {
+        "code": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.5-flash-preview-image\nPlease retry in 35.176249456s.",
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+            {
+                "@type": "type.googleapis.com\/google.rpc.Help",
+                "links": [
+                    {
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                "violations": [
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "model": "gemini-2.5-flash-preview-image",
+                            "location": "global"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                            "model": "gemini-2.5-flash-preview-image",
+                            "location": "global"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                "retryDelay": "35s"
+            }
+        ]
+    }
+}
+[2025-11-28 05:27:24]   ===== END Error Response =====
+[2025-11-28 05:27:24]   ✗ bedroom failed (HTTP 429)
+[2025-11-28 05:27:24]   ===== bedroom Error Response =====
+[2025-11-28 05:27:24]   {
+    "error": {
+        "code": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.5-flash-preview-image\nPlease retry in 35.179841704s.",
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+            {
+                "@type": "type.googleapis.com\/google.rpc.Help",
+                "links": [
+                    {
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                "violations": [
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                "retryDelay": "35s"
+            }
+        ]
+    }
+}
+[2025-11-28 05:27:24]   ===== END Error Response =====
+[2025-11-28 05:27:24] 
+[2025-11-28 05:27:24] ✓ All mockups generated in 1 seconds!
+[2025-11-28 05:27:24] 
+[2025-11-28 05:27:24] Total mockups generated: 0
+[2025-11-28 05:27:24] 
+[2025-11-28 05:27:24] No mockups were generated to upload.
+[2025-11-28 05:27:24] 
+[2025-11-28 05:27:24] Marking product as processed...
+[2025-11-28 05:27:25] ✓ Product marked as processed successfully!
+[2025-11-28 05:27:25] 
+[2025-11-28 05:27:25] === Processing Complete ===
+[2025-11-28 05:27:25] Product ID: 534
+[2025-11-28 05:27:25] Product Name: Abstract
+[2025-11-28 05:27:25] Mockups Generated: 0
+[2025-11-28 05:27:25] Mockups Uploaded: 0
+[2025-11-28 05:27:25] Status: Marked as processed
+[2025-11-28 05:27:25] 
+[2025-11-28 05:27:25] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:40:58] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:40:58] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:40:58] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:40:58] 
+[2025-11-28 05:40:58] Processing Product ID: 534
+[2025-11-28 05:40:58] Product Name: Abstract
+[2025-11-28 05:40:58] Description: N/A
+[2025-11-28 05:40:58] 
+[2025-11-28 05:40:58] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:40:58] 
+[2025-11-28 05:40:58] Downloading artwork...
+[2025-11-28 05:40:58]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:40:58]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:40:59]   Downloaded 3581316 bytes
+[2025-11-28 05:40:59]   Successfully wrote 3581316 bytes to file
+[2025-11-28 05:40:59] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:40:59] 
+[2025-11-28 05:40:59] Optimizing artwork for AI payload...
+[2025-11-28 05:41:00] Artwork optimized (max dimension 1024px) for AI requests.
+[2025-11-28 05:41:00] 
+[2025-11-28 05:41:00] Generating AI-based product name and description...
+[2025-11-28 05:41:02]   ===== DEBUG: AI Generated Response =====
+[2025-11-28 05:41:02] NAME: Landscape Oil Painting Art
+DESCRIPTION: An impressionistic landscape painting with muted colors and visible brushstrokes, showing trees and water.
+• Captures a serene, natural scene.
+• Features a unique and textured oil painting style.
+• Comes framed and ready to hang.
+[2025-11-28 05:41:02]   ===== END DEBUG =====
+[2025-11-28 05:41:02]   DEBUG: Extracted Name: Landscape Oil Painting Art
+[2025-11-28 05:41:02]   DEBUG: Extracted Description: An impressionistic landscape painting with muted colors and visible brushstrokes, showing trees and ...
+[2025-11-28 05:41:02] ✓ AI Product Name Generated: Landscape Oil Painting Art
+[2025-11-28 05:41:02] ✓ AI Product Description Generated:
+[2025-11-28 05:41:02]    An impressionistic landscape painting with muted colors and visible brushstrokes, showing trees and water.
+[2025-11-28 05:41:02]    • Captures a serene, natural scene.
+[2025-11-28 05:41:02]    • Features a unique and textured oil painting style.
+[2025-11-28 05:41:02]    • Comes framed and ready to hang.
+[2025-11-28 05:41:02] 
+[2025-11-28 05:41:02] Product Info:
+[2025-11-28 05:41:02]   - AI Generated Name: Landscape Oil Painting Art
+[2025-11-28 05:41:02]   - Original Name: Abstract
+[2025-11-28 05:41:02]   - Dimensions: 45.00 x 45.00
+[2025-11-28 05:41:02]   - Framed: Yes
+[2025-11-28 05:41:02]   - AI Description: An impressionistic landscape painting with muted colors and visible brushstrokes, showing trees and ...
+[2025-11-28 05:41:02]   - Suitable For: home, office, dining, bedroom
+[2025-11-28 05:41:02] 
+[2025-11-28 05:41:02] Generating mockup types: living_room, dining_room, office, bedroom
+[2025-11-28 05:41:02] 
+[2025-11-28 05:41:02] Generating all 4 mockup images in parallel...
+[2025-11-28 05:41:04]   ✗ living_room failed (HTTP 429)
+[2025-11-28 05:41:04]   ===== living_room Error Response =====
+[2025-11-28 05:41:04]   {
+    "error": {
+        "code": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.5-flash-preview-image\nPlease retry in 55.689144268s.",
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+            {
+                "@type": "type.googleapis.com\/google.rpc.Help",
+                "links": [
+                    {
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                "violations": [
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                "retryDelay": "55s"
+            }
+        ]
+    }
+}
+[2025-11-28 05:41:04]   ===== END Error Response =====
+[2025-11-28 05:41:04]   ✗ dining_room failed (HTTP 429)
+[2025-11-28 05:41:04]   ===== dining_room Error Response =====
+[2025-11-28 05:41:04]   {
+    "error": {
+        "code": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.5-flash-preview-image\nPlease retry in 55.690171049s.",
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+            {
+                "@type": "type.googleapis.com\/google.rpc.Help",
+                "links": [
+                    {
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                "violations": [
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "model": "gemini-2.5-flash-preview-image",
+                            "location": "global"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "model": "gemini-2.5-flash-preview-image",
+                            "location": "global"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                "retryDelay": "55s"
+            }
+        ]
+    }
+}
+[2025-11-28 05:41:04]   ===== END Error Response =====
+[2025-11-28 05:41:04]   ✗ office failed (HTTP 429)
+[2025-11-28 05:41:04]   ===== office Error Response =====
+[2025-11-28 05:41:04]   {
+    "error": {
+        "code": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.5-flash-preview-image\nPlease retry in 55.684311447s.",
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+            {
+                "@type": "type.googleapis.com\/google.rpc.Help",
+                "links": [
+                    {
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                "violations": [
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                "retryDelay": "55s"
+            }
+        ]
+    }
+}
+[2025-11-28 05:41:04]   ===== END Error Response =====
+[2025-11-28 05:41:04]   ✗ bedroom failed (HTTP 429)
+[2025-11-28 05:41:04]   ===== bedroom Error Response =====
+[2025-11-28 05:41:04]   {
+    "error": {
+        "code": 429,
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits. To monitor your current usage, head to: https:\/\/ai.dev\/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_requests, limit: 0, model: gemini-2.5-flash-preview-image\n* Quota exceeded for metric: generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.5-flash-preview-image\nPlease retry in 55.693411342s.",
+        "status": "RESOURCE_EXHAUSTED",
+        "details": [
+            {
+                "@type": "type.googleapis.com\/google.rpc.Help",
+                "links": [
+                    {
+                        "description": "Learn more about Gemini API quotas",
+                        "url": "https:\/\/ai.google.dev\/gemini-api\/docs\/rate-limits"
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.QuotaFailure",
+                "violations": [
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_requests",
+                        "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+                        "quotaDimensions": {
+                            "location": "global",
+                            "model": "gemini-2.5-flash-preview-image"
+                        }
+                    },
+                    {
+                        "quotaMetric": "generativelanguage.googleapis.com\/generate_content_free_tier_input_token_count",
+                        "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+                        "quotaDimensions": {
+                            "model": "gemini-2.5-flash-preview-image",
+                            "location": "global"
+                        }
+                    }
+                ]
+            },
+            {
+                "@type": "type.googleapis.com\/google.rpc.RetryInfo",
+                "retryDelay": "55s"
+            }
+        ]
+    }
+}
+[2025-11-28 05:41:04]   ===== END Error Response =====
+[2025-11-28 05:41:04] 
+[2025-11-28 05:41:04] ✓ All mockups generated in 2 seconds!
+[2025-11-28 05:41:04] 
+[2025-11-28 05:41:04] Total mockups generated: 0
+[2025-11-28 05:41:04] 
+[2025-11-28 05:41:04] No mockups were generated to upload.
+[2025-11-28 05:41:04] 
+[2025-11-28 05:41:04] Marking product as processed...
+[2025-11-28 05:41:04] ✓ Product marked as processed successfully!
+[2025-11-28 05:41:04] 
+[2025-11-28 05:41:04] === Processing Complete ===
+[2025-11-28 05:41:04] Product ID: 534
+[2025-11-28 05:41:04] Product Name: Abstract
+[2025-11-28 05:41:04] Mockups Generated: 0
+[2025-11-28 05:41:04] Mockups Uploaded: 0
+[2025-11-28 05:41:04] Status: Marked as processed
+[2025-11-28 05:41:04] 
+[2025-11-28 05:41:04] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:41:53] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:41:53] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:41:53] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:41:53] 
+[2025-11-28 05:41:53] Processing Product ID: 534
+[2025-11-28 05:41:53] Product Name: Abstract
+[2025-11-28 05:41:53] Description: N/A
+[2025-11-28 05:41:53] 
+[2025-11-28 05:41:53] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:41:53] 
+[2025-11-28 05:41:53] Downloading artwork...
+[2025-11-28 05:41:53]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_534_1763712097_69201c61d4a1f.jpg
+[2025-11-28 05:41:53]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:41:54]   Downloaded 3581316 bytes
+[2025-11-28 05:41:54]   Successfully wrote 3581316 bytes to file
+[2025-11-28 05:41:54] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_534.jpg
+[2025-11-28 05:41:54] 
+[2025-11-28 05:41:54] Optimizing artwork for AI payload...
+[2025-11-28 05:41:54] Artwork optimized (max dimension 1024px) for AI requests.
+[2025-11-28 05:41:54] 
+[2025-11-28 05:41:54] Generating AI-based product name and description...
+[2025-11-28 05:41:57]   ===== DEBUG: AI Generated Response =====
+[2025-11-28 05:41:57] NAME: Impressionist Landscape Painting Print
+DESCRIPTION: A framed impressionist-style landscape painting, depicting a waterside scene with trees, fields, and figures.
+• Soft color palette and textured brushstrokes.
+• High-quality print in a black frame.
+• Adds a touch of natural beauty to any room.
+[2025-11-28 05:41:57]   ===== END DEBUG =====
+[2025-11-28 05:41:57]   DEBUG: Extracted Name: Impressionist Landscape Painting Print
+[2025-11-28 05:41:57]   DEBUG: Extracted Description: A framed impressionist-style landscape painting, depicting a waterside scene with trees, fields, and...
+[2025-11-28 05:41:57] ✓ AI Product Name Generated: Impressionist Landscape Painting Print
+[2025-11-28 05:41:57] ✓ AI Product Description Generated:
+[2025-11-28 05:41:57]    A framed impressionist-style landscape painting, depicting a waterside scene with trees, fields, and figures.
+[2025-11-28 05:41:57]    • Soft color palette and textured brushstrokes.
+[2025-11-28 05:41:57]    • High-quality print in a black frame.
+[2025-11-28 05:41:57]    • Adds a touch of natural beauty to any room.
+[2025-11-28 05:41:57] 
+[2025-11-28 05:41:57] Product Info:
+[2025-11-28 05:41:57]   - AI Generated Name: Impressionist Landscape Painting Print
+[2025-11-28 05:41:57]   - Original Name: Abstract
+[2025-11-28 05:41:57]   - Dimensions: 45.00 x 45.00
+[2025-11-28 05:41:57]   - Framed: Yes
+[2025-11-28 05:41:57]   - AI Description: A framed impressionist-style landscape painting, depicting a waterside scene with trees, fields, and...
+[2025-11-28 05:41:57]   - Suitable For: home, office, dining, bedroom
+[2025-11-28 05:41:57] 
+[2025-11-28 05:41:57] Generating mockup types: living_room, dining_room, office, bedroom
+[2025-11-28 05:41:57] 
+[2025-11-28 05:41:57] Generating all 4 mockup images in parallel...
+[2025-11-28 05:42:11]   ✓ living_room mockup generated successfully
+[2025-11-28 05:42:11]   ✓ dining_room mockup generated successfully
+[2025-11-28 05:42:11]   ✓ office mockup generated successfully
+[2025-11-28 05:42:11]   ✓ bedroom mockup generated successfully
+[2025-11-28 05:42:11] 
+[2025-11-28 05:42:11] ✓ All mockups generated in 14 seconds!
+[2025-11-28 05:42:11] 
+[2025-11-28 05:42:11] Total mockups generated: 4
+[2025-11-28 05:42:11] 
+[2025-11-28 05:42:11] Uploading mockups to product with metadata...
+[2025-11-28 05:42:11] Product Name: Impressionist Landscape Painting Print
+[2025-11-28 05:42:11] Description: A framed impressionist-style landscape painting, d...
+[2025-11-28 05:42:11] Suitable For: home, office, dining, bedroom
+[2025-11-28 05:42:11] 
+[2025-11-28 05:42:11] Uploading living_room mockup...
+[2025-11-28 05:42:12]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":534,"image":"public\/product_images\/product_534_1764304932_6929282420c5d.jpg","is_mockup":1,"mockup_description":"Livin
+[2025-11-28 05:42:12]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 05:42:12]   → Metadata: Living Room Setting | Impressionist Landscape Painting Print
+[2025-11-28 05:42:12]   ✓ Upload successful!
+[2025-11-28 05:42:12] Uploading dining_room mockup...
+[2025-11-28 05:42:13]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":534,"image":"public\/product_images\/product_534_1764304932_69292824ec953.jpg","is_mockup":1,"mockup_description":"Dinin
+[2025-11-28 05:42:13]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 05:42:13]   → Metadata: Dining Room Setting | Impressionist Landscape Painting Print
+[2025-11-28 05:42:13]   ✓ Upload successful!
+[2025-11-28 05:42:13] Uploading office mockup...
+[2025-11-28 05:42:13]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":534,"image":"public\/product_images\/product_534_1764304933_692928259e18e.jpg","is_mockup":1,"mockup_description":"Offic
+[2025-11-28 05:42:13]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 05:42:13]   → Metadata: Office Environment | Impressionist Landscape Painting Print
+[2025-11-28 05:42:13]   ✓ Upload successful!
+[2025-11-28 05:42:13] Uploading bedroom mockup...
+[2025-11-28 05:42:14]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":534,"image":"public\/product_images\/product_534_1764304934_6929282642654.jpg","is_mockup":1,"mockup_description":"Bedro
+[2025-11-28 05:42:14]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 05:42:14]   → Metadata: Bedroom Decor | Impressionist Landscape Painting Print
+[2025-11-28 05:42:14]   ✓ Upload successful!
+[2025-11-28 05:42:14] 
+[2025-11-28 05:42:14] Successfully uploaded 4 out of 4 mockups
+[2025-11-28 05:42:14] Metadata log saved to: mockup_metadata_log.json
+[2025-11-28 05:42:14] 
+[2025-11-28 05:42:14] Marking product as processed...
+[2025-11-28 05:42:14] ✓ Product marked as processed successfully!
+[2025-11-28 05:42:14] 
+[2025-11-28 05:42:14] === Processing Complete ===
+[2025-11-28 05:42:14] Product ID: 534
+[2025-11-28 05:42:14] Product Name: Abstract
+[2025-11-28 05:42:14] Mockups Generated: 4
+[2025-11-28 05:42:14] Mockups Uploaded: 4
+[2025-11-28 05:42:14] Status: Marked as processed
+[2025-11-28 05:42:14] 
+[2025-11-28 05:42:14] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:43:29] === Product Mockup Generator V2 Started ===
+[2025-11-28 05:43:29] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 05:43:29] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 05:43:29] 
+[2025-11-28 05:43:29] Processing Product ID: 533
+[2025-11-28 05:43:29] Product Name: Devotional
+[2025-11-28 05:43:29] Description: N/A
+[2025-11-28 05:43:29] 
+[2025-11-28 05:43:30] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_533_1763711808_69201b404ec6a.jpg
+[2025-11-28 05:43:30] 
+[2025-11-28 05:43:30] Downloading artwork...
+[2025-11-28 05:43:30]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_533_1763711808_69201b404ec6a.jpg
+[2025-11-28 05:43:30]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_533.jpg
+[2025-11-28 05:43:30]   Downloaded 3049844 bytes
+[2025-11-28 05:43:30]   Successfully wrote 3049844 bytes to file
+[2025-11-28 05:43:30] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_533.jpg
+[2025-11-28 05:43:30] 
+[2025-11-28 05:43:30] Optimizing artwork for AI payload...
+[2025-11-28 05:43:31] Artwork optimized (max dimension 1024px) for AI requests.
+[2025-11-28 05:43:31] 
+[2025-11-28 05:43:31] Generating AI-based product name and description...
+[2025-11-28 05:43:34]   ===== DEBUG: AI Generated Response =====
+[2025-11-28 05:43:34] NAME: Guru Nanak Portrait Art
+DESCRIPTION: A traditional portrait of Guru Nanak, rendered with a classic style and elegant framing.
+• Features a detailed depiction of Guru Nanak in rich colors.
+• Presented in an ornate, gold-toned frame.
+• A respectful and spiritual piece for any home.
+[2025-11-28 05:43:34]   ===== END DEBUG =====
+[2025-11-28 05:43:34]   DEBUG: Extracted Name: Guru Nanak Portrait Art
+[2025-11-28 05:43:34]   DEBUG: Extracted Description: A traditional portrait of Guru Nanak, rendered with a classic style and elegant framing.
+• Feature...
+[2025-11-28 05:43:34] ✓ AI Product Name Generated: Guru Nanak Portrait Art
+[2025-11-28 05:43:34] ✓ AI Product Description Generated:
+[2025-11-28 05:43:34]    A traditional portrait of Guru Nanak, rendered with a classic style and elegant framing.
+[2025-11-28 05:43:34]    • Features a detailed depiction of Guru Nanak in rich colors.
+[2025-11-28 05:43:34]    • Presented in an ornate, gold-toned frame.
+[2025-11-28 05:43:34]    • A respectful and spiritual piece for any home.
+[2025-11-28 05:43:34] 
+[2025-11-28 05:43:34] Product Info:
+[2025-11-28 05:43:34]   - AI Generated Name: Guru Nanak Portrait Art
+[2025-11-28 05:43:34]   - Original Name: Devotional
+[2025-11-28 05:43:34]   - Dimensions: 43.00 x 71.00
+[2025-11-28 05:43:34]   - Framed: Yes
+[2025-11-28 05:43:34]   - AI Description: A traditional portrait of Guru Nanak, rendered with a classic style and elegant framing.
+• Feature...
+[2025-11-28 05:43:34]   - Suitable For: home, office, dining, bedroom
+[2025-11-28 05:43:34] 
+[2025-11-28 05:43:34] Generating mockup types: living_room, dining_room, office, bedroom
+[2025-11-28 05:43:34] 
+[2025-11-28 05:43:34] Generating all 4 mockup images in parallel...
+[2025-11-28 05:43:47]   ✓ living_room mockup generated successfully
+[2025-11-28 05:43:47]   ✓ dining_room mockup generated successfully
+[2025-11-28 05:43:47]   ✓ office mockup generated successfully
+[2025-11-28 05:43:47]   ✓ bedroom mockup generated successfully
+[2025-11-28 05:43:47] 
+[2025-11-28 05:43:47] ✓ All mockups generated in 13 seconds!
+[2025-11-28 05:43:47] 
+[2025-11-28 05:43:47] Total mockups generated: 4
+[2025-11-28 05:43:47] 
+[2025-11-28 05:43:47] Uploading mockups to product with metadata...
+[2025-11-28 05:43:47] Product Name: Guru Nanak Portrait Art
+[2025-11-28 05:43:47] Description: A traditional portrait of Guru Nanak, rendered wit...
+[2025-11-28 05:43:47] Suitable For: home, office, dining, bedroom
+[2025-11-28 05:43:47] 
+[2025-11-28 05:43:47] Uploading living_room mockup...
+[2025-11-28 05:43:48]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":533,"image":"public\/product_images\/product_533_1764305027_69292883ec1ca.jpg","is_mockup":1,"mockup_description":"Livin
+[2025-11-28 05:43:48]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 05:43:48]   → Metadata: Living Room Setting | Guru Nanak Portrait Art
+[2025-11-28 05:43:48]   ✓ Upload successful!
+[2025-11-28 05:43:48] Uploading dining_room mockup...
+[2025-11-28 05:43:49]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":533,"image":"public\/product_images\/product_533_1764305029_692928850eac7.jpg","is_mockup":1,"mockup_description":"Dinin
+[2025-11-28 05:43:49]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 05:43:49]   → Metadata: Dining Room Setting | Guru Nanak Portrait Art
+[2025-11-28 05:43:49]   ✓ Upload successful!
+[2025-11-28 05:43:49] Uploading office mockup...
+[2025-11-28 05:43:49]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":533,"image":"public\/product_images\/product_533_1764305029_69292885ed653.jpg","is_mockup":1,"mockup_description":"Offic
+[2025-11-28 05:43:49]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 05:43:49]   → Metadata: Office Environment | Guru Nanak Portrait Art
+[2025-11-28 05:43:49]   ✓ Upload successful!
+[2025-11-28 05:43:49] Uploading bedroom mockup...
+[2025-11-28 05:43:51]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":533,"image":"public\/product_images\/product_533_1764305031_6929288700bfa.jpg","is_mockup":1,"mockup_description":"Bedro
+[2025-11-28 05:43:51]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 05:43:51]   → Metadata: Bedroom Decor | Guru Nanak Portrait Art
+[2025-11-28 05:43:51]   ✓ Upload successful!
+[2025-11-28 05:43:51] 
+[2025-11-28 05:43:51] Successfully uploaded 4 out of 4 mockups
+[2025-11-28 05:43:51] Metadata log saved to: mockup_metadata_log.json
+[2025-11-28 05:43:51] 
+[2025-11-28 05:43:51] Marking product as processed...
+[2025-11-28 05:43:51] ✓ Product marked as processed successfully!
+[2025-11-28 05:43:51] 
+[2025-11-28 05:43:51] === Processing Complete ===
+[2025-11-28 05:43:51] Product ID: 533
+[2025-11-28 05:43:51] Product Name: Devotional
+[2025-11-28 05:43:51] Mockups Generated: 4
+[2025-11-28 05:43:51] Mockups Uploaded: 4
+[2025-11-28 05:43:51] Status: Marked as processed
+[2025-11-28 05:43:51] 
+[2025-11-28 05:43:51] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 06:00:53] === Product Mockup Generator V2 Started ===
+[2025-11-28 06:00:53] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
+[2025-11-28 06:00:53] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_generations_log.txt
+[2025-11-28 06:00:53] 
+[2025-11-28 06:00:53] Processing Product ID: 532
+[2025-11-28 06:00:53] Product Name: Devotional
+[2025-11-28 06:00:53] Description: N/A
+[2025-11-28 06:00:53] 
+[2025-11-28 06:00:54] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_532_1763711710_69201ade1f8ac.jpg
+[2025-11-28 06:00:54] 
+[2025-11-28 06:00:54] Downloading artwork...
+[2025-11-28 06:00:54]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_532_1763711710_69201ade1f8ac.jpg
+[2025-11-28 06:00:54]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_532.jpg
+[2025-11-28 06:00:54]   Downloaded 5523556 bytes
+[2025-11-28 06:00:54]   Successfully wrote 5523556 bytes to file
+[2025-11-28 06:00:54] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/original_532.jpg
+[2025-11-28 06:00:54] 
+[2025-11-28 06:00:54] Optimizing artwork for AI payload...
+[2025-11-28 06:00:55] Artwork optimized (max dimension 1024px) for AI requests.
+[2025-11-28 06:00:55] 
+[2025-11-28 06:00:55] Generating AI-based product name and description...
+[2025-11-28 06:00:58]   ===== DEBUG: AI Generated Response =====
+[2025-11-28 06:00:58] NAME: Indian Mythological Framed Art
+DESCRIPTION: This vibrant artwork depicts a detailed scene of Indian mythology, showcasing figures, symbols, and intricate patterns.
+• Features rich colors and gold accents for a luxurious feel.
+• Intricate hand-drawn style with fine details.
+• Presented in a framed format, ready to display.
+[2025-11-28 06:00:58]   ===== END DEBUG =====
+[2025-11-28 06:00:58]   DEBUG: Extracted Name: Indian Mythological Framed Art
+[2025-11-28 06:00:58]   DEBUG: Extracted Description: This vibrant artwork depicts a detailed scene of Indian mythology, showcasing figures, symbols, and ...
+[2025-11-28 06:00:58] ✓ AI Product Name Generated: Indian Mythological Framed Art
+[2025-11-28 06:00:58] ✓ AI Product Description Generated:
+[2025-11-28 06:00:58]    This vibrant artwork depicts a detailed scene of Indian mythology, showcasing figures, symbols, and intricate patterns.
+[2025-11-28 06:00:58]    • Features rich colors and gold accents for a luxurious feel.
+[2025-11-28 06:00:58]    • Intricate hand-drawn style with fine details.
+[2025-11-28 06:00:58]    • Presented in a framed format, ready to display.
+[2025-11-28 06:00:58] 
+[2025-11-28 06:00:58] Product Info:
+[2025-11-28 06:00:58]   - AI Generated Name: Indian Mythological Framed Art
+[2025-11-28 06:00:58]   - Original Name: Devotional
+[2025-11-28 06:00:58]   - Dimensions: 63.00 x 51.00
+[2025-11-28 06:00:58]   - Framed: Yes
+[2025-11-28 06:00:58]   - AI Description: This vibrant artwork depicts a detailed scene of Indian mythology, showcasing figures, symbols, and ...
+[2025-11-28 06:00:58]   - Suitable For: home, office, dining, bedroom
+[2025-11-28 06:00:58]   - Orientation: vertical
+[2025-11-28 06:00:58] 
+[2025-11-28 06:00:58] Vertical artwork detected - generating vertical-specific mockups
+[2025-11-28 06:00:58] Generating mockup types: corridor, staircase, entryway
+[2025-11-28 06:00:58] 
+[2025-11-28 06:00:58] Generating all 3 mockup images in parallel...
+[2025-11-28 06:01:12]   ✓ corridor mockup generated successfully
+[2025-11-28 06:01:12]   ✓ staircase mockup generated successfully
+[2025-11-28 06:01:12]   ✓ entryway mockup generated successfully
+[2025-11-28 06:01:12] 
+[2025-11-28 06:01:12] ✓ All mockups generated in 14 seconds!
+[2025-11-28 06:01:12] 
+[2025-11-28 06:01:12] Total mockups generated: 3
+[2025-11-28 06:01:12] 
+[2025-11-28 06:01:12] Uploading mockups to product with metadata...
+[2025-11-28 06:01:12] Product Name: Indian Mythological Framed Art
+[2025-11-28 06:01:12] Description: This vibrant artwork depicts a detailed scene of I...
+[2025-11-28 06:01:12] Suitable For: home, office, dining, bedroom
+[2025-11-28 06:01:12] 
+[2025-11-28 06:01:12] Uploading corridor mockup...
+[2025-11-28 06:01:13]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":532,"image":"public\/product_images\/product_532_1764306073_69292c9994fed.jpg","is_mockup":1,"mockup_description":"Moder
+[2025-11-28 06:01:13]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 06:01:13]   → Metadata: Modern Corridor Setting | Indian Mythological Framed Art
+[2025-11-28 06:01:13]   ✓ Upload successful!
+[2025-11-28 06:01:13] Uploading staircase mockup...
+[2025-11-28 06:01:15]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":532,"image":"public\/product_images\/product_532_1764306074_69292c9ac0b28.jpg","is_mockup":1,"mockup_description":"Elega
+[2025-11-28 06:01:15]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 06:01:15]   → Metadata: Elegant Staircase Setting | Indian Mythological Framed Art
+[2025-11-28 06:01:15]   ✓ Upload successful!
+[2025-11-28 06:01:15] Uploading entryway mockup...
+[2025-11-28 06:01:16]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":532,"image":"public\/product_images\/product_532_1764306076_69292c9c0c1a7.jpg","is_mockup":1,"mockup_description":"Styli
+[2025-11-28 06:01:16]   → ✓ Uploaded successfully via API to server!
+[2025-11-28 06:01:16]   → Metadata: Stylish Entryway Setting | Indian Mythological Framed Art
+[2025-11-28 06:01:16]   ✓ Upload successful!
+[2025-11-28 06:01:16] 
+[2025-11-28 06:01:16] Successfully uploaded 3 out of 3 mockups
+[2025-11-28 06:01:16] Metadata log saved to: mockup_metadata_log.json
+[2025-11-28 06:01:16] 
+[2025-11-28 06:01:16] Marking product as processed...
+[2025-11-28 06:01:16] ✓ Product marked as processed successfully!
+[2025-11-28 06:01:16] 
+[2025-11-28 06:01:16] === Processing Complete ===
+[2025-11-28 06:01:16] Product ID: 532
+[2025-11-28 06:01:16] Product Name: Devotional
+[2025-11-28 06:01:16] Mockups Generated: 3
+[2025-11-28 06:01:16] Mockups Uploaded: 3
+[2025-11-28 06:01:16] Status: Marked as processed
+[2025-11-28 06:01:16] 
+[2025-11-28 06:01:16] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups/
