@@ -266,10 +266,11 @@ function generateAIProductNameAndDescription($apiKey, $artworkPath, $artworkData
 
     $imageBase64 = base64_encode($artworkData);
     
-    // Prompt for generating product name and description
+    // Prompt for generating product name, description, and suitable_for
     $prompt = "Analyze this artwork and generate:
 1. A short, descriptive product name (3-5 words maximum)
 2. A product description (2 lines with bullet points)
+3. Suitable locations/rooms where this artwork would fit best (comma-separated list)
 
 Format your response EXACTLY as follows:
 NAME: [product name here]
@@ -277,13 +278,15 @@ DESCRIPTION: [First line describing the artwork style and subject]
 • [Key feature or characteristic 1]
 • [Key feature or characteristic 2]
 • [Key feature or characteristic 3]
+SUITABLE_FOR: [comma-separated list of locations, e.g., living room, office, bedroom, dining room, corridor, entryway]
 
 Example:
 NAME: Modern Abstract Wall Art
 DESCRIPTION: A striking contemporary piece featuring bold geometric shapes and vibrant colors that add energy to any space.
 • Perfect for modern and minimalist interiors
 • High-quality print with vivid color reproduction
-• Ideal for living rooms, offices, and galleries";
+• Ideal for living rooms, offices, and galleries
+SUITABLE_FOR: living room, office, bedroom, dining room";
     
     // Prepare API request
     $requestBody = [
@@ -331,6 +334,7 @@ DESCRIPTION: A striking contemporary piece featuring bold geometric shapes and v
             // Parse the response
             $name = null;
             $description = null;
+            $suitableFor = null;
             
             // Extract NAME
             if (preg_match('/NAME:\s*(.+?)(?:\n|DESCRIPTION:)/is', $generatedText, $nameMatch)) {
@@ -341,21 +345,37 @@ DESCRIPTION: A striking contemporary piece featuring bold geometric shapes and v
                 logMessage("  DEBUG: Failed to extract NAME from response");
             }
             
-            // Extract DESCRIPTION (everything after "DESCRIPTION:")
-            if (preg_match('/DESCRIPTION:\s*(.+?)$/is', $generatedText, $descMatch)) {
+            // Extract DESCRIPTION (everything after "DESCRIPTION:" until "SUITABLE_FOR:")
+            if (preg_match('/DESCRIPTION:\s*(.+?)(?:\nSUITABLE_FOR:|$)/is', $generatedText, $descMatch)) {
                 $description = trim($descMatch[1]);
                 logMessage("  DEBUG: Extracted Description: " . substr($description, 0, 100) . "...");
             } else {
                 logMessage("  DEBUG: Failed to extract DESCRIPTION from response");
             }
             
+            // Extract SUITABLE_FOR
+            if (preg_match('/SUITABLE_FOR:\s*(.+?)$/is', $generatedText, $suitableMatch)) {
+                $suitableFor = trim($suitableMatch[1]);
+                $suitableFor = trim($suitableFor, '"\'');
+                logMessage("  DEBUG: Extracted Suitable For: {$suitableFor}");
+            } else {
+                logMessage("  DEBUG: Failed to extract SUITABLE_FOR from response");
+            }
+            
             if ($name && $description) {
-                return [
+                $result = [
                     'name' => $name,
                     'description' => $description
                 ];
+                
+                // Add suitable_for if extracted
+                if ($suitableFor) {
+                    $result['suitable_for'] = $suitableFor;
+                }
+                
+                return $result;
             } else {
-                logMessage("  DEBUG: Parsing failed - Name: " . ($name ? "OK" : "NULL") . ", Description: " . ($description ? "OK" : "NULL"));
+                logMessage("  DEBUG: Parsing failed - Name: " . ($name ? "OK" : "NULL") . ", Description: " . ($description ? "OK" : "NULL") . ", Suitable For: " . ($suitableFor ? "OK" : "NULL"));
             }
         } else {
             logMessage("  DEBUG: Response structure unexpected");
@@ -861,8 +881,8 @@ if (!$optimizedArtworkData) {
 logMessage("Artwork optimized (max dimension 1024px) for AI requests.");
 logMessage("");
 
-// Step 3.5: Generate AI product name (3-5 words) and description
-logMessage("Generating AI-based product name and description...");
+// Step 3.5: Generate AI product name (3-5 words), description, and suitable_for
+logMessage("Generating AI-based product name, description, and suitable locations...");
 $aiGenerated = generateAIProductNameAndDescription($GEMINI_API_KEY, $originalImagePath, $optimizedArtworkData);
 if ($aiGenerated && isset($aiGenerated['name']) && isset($aiGenerated['description'])) {
     logMessage("✓ AI Product Name Generated: {$aiGenerated['name']}");
@@ -874,10 +894,20 @@ if ($aiGenerated && isset($aiGenerated['name']) && isset($aiGenerated['descripti
     }
     $aiProductName = $aiGenerated['name'];
     $aiProductDescription = $aiGenerated['description'];
+    
+    // Use AI-generated suitable_for if available
+    if (isset($aiGenerated['suitable_for']) && !empty($aiGenerated['suitable_for'])) {
+        $aiSuitableFor = $aiGenerated['suitable_for'];
+        logMessage("✓ AI Suitable For Generated: {$aiSuitableFor}");
+    } else {
+        $aiSuitableFor = null;
+        logMessage("⚠ AI did not generate suitable_for, will use database value or default");
+    }
 } else {
     logMessage("⚠ Using original product data");
     $aiProductName = $product['name'];
     $aiProductDescription = $product['description'] ?? '';
+    $aiSuitableFor = null;
 }
 logMessage("");
 
@@ -886,7 +916,7 @@ $productInfo = [
     'name' => $aiProductName,  // Use AI-generated name
     'original_name' => $product['name'],  // Keep original for reference
     'description' => $aiProductDescription,  // Use AI-generated description
-    'suitable_for' => $product['suitable_for'] ?? 'home, office, dining, bedroom',
+    'suitable_for' => $aiSuitableFor ?? $product['suitable_for'] ?? 'home, office, dining, bedroom',  // Use AI-generated if available, else database value, else default
     'width' => $product['width'] ?? null,
     'height' => $product['height'] ?? null,
     'orientation' => $product['orientation'] ?? null,
