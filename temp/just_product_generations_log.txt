@@ -1,0 +1,432 @@
+[2025-12-05 15:47:06] === Just Product Image Generator Started ===
+[2025-12-05 15:47:06] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:47:06] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:47:06] 
+[2025-12-05 15:47:09] Processing Product ID: 71
+[2025-12-05 15:47:09] Product Name: Free Art
+[2025-12-05 15:47:09] Orientation: Not specified
+[2025-12-05 15:47:09] Framed: Yes
+[2025-12-05 15:47:09] 
+[2025-12-05 15:47:09] Product Image URL: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:47:09] 
+[2025-12-05 15:47:09] Downloading artwork...
+[2025-12-05 15:47:09]   Downloading from: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:47:09]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_71.jpg
+[2025-12-05 15:47:09] ERROR: Failed to download image. HTTP Code: 404, Error: 
+[2025-12-05 15:47:09] ERROR: Response data: <!DOCTYPE html>
+<html lang="en-us"
+    prefix="content: http://purl.org/rss/1.0/modules/content/ dc: http://purl.org/dc/terms/ foaf: http://xmlns.com/foaf/0.1/ og: http://ogp.me/ns# rdfs: http://www.w
+[2025-12-05 15:47:09] ERROR: Failed to download image from: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:47:49] === Just Product Image Generator Started ===
+[2025-12-05 15:47:49] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:47:49] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:47:49] 
+[2025-12-05 15:47:49] Processing Product ID: 71
+[2025-12-05 15:47:49] Product Name: Free Art
+[2025-12-05 15:47:49] Orientation: Not specified
+[2025-12-05 15:47:49] Framed: Yes
+[2025-12-05 15:47:49] 
+[2025-12-05 15:47:49] Product Image URL: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:47:49] 
+[2025-12-05 15:47:49] Downloading artwork...
+[2025-12-05 15:47:49]   Downloading from: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:47:49]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_71.jpg
+[2025-12-05 15:47:50] ERROR: Failed to download image. HTTP Code: 404, Error: 
+[2025-12-05 15:47:50] ERROR: Response data: <!DOCTYPE html>
+<html lang="en-us"
+    prefix="content: http://purl.org/rss/1.0/modules/content/ dc: http://purl.org/dc/terms/ foaf: http://xmlns.com/foaf/0.1/ og: http://ogp.me/ns# rdfs: http://www.w
+[2025-12-05 15:47:50] ERROR: Failed to download image from: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:47:54] === Just Product Image Generator Started ===
+[2025-12-05 15:47:54] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:47:54] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:47:54] 
+[2025-12-05 15:47:54] Processing Product ID: 71
+[2025-12-05 15:47:54] Product Name: Free Art
+[2025-12-05 15:47:54] Orientation: Not specified
+[2025-12-05 15:47:54] Framed: Yes
+[2025-12-05 15:47:54] 
+[2025-12-05 15:47:54] Product Image URL: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:47:54] 
+[2025-12-05 15:47:54] Downloading artwork...
+[2025-12-05 15:47:54]   Downloading from: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:47:54]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_71.jpg
+[2025-12-05 15:47:54] ERROR: Failed to download image. HTTP Code: 404, Error: 
+[2025-12-05 15:47:54] ERROR: Response data: <!DOCTYPE html>
+<html lang="en-us"
+    prefix="content: http://purl.org/rss/1.0/modules/content/ dc: http://purl.org/dc/terms/ foaf: http://xmlns.com/foaf/0.1/ og: http://ogp.me/ns# rdfs: http://www.w
+[2025-12-05 15:47:54] ERROR: Failed to download image from: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:49:40] === Just Product Image Generator Started ===
+[2025-12-05 15:49:40] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:49:40] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:49:40] 
+[2025-12-05 15:49:40] Products remaining to process: 653
+[2025-12-05 15:49:40] 
+[2025-12-05 15:49:40] Processing Product ID: 71
+[2025-12-05 15:49:40] Product Name: Free Art
+[2025-12-05 15:49:40] Orientation: Not specified
+[2025-12-05 15:49:40] Framed: Yes
+[2025-12-05 15:49:40] 
+[2025-12-05 15:49:40] Product Image URL: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:49:40] 
+[2025-12-05 15:49:40] Validating image URL...
+[2025-12-05 15:49:40] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:49:40] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/assets/products/product_71_1754738094_0.jpeg
+[2025-12-05 15:49:40] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:49:40] 
+[2025-12-05 15:49:41] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:49:49] === Just Product Image Generator Started ===
+[2025-12-05 15:49:49] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:49:49] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:49:49] 
+[2025-12-05 15:49:49] Products remaining to process: 652
+[2025-12-05 15:49:49] 
+[2025-12-05 15:49:50] Processing Product ID: 82
+[2025-12-05 15:49:50] Product Name: Test NMAE
+[2025-12-05 15:49:50] Orientation: Not specified
+[2025-12-05 15:49:50] Framed: Yes
+[2025-12-05 15:49:50] 
+[2025-12-05 15:49:50] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_82_1754740454_689736e6dc29d.jpeg
+[2025-12-05 15:49:50] 
+[2025-12-05 15:49:50] Validating image URL...
+[2025-12-05 15:49:50] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:49:50] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/public/product_images/product_82_1754740454_689736e6dc29d.jpeg
+[2025-12-05 15:49:50] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:49:50] 
+[2025-12-05 15:49:50] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:49:56] === Just Product Image Generator Started ===
+[2025-12-05 15:49:56] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:49:56] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:49:56] 
+[2025-12-05 15:49:56] Products remaining to process: 651
+[2025-12-05 15:49:56] 
+[2025-12-05 15:49:56] Processing Product ID: 83
+[2025-12-05 15:49:56] Product Name: Test NMAE
+[2025-12-05 15:49:56] Orientation: Not specified
+[2025-12-05 15:49:56] Framed: Yes
+[2025-12-05 15:49:56] 
+[2025-12-05 15:49:57] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_83_1754740484_68973704d2256.jpeg
+[2025-12-05 15:49:57] 
+[2025-12-05 15:49:57] Validating image URL...
+[2025-12-05 15:49:57] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:49:57] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/public/product_images/product_83_1754740484_68973704d2256.jpeg
+[2025-12-05 15:49:57] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:49:57] 
+[2025-12-05 15:49:57] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:49:58] === Just Product Image Generator Started ===
+[2025-12-05 15:49:58] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:49:58] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:49:58] 
+[2025-12-05 15:49:58] Products remaining to process: 650
+[2025-12-05 15:49:58] 
+[2025-12-05 15:49:58] Processing Product ID: 84
+[2025-12-05 15:49:58] Product Name: Test NMAE
+[2025-12-05 15:49:58] Orientation: Not specified
+[2025-12-05 15:49:58] Framed: Yes
+[2025-12-05 15:49:58] 
+[2025-12-05 15:49:58] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_84_1754740686_689737ce70b9d.jpeg
+[2025-12-05 15:49:58] 
+[2025-12-05 15:49:58] Validating image URL...
+[2025-12-05 15:49:58] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:49:58] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/public/product_images/product_84_1754740686_689737ce70b9d.jpeg
+[2025-12-05 15:49:58] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:49:58] 
+[2025-12-05 15:49:58] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:49:59] === Just Product Image Generator Started ===
+[2025-12-05 15:49:59] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:49:59] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:49:59] 
+[2025-12-05 15:49:59] Products remaining to process: 649
+[2025-12-05 15:49:59] 
+[2025-12-05 15:49:59] Processing Product ID: 85
+[2025-12-05 15:49:59] Product Name: Aarti Pal
+[2025-12-05 15:49:59] Orientation: Not specified
+[2025-12-05 15:49:59] Framed: Yes
+[2025-12-05 15:49:59] 
+[2025-12-05 15:49:59] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_85_1754740824_6897385827ded.png
+[2025-12-05 15:49:59] 
+[2025-12-05 15:49:59] Validating image URL...
+[2025-12-05 15:49:59] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:49:59] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/public/product_images/product_85_1754740824_6897385827ded.png
+[2025-12-05 15:49:59] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:49:59] 
+[2025-12-05 15:49:59] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:50:00] === Just Product Image Generator Started ===
+[2025-12-05 15:50:00] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:50:00] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:50:00] 
+[2025-12-05 15:50:00] Products remaining to process: 648
+[2025-12-05 15:50:00] 
+[2025-12-05 15:50:00] Processing Product ID: 86
+[2025-12-05 15:50:00] Product Name: Test NMAE
+[2025-12-05 15:50:00] Orientation: Not specified
+[2025-12-05 15:50:00] Framed: Yes
+[2025-12-05 15:50:00] 
+[2025-12-05 15:50:00] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_86_1754740915_689738b3ecb97.jpeg
+[2025-12-05 15:50:00] 
+[2025-12-05 15:50:00] Validating image URL...
+[2025-12-05 15:50:01] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:50:01] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/public/product_images/product_86_1754740915_689738b3ecb97.jpeg
+[2025-12-05 15:50:01] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:50:01] 
+[2025-12-05 15:50:01] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:50:02] === Just Product Image Generator Started ===
+[2025-12-05 15:50:02] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:50:02] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:50:02] 
+[2025-12-05 15:50:02] Products remaining to process: 647
+[2025-12-05 15:50:02] 
+[2025-12-05 15:50:02] Processing Product ID: 87
+[2025-12-05 15:50:02] Product Name: Aarti Pal
+[2025-12-05 15:50:02] Orientation: Not specified
+[2025-12-05 15:50:02] Framed: Yes
+[2025-12-05 15:50:02] 
+[2025-12-05 15:50:02] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_87_1754740962_689738e273ffe.png
+[2025-12-05 15:50:02] 
+[2025-12-05 15:50:02] Validating image URL...
+[2025-12-05 15:50:02] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:50:02] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/public/product_images/product_87_1754740962_689738e273ffe.png
+[2025-12-05 15:50:02] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:50:02] 
+[2025-12-05 15:50:02] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:50:03] === Just Product Image Generator Started ===
+[2025-12-05 15:50:03] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:50:03] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:50:03] 
+[2025-12-05 15:50:03] Products remaining to process: 646
+[2025-12-05 15:50:03] 
+[2025-12-05 15:50:03] Processing Product ID: 89
+[2025-12-05 15:50:03] Product Name: Test NMAE
+[2025-12-05 15:50:03] Orientation: Not specified
+[2025-12-05 15:50:03] Framed: Yes
+[2025-12-05 15:50:03] 
+[2025-12-05 15:50:03] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_89_1755183643_689dfa1b8928b.jpeg
+[2025-12-05 15:50:03] 
+[2025-12-05 15:50:03] Validating image URL...
+[2025-12-05 15:50:04] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:50:04] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/public/product_images/product_89_1755183643_689dfa1b8928b.jpeg
+[2025-12-05 15:50:04] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:50:04] 
+[2025-12-05 15:50:04] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:50:04] === Just Product Image Generator Started ===
+[2025-12-05 15:50:04] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:50:04] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:50:04] 
+[2025-12-05 15:50:04] Products remaining to process: 645
+[2025-12-05 15:50:04] 
+[2025-12-05 15:50:04] Processing Product ID: 99
+[2025-12-05 15:50:04] Product Name: Test NMAE
+[2025-12-05 15:50:04] Orientation: Not specified
+[2025-12-05 15:50:04] Framed: Yes
+[2025-12-05 15:50:04] 
+[2025-12-05 15:50:05] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_99_1755333030_68a041a6604a6.jpeg
+[2025-12-05 15:50:05] 
+[2025-12-05 15:50:05] Validating image URL...
+[2025-12-05 15:50:05] ERROR: Image URL is not accessible (HTTP 404)
+[2025-12-05 15:50:05] ERROR: Image does not exist at: https://api.invoicemate.in/storage/app/public/product_images/product_99_1755333030_68a041a6604a6.jpeg
+[2025-12-05 15:50:05] SKIPPING: This product will be skipped. Please check the image URL or upload a valid image.
+[2025-12-05 15:50:05] 
+[2025-12-05 15:50:05] ✓ Product marked as processed (skipped due to missing image)
+[2025-12-05 15:50:06] === Just Product Image Generator Started ===
+[2025-12-05 15:50:06] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:50:06] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:50:06] 
+[2025-12-05 15:50:06] Products remaining to process: 644
+[2025-12-05 15:50:06] 
+[2025-12-05 15:50:06] Processing Product ID: 101
+[2025-12-05 15:50:06] Product Name: Test NMAE
+[2025-12-05 15:50:06] Orientation: Not specified
+[2025-12-05 15:50:06] Framed: Yes
+[2025-12-05 15:50:06] 
+[2025-12-05 15:50:06] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_101_1755333135_68a0420f67f50.jpeg
+[2025-12-05 15:50:06] 
+[2025-12-05 15:50:06] Validating image URL...
+[2025-12-05 15:50:06] ✓ Image URL is valid and accessible
+[2025-12-05 15:50:06] 
+[2025-12-05 15:50:06] Downloading artwork...
+[2025-12-05 15:50:06]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_101_1755333135_68a0420f67f50.jpeg
+[2025-12-05 15:50:06]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_101.jpg
+[2025-12-05 15:50:06]   Downloaded 14849 bytes
+[2025-12-05 15:50:06]   Successfully wrote 14849 bytes to file
+[2025-12-05 15:50:06] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_101.jpg
+[2025-12-05 15:50:06] 
+[2025-12-05 15:50:06] Optimizing artwork for AI payload...
+[2025-12-05 15:50:06] Artwork optimized (max dimension 1024px) for AI request.
+[2025-12-05 15:50:06] 
+[2025-12-05 15:50:06] Product Info:
+[2025-12-05 15:50:06]   - Name: Test NMAE
+[2025-12-05 15:50:06]   - Dimensions: 43.00 x 32.00
+[2025-12-05 15:50:06]   - Orientation: horizontal
+[2025-12-05 15:50:06]   - Framed: Yes
+[2025-12-05 15:50:06] 
+[2025-12-05 15:50:06] Generating clean product image (background removed)...
+[2025-12-05 15:50:09] === Just Product Image Generator Started ===
+[2025-12-05 15:50:09] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:50:09] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:50:09] 
+[2025-12-05 15:50:09] Products remaining to process: 644
+[2025-12-05 15:50:09] 
+[2025-12-05 15:50:09] Processing Product ID: 101
+[2025-12-05 15:50:09] Product Name: Test NMAE
+[2025-12-05 15:50:09] Orientation: Not specified
+[2025-12-05 15:50:09] Framed: Yes
+[2025-12-05 15:50:09] 
+[2025-12-05 15:50:09] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_101_1755333135_68a0420f67f50.jpeg
+[2025-12-05 15:50:09] 
+[2025-12-05 15:50:09] Validating image URL...
+[2025-12-05 15:50:10] ✓ Image URL is valid and accessible
+[2025-12-05 15:50:10] 
+[2025-12-05 15:50:10] Downloading artwork...
+[2025-12-05 15:50:10]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_101_1755333135_68a0420f67f50.jpeg
+[2025-12-05 15:50:10]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_101.jpg
+[2025-12-05 15:50:10]   Downloaded 14849 bytes
+[2025-12-05 15:50:10]   Successfully wrote 14849 bytes to file
+[2025-12-05 15:50:10] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_101.jpg
+[2025-12-05 15:50:10] 
+[2025-12-05 15:50:10] Optimizing artwork for AI payload...
+[2025-12-05 15:50:10] Artwork optimized (max dimension 1024px) for AI request.
+[2025-12-05 15:50:10] 
+[2025-12-05 15:50:10] Product Info:
+[2025-12-05 15:50:10]   - Name: Test NMAE
+[2025-12-05 15:50:10]   - Dimensions: 43.00 x 32.00
+[2025-12-05 15:50:10]   - Orientation: horizontal
+[2025-12-05 15:50:10]   - Framed: Yes
+[2025-12-05 15:50:10] 
+[2025-12-05 15:50:10] Generating clean product image (background removed)...
+[2025-12-05 15:50:21]   ✓ Clean product image generated successfully by Gemini AI
+[2025-12-05 15:50:21] ✓ Clean product image generated in 15 seconds!
+[2025-12-05 15:50:21] 
+[2025-12-05 15:50:21] Uploading clean product image...
+[2025-12-05 15:50:22]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":101,"image":"public\/product_images\/product_101_1764946222_6932f12e67c77.jpg","just_product":1,"updated_at":"2025-12-05
+[2025-12-05 15:50:22]   → ✓ Uploaded successfully via API!
+[2025-12-05 15:50:22] ✓ Upload successful!
+[2025-12-05 15:50:22] 
+[2025-12-05 15:50:22] Marking product as just_product_processed...
+[2025-12-05 15:50:22] ✓ Product marked as just_product_processed successfully!
+[2025-12-05 15:50:22] 
+[2025-12-05 15:50:22] === Processing Complete ===
+[2025-12-05 15:50:22] Product ID: 101
+[2025-12-05 15:50:22] Product Name: Test NMAE
+[2025-12-05 15:50:22] Image Generated: Yes
+[2025-12-05 15:50:22] Image Uploaded: Yes
+[2025-12-05 15:50:22] Status: Marked as processed
+[2025-12-05 15:50:22] 
+[2025-12-05 15:50:30]   ✓ Clean product image generated successfully by Gemini AI
+[2025-12-05 15:50:30] ✓ Clean product image generated in 20 seconds!
+[2025-12-05 15:50:30] 
+[2025-12-05 15:50:30] Uploading clean product image...
+[2025-12-05 15:50:31]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":101,"image":"public\/product_images\/product_101_1764946231_6932f1377e4b1.jpg","just_product":1,"updated_at":"2025-12-05
+[2025-12-05 15:50:31]   → ✓ Uploaded successfully via API!
+[2025-12-05 15:50:31] ✓ Upload successful!
+[2025-12-05 15:50:31] 
+[2025-12-05 15:50:31] Marking product as just_product_processed...
+[2025-12-05 15:50:31] ✓ Product marked as just_product_processed successfully!
+[2025-12-05 15:50:31] 
+[2025-12-05 15:50:31] === Processing Complete ===
+[2025-12-05 15:50:31] Product ID: 101
+[2025-12-05 15:50:31] Product Name: Test NMAE
+[2025-12-05 15:50:31] Image Generated: Yes
+[2025-12-05 15:50:31] Image Uploaded: Yes
+[2025-12-05 15:50:31] Status: Marked as processed
+[2025-12-05 15:50:31] 
+[2025-12-05 15:51:57] === Just Product Image Generator Started ===
+[2025-12-05 15:51:57] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:51:57] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:51:57] 
+[2025-12-05 15:51:57] Products remaining to process: 635
+[2025-12-05 15:51:57] 
+[2025-12-05 15:51:57] Processing Product ID: 188
+[2025-12-05 15:51:57] Product Name: Landscapes
+[2025-12-05 15:51:57] Orientation: horizontal
+[2025-12-05 15:51:57] Framed: Yes
+[2025-12-05 15:51:57] 
+[2025-12-05 15:51:57] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_188_1762453285_690ce725c8c09.jpg
+[2025-12-05 15:51:57] 
+[2025-12-05 15:51:57] Validating image URL...
+[2025-12-05 15:51:58] ✓ Image URL is valid and accessible
+[2025-12-05 15:51:58] 
+[2025-12-05 15:51:58] Downloading artwork...
+[2025-12-05 15:51:58]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_188_1762453285_690ce725c8c09.jpg
+[2025-12-05 15:51:58]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_188.jpg
+[2025-12-05 15:51:58]   Downloaded 2860160 bytes
+[2025-12-05 15:51:58]   Successfully wrote 2860160 bytes to file
+[2025-12-05 15:51:58] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_188.jpg
+[2025-12-05 15:51:58] 
+[2025-12-05 15:51:58] Optimizing artwork for AI payload...
+[2025-12-05 15:51:59] Artwork optimized (max dimension 1024px) for AI request.
+[2025-12-05 15:51:59] 
+[2025-12-05 15:51:59] Product Info:
+[2025-12-05 15:51:59]   - Name: Landscapes
+[2025-12-05 15:51:59]   - Dimensions: 96.00 x 48.00
+[2025-12-05 15:51:59]   - Orientation: horizontal
+[2025-12-05 15:51:59]   - Framed: Yes
+[2025-12-05 15:51:59] 
+[2025-12-05 15:51:59] Generating clean product image (background removed)...
+[2025-12-05 15:52:14]   ✓ Clean product image generated successfully by Gemini AI
+[2025-12-05 15:52:14] ✓ Clean product image generated in 15 seconds!
+[2025-12-05 15:52:14] 
+[2025-12-05 15:52:14] Uploading clean product image...
+[2025-12-05 15:52:15]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":188,"image":"public\/product_images\/product_188_1764946335_6932f19f48c24.jpg","just_product":1,"updated_at":"2025-12-05
+[2025-12-05 15:52:15]   → ✓ Uploaded successfully via API!
+[2025-12-05 15:52:15] ✓ Upload successful!
+[2025-12-05 15:52:15] 
+[2025-12-05 15:52:15] Marking product as just_product_processed...
+[2025-12-05 15:52:15] ✓ Product marked as just_product_processed successfully!
+[2025-12-05 15:52:15] 
+[2025-12-05 15:52:15] === Processing Complete ===
+[2025-12-05 15:52:15] Product ID: 188
+[2025-12-05 15:52:15] Product Name: Landscapes
+[2025-12-05 15:52:15] Image Generated: Yes
+[2025-12-05 15:52:15] Image Uploaded: Yes
+[2025-12-05 15:52:15] Status: Marked as processed
+[2025-12-05 15:52:15] 
+[2025-12-05 15:53:34] === Just Product Image Generator Started ===
+[2025-12-05 15:53:34] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/
+[2025-12-05 15:53:34] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product_generations_log.txt
+[2025-12-05 15:53:34] 
+[2025-12-05 15:53:34] Products remaining to process: 634
+[2025-12-05 15:53:34] 
+[2025-12-05 15:53:34] Processing Product ID: 189
+[2025-12-05 15:53:34] Product Name: Vibrant Abstract Blue Expression
+[2025-12-05 15:53:34] Orientation: square
+[2025-12-05 15:53:34] Framed: Yes
+[2025-12-05 15:53:34] 
+[2025-12-05 15:53:34] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_189_1762586558_690eefbe31f19.jpg
+[2025-12-05 15:53:34] 
+[2025-12-05 15:53:34] Validating image URL...
+[2025-12-05 15:53:34] ✓ Image URL is valid and accessible
+[2025-12-05 15:53:34] 
+[2025-12-05 15:53:34] Downloading artwork...
+[2025-12-05 15:53:34]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_189_1762586558_690eefbe31f19.jpg
+[2025-12-05 15:53:34]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_189.jpg
+[2025-12-05 15:53:35]   Downloaded 4487779 bytes
+[2025-12-05 15:53:35]   Successfully wrote 4487779 bytes to file
+[2025-12-05 15:53:35] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/just_product/original_189.jpg
+[2025-12-05 15:53:35] 
+[2025-12-05 15:53:35] Optimizing artwork for AI payload...
+[2025-12-05 15:53:35] Artwork optimized (max dimension 1024px) for AI request.
+[2025-12-05 15:53:35] 
+[2025-12-05 15:53:35] Product Info:
+[2025-12-05 15:53:35]   - Name: Vibrant Abstract Blue Expression
+[2025-12-05 15:53:35]   - Dimensions: 37.00 x 37.00
+[2025-12-05 15:53:35]   - Orientation: square
+[2025-12-05 15:53:35]   - Framed: Yes
+[2025-12-05 15:53:35] 
+[2025-12-05 15:53:35] Generating clean product image (background removed)...
+[2025-12-05 15:53:48]   ✓ Clean product image generated successfully by Gemini AI
+[2025-12-05 15:53:48] ✓ Clean product image generated in 13 seconds!
+[2025-12-05 15:53:48] 
+[2025-12-05 15:53:48] Uploading clean product image...
+[2025-12-05 15:53:48]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":189,"image":"public\/product_images\/product_189_1764946428_6932f1fcd9a65.jpg","just_product":1,"updated_at":"2025-12-05
+[2025-12-05 15:53:48]   → ✓ Uploaded successfully via API!
+[2025-12-05 15:53:48] ✓ Upload successful!
+[2025-12-05 15:53:48] 
+[2025-12-05 15:53:48] Marking product as just_product_processed...
+[2025-12-05 15:53:49] ✓ Product marked as just_product_processed successfully!
+[2025-12-05 15:53:49] 
+[2025-12-05 15:53:49] === Processing Complete ===
+[2025-12-05 15:53:49] Product ID: 189
+[2025-12-05 15:53:49] Product Name: Vibrant Abstract Blue Expression
+[2025-12-05 15:53:49] Image Generated: Yes
+[2025-12-05 15:53:49] Image Uploaded: Yes
+[2025-12-05 15:53:49] Status: Marked as processed
+[2025-12-05 15:53:49] 
