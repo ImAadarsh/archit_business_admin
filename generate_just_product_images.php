@@ -361,14 +361,84 @@ The output should look like a professional e-commerce product photo - just the a
     // Parse response and extract image
     $response = json_decode($result, true);
     
-    if (!isset($response['candidates'][0]['content']['parts'][0]['inlineData']['data'])) {
-        logMessage("  ERROR: No image data in API response");
-        logMessage("  Response structure: " . json_encode(array_keys($response), JSON_PRETTY_PRINT));
+    // Check for error in response
+    if (isset($response['error'])) {
+        logMessage("  ERROR: API returned error in response");
+        logMessage("  Error message: " . ($response['error']['message'] ?? 'Unknown error'));
+        logMessage("  Error code: " . ($response['error']['code'] ?? 'Unknown'));
+        logMessage("  Full error: " . json_encode($response['error'], JSON_PRETTY_PRINT));
+        return false;
+    }
+    
+    // Check if candidates exist
+    if (!isset($response['candidates']) || empty($response['candidates'])) {
+        logMessage("  ERROR: No candidates in API response");
+        logMessage("  Full response: " . json_encode($response, JSON_PRETTY_PRINT));
+        return false;
+    }
+    
+    $candidate = $response['candidates'][0];
+    
+    // Check for safety ratings that might have blocked generation
+    if (isset($candidate['safetyRatings'])) {
+        $blocked = false;
+        foreach ($candidate['safetyRatings'] as $rating) {
+            if (isset($rating['blocked']) && $rating['blocked'] === true) {
+                $blocked = true;
+                logMessage("  ERROR: Content blocked by safety filter");
+                logMessage("  Category: " . ($rating['category'] ?? 'Unknown'));
+                logMessage("  Probability: " . ($rating['probability'] ?? 'Unknown'));
+                logMessage("  Safety ratings: " . json_encode($candidate['safetyRatings'], JSON_PRETTY_PRINT));
+            }
+        }
+        if ($blocked) {
+            return false;
+        }
+    }
+    
+    // Check for finish reason
+    if (isset($candidate['finishReason'])) {
+        if ($candidate['finishReason'] !== 'STOP') {
+            logMessage("  WARNING: Finish reason is not STOP: " . $candidate['finishReason']);
+        }
+    }
+    
+    // Check if content exists
+    if (!isset($candidate['content']) || !isset($candidate['content']['parts'])) {
+        logMessage("  ERROR: No content/parts in candidate");
+        logMessage("  Candidate structure: " . json_encode(array_keys($candidate), JSON_PRETTY_PRINT));
+        logMessage("  Full candidate: " . json_encode($candidate, JSON_PRETTY_PRINT));
+        return false;
+    }
+    
+    // Look for image data in parts
+    $imageData = null;
+    $textResponse = null;
+    foreach ($candidate['content']['parts'] as $partIndex => $part) {
+        if (isset($part['inlineData']['data'])) {
+            $imageData = $part['inlineData']['data'];
+            logMessage("  Found image data in part index: {$partIndex}");
+            break;
+        }
+        if (isset($part['text'])) {
+            $textResponse = $part['text'];
+            logMessage("  Found text response in part index: {$partIndex}");
+        }
+    }
+    
+    if (!$imageData) {
+        logMessage("  ERROR: No image data found in any part");
+        if ($textResponse) {
+            logMessage("  Text response from API: {$textResponse}");
+        }
+        logMessage("  Parts structure: " . json_encode($candidate['content']['parts'], JSON_PRETTY_PRINT));
+        logMessage("  Full candidate: " . json_encode($candidate, JSON_PRETTY_PRINT));
+        logMessage("  Full response: " . json_encode($response, JSON_PRETTY_PRINT));
         return false;
     }
     
     // Decode and save the generated image
-    $generatedImageData = base64_decode($response['candidates'][0]['content']['parts'][0]['inlineData']['data']);
+    $generatedImageData = base64_decode($imageData);
     
     if (file_put_contents($outputPath, $generatedImageData)) {
         logMessage("  ✓ Clean product image generated successfully by Gemini AI");
