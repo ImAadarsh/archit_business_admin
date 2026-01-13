@@ -212,13 +212,16 @@ if(isset($_GET['filter'])) {
     $sql = "SELECT inv.*, 
                    addr.state as customer_state,
                    items.gst_rate,
+                   c.hsn_code,
                    SUM(items.price_of_all) as gst_group_amount,
                    SUM(items.dgst + items.cgst + items.igst) as gst_group_tax
             FROM invoices inv
             LEFT JOIN addres addr ON inv.billing_address_id = addr.id AND addr.type = 'billing'
             INNER JOIN items ON inv.id = items.invoice_id
+            LEFT JOIN products p ON items.product_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
             WHERE $where_clause
-            GROUP BY inv.id, items.gst_rate
+            GROUP BY inv.id, items.gst_rate, c.hsn_code
             ORDER BY inv.id DESC, items.gst_rate";
     // Debug: Display the generated SQL
     echo "<!-- DEBUG SQL Query: " . htmlspecialchars($sql) . " -->";
@@ -229,13 +232,16 @@ if(isset($_GET['filter'])) {
     $sql = "SELECT inv.*, 
                    addr.state as customer_state,
                    items.gst_rate,
+                   c.hsn_code,
                    SUM(items.price_of_all) as gst_group_amount,
                    SUM(items.dgst + items.cgst + items.igst) as gst_group_tax
             FROM invoices inv
             LEFT JOIN addres addr ON inv.billing_address_id = addr.id AND addr.type = 'billing'
             INNER JOIN items ON inv.id = items.invoice_id
+            LEFT JOIN products p ON items.product_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
             WHERE inv.business_id = '$b_id' AND inv.is_completed = 1
-            GROUP BY inv.id, items.gst_rate
+            GROUP BY inv.id, items.gst_rate, c.hsn_code
             ORDER BY inv.id DESC, items.gst_rate";
 }
 ?>
@@ -434,6 +440,7 @@ $online = 0;
             <th>State</th>
             <th>Type</th>
             <th>Payment Mode</th>
+            <th>HSN Code</th>
             <th>GST Rate</th>
             <th>Sale Amount</th>
             <th>GST Amount</th>
@@ -501,6 +508,7 @@ $online = 0;
                 <td><?php echo $show_invoice_info ? (isset($final['customer_state']) ? htmlspecialchars($final['customer_state']) : 'N/A') : ''; ?></td>
                 <td><?php echo $show_invoice_info ? ((!empty($final['type']) && strtolower($final['type']) !== 'null') ? ucfirst(htmlspecialchars($final['type'])) : 'N/A') : ''; ?></td>
                 <td><?php echo $show_invoice_info ? (isset($final['payment_mode']) ? ucfirst(htmlspecialchars($final['payment_mode'])) : 'N/A') : ''; ?></td>
+                <td><?php echo isset($final['hsn_code']) ? htmlspecialchars($final['hsn_code']) : 'N/A'; ?></td>
                 <td><strong><?php 
                     if (isset($final['gst_rate']) && $final['gst_rate'] !== null) {
                         // Convert decimal to percentage (0.05 -> 5, 0.18 -> 18)

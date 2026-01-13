@@ -35,7 +35,7 @@ header('Expires: 0');
 
 // Output the CSV data
 $output = fopen('php://output', 'w');
-fputcsv($output, array('Invoice Number', 'Date', 'Customer Name', 'GST/Adhaar Number', 'State', 'GST Rate', 'Amount', 'DGST Amount', 'CGST Amount', 'IGST Amount', 'Total Amount'));
+fputcsv($output, array('Invoice Number', 'Date', 'Customer Name', 'GST/Adhaar Number', 'State', 'HSN Code', 'GST Rate', 'Amount', 'DGST Amount', 'CGST Amount', 'IGST Amount', 'Total Amount'));
 
 $temp = 0;
 
@@ -83,6 +83,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         isset($row['name']) ? $row['name'] : 'N/A',
         isset($row['doc_no']) ? $row['doc_no'] : 'N/A',
         isset($row['customer_state']) ? $row['customer_state'] : 'N/A',
+        isset($row['hsn_code']) ? $row['hsn_code'] : 'N/A',
         $gst_rate_display,
         number_format($row_sale_amount, 2),
         number_format($dgst_for_row, 2),
