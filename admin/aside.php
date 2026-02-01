@@ -184,6 +184,37 @@
             </li>
         </ul>
 
+        <!-- Shop Management Section -->
+        <p class="text-muted nav-heading mt-4 mb-1">
+            <span>Shop Management</span>
+        </p>
+        <ul class="navbar-nav flex-fill w-100 mb-2">
+            <li class="nav-item">
+                <a href="shop-users.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-users fe-16"></i>
+                    <span class="ml-3 item-text">Shop Users</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="shop-orders.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-shopping-cart fe-16"></i>
+                    <span class="ml-3 item-text">Shop Orders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="shop-ai-images.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-image fe-16"></i>
+                    <span class="ml-3 item-text">AI Wall Images</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="shop-settings.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-settings fe-16"></i>
+                    <span class="ml-3 item-text">Shop Settings</span>
+                </a>
+            </li>
+        </ul>
+
         <!-- Account Section -->
         <p class="text-muted nav-heading mt-4 mb-1">
             <span>Account</span>
