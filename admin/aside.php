@@ -208,6 +208,24 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="shop-wishlist.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-heart fe-16"></i>
+                    <span class="ml-3 item-text">Shop Wishlist</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="shop-cart.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-shopping-cart fe-16"></i>
+                    <span class="ml-3 item-text">Shop Cart</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="shop-saved-preferences.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-star fe-16"></i>
+                    <span class="ml-3 item-text">Saved Preferences</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="shop-settings.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-settings fe-16"></i>
                     <span class="ml-3 item-text">Shop Settings</span>
