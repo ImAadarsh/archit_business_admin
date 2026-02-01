@@ -13,7 +13,7 @@
                 <img height="50" src="<?php echo $logo; ?>" alt="Business Logo">
             </a>
         </div>
-        
+
         <!-- Main Dashboard -->
         <ul class="navbar-nav flex-fill w-100 mb-2">
             <li class="nav-item">
@@ -23,7 +23,7 @@
                 </a>
             </li>
         </ul>
-        
+
         <!-- Subscription Section -->
         <p class="text-muted nav-heading mt-4 mb-1">
             <span>Subscription</span>
@@ -48,7 +48,7 @@
                 </a>
             </li>
         </ul>
-        
+
         <!-- Business Management Section -->
         <p class="text-muted nav-heading mt-4 mb-1">
             <span>Business Management</span>
@@ -79,7 +79,7 @@
                 </a>
             </li>
         </ul>
-        
+
         <!-- Financial Management Section -->
         <p class="text-muted nav-heading mt-4 mb-1">
             <span>Financial Management</span>
@@ -104,7 +104,7 @@
                 </a>
             </li>
         </ul>
-        
+
         <!-- Sales & Inventory Section -->
         <p class="text-muted nav-heading mt-4 mb-1">
             <span>Sales & Inventory</span>
@@ -159,6 +159,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="eway-bill.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-truck fe-16"></i>
+                    <span class="ml-3 item-text">e-Way Bill</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="purchase.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-box fe-16"></i>
                     <span class="ml-3 item-text">Sales Report</span>
@@ -177,7 +183,7 @@
                 </a>
             </li>
         </ul>
-        
+
         <!-- Account Section -->
         <p class="text-muted nav-heading mt-4 mb-1">
             <span>Account</span>
@@ -196,6 +202,6 @@
                 </a>
             </li>
         </ul>
-        
+
     </nav>
 </aside>
