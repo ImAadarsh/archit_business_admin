@@ -1,7 +1,7 @@
 <?php
 // connect to the database
-include ("admin/connect.php");
-include ("admin/session.php");
+include("admin/connect.php");
+include("admin/session.php");
 
 // Ensure user is authenticated
 if (!isset($_SESSION)) {
@@ -41,18 +41,18 @@ $temp = 0;
 
 while ($row = mysqli_fetch_assoc($result)) {
     $temp++;
-    
+
     // Calculate row-level amounts (per GST rate)
     $row_gst_amount = isset($row['gst_group_tax']) ? floatval($row['gst_group_tax']) : 0;
     $row_sale_amount = isset($row['gst_group_amount']) ? floatval($row['gst_group_amount']) : 0;
-    $row_total = $row_sale_amount + $row_gst_amount;
-    
+    $row_total = $row_sale_amount;
+
     // Calculate individual GST components (proportional to this GST rate group)
     $dgst_amount = isset($row['total_dgst']) ? floatval($row['total_dgst']) : 0;
     $cgst_amount = isset($row['total_cgst']) ? floatval($row['total_cgst']) : 0;
     $igst_amount = isset($row['total_igst']) ? floatval($row['total_igst']) : 0;
     $total_invoice_gst = $dgst_amount + $cgst_amount + $igst_amount;
-    
+
     // Proportionally distribute GST components for this GST rate group
     if ($total_invoice_gst > 0) {
         $proportion = $row_gst_amount / $total_invoice_gst;
@@ -64,9 +64,9 @@ while ($row = mysqli_fetch_assoc($result)) {
         $cgst_for_row = 0;
         $igst_for_row = 0;
     }
-    
+
     $invoice_date = isset($row['invoice_date']) ? strtotime($row['invoice_date']) : time();
-    
+
     // Convert decimal GST rate to percentage (0.05 -> 5, 0.18 -> 18)
     $gst_rate_display = 'N/A';
     if (isset($row['gst_rate']) && $row['gst_rate'] !== null) {
@@ -76,7 +76,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         }
         $gst_rate_display = round($gst_val) . '%';
     }
-    
+
     fputcsv($output, array(
         isset($row['serial_no']) ? $row['serial_no'] : 'N/A',
         date('d M Y', $invoice_date),
