@@ -85,7 +85,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         isset($row['customer_state']) ? $row['customer_state'] : 'N/A',
         isset($row['hsn_code']) ? $row['hsn_code'] : 'N/A',
         $gst_rate_display,
-        number_format($row_sale_amount, 2),
+        number_format($row_sale_amount - $total_invoice_gst, 2),
         number_format($dgst_for_row, 2),
         number_format($cgst_for_row, 2),
         number_format($igst_for_row, 2),
