@@ -84,16 +84,60 @@ class EwayBillController
             return ['status' => true, 'token' => $token];
         }
 
-        return ['status' => false, 'message' => 'Authentication failed: ' . ($result['message'] ?? 'Unknown error')];
+        $msg = $result['message'] ?? $result['error'] ?? 'Unknown error';
+        return [
+            'status' => false,
+            'message' => 'Authentication failed: ' . $msg,
+            'api_response' => $response,
+            'api_http_code' => $http_code,
+            'api_decoded' => $result
+        ];
     }
 
     /**
-     * Map internal invoice data to e-Way bill API request format
+     * Indian state name to GST state code (first 2 digits of GSTIN)
+     */
+    public function stateNameToCode($stateName)
+    {
+        if (empty($stateName)) return 7;
+        $map = [
+            'Jammu' => 1, 'Kashmir' => 1, 'Himachal' => 2, 'Punjab' => 3, 'Chandigarh' => 4,
+            'Uttarakhand' => 5, 'Haryana' => 6, 'Delhi' => 7, 'Rajasthan' => 8, 'Uttar Pradesh' => 9,
+            'Bihar' => 10, 'Sikkim' => 11, 'Arunachal' => 12, 'Nagaland' => 13, 'Manipur' => 14,
+            'Mizoram' => 15, 'Tripura' => 16, 'Meghalaya' => 17, 'Assam' => 18, 'West Bengal' => 19,
+            'Jharkhand' => 20, 'Odisha' => 21, 'Chhattisgarh' => 22, 'Madhya Pradesh' => 23,
+            'Gujarat' => 24, 'Daman' => 25, 'Dadra' => 26, 'Maharashtra' => 27, 'Maharastra' => 27,
+            'Karnataka' => 29, 'Goa' => 30, 'Lakshadweep' => 31, 'Kerala' => 32, 'Tamil Nadu' => 33,
+            'Puducherry' => 34, 'Andaman' => 35, 'Telangana' => 36, 'Andhra Pradesh' => 37, 'Ladakh' => 38,
+        ];
+        $key = trim($stateName);
+        foreach ($map as $name => $code) {
+            if (stripos($key, $name) !== false || stripos($name, $key) !== false) return $code;
+        }
+        return 7;
+    }
+
+    /**
+     * Parse location address into line1 and line2 (strip HTML)
+     */
+    private function parseAddressLines($address)
+    {
+        if (empty($address)) return ['', ''];
+        $text = trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $address)));
+        $lines = preg_split('/\n+/', $text, 2);
+        return [
+            trim($lines[0] ?? ''),
+            trim($lines[1] ?? '')
+        ];
+    }
+
+    /**
+     * Map internal invoice data to e-Way bill API request format (full API spec)
      */
     public function prepareEwayBillData($invoice_id, $transport_details)
     {
         $sql = "SELECT i.*, b.business_name, b.gst as fromGstin, b.email, 
-                       l.location_name, l.address as fromAddr1, l.state as fromState,
+                       l.location_name, l.address as fromAddrRaw, l.state as fromState,
                        a.address_1 as toAddr1, a.address_2 as toAddr2, a.city as toCity, a.state as toState, a.pincode as toPincode
                 FROM invoices i
                 JOIN businessses b ON i.business_id = b.id
@@ -112,6 +156,13 @@ class EwayBillController
 
         if (!$invoice)
             return null;
+
+        $fromAddrLines = $this->parseAddressLines($invoice['fromAddrRaw'] ?? '');
+        $fromStateCode = $this->stateNameToCode($invoice['fromState'] ?? '');
+        $toStateCode = $this->stateNameToCode($invoice['toState'] ?? '');
+        $toPincode = (int) ($invoice['toPincode'] ?? 0);
+        if ($toPincode < 100000) $toPincode = 110001;
+        $fromPincode = 110001; // locations table has no pincode; override in form if needed
 
         // Fetch items
         $items_sql = "SELECT it.*, p.name as productName, p.hsn_code 
@@ -132,7 +183,7 @@ class EwayBillController
                 "productDesc" => $row['productName'],
                 "hsnCode" => (int) $row['hsn_code'],
                 "quantity" => (float) $row['quantity'],
-                "qtyUnit" => "NOS", // Defaulting to unit, should ideally be from product data
+                "qtyUnit" => "NOS",
                 "taxableAmount" => (float) ($row['price_of_all'] - ($row['igst'] ?: ($row['cgst'] + $row['dgst']))),
                 "sgstRate" => $row['dgst'] > 0 ? (float) ($row['gst_rate'] / 2) : 0,
                 "cgstRate" => $row['cgst'] > 0 ? (float) ($row['gst_rate'] / 2) : 0,
@@ -142,36 +193,52 @@ class EwayBillController
         }
         $stmt->close();
 
-        // Map to API format (Simplified based on Postman collection)
+        $transMode = $transport_details['transMode'] ?? '1';
+        $vehicleType = ($transMode === '1') ? 'R' : (($transMode === '2') ? 'R' : (($transMode === '3') ? 'A' : 'S'));
+
         return [
             "supplyType" => "O",
             "subSupplyType" => "1",
+            "subSupplyDesc" => " ",
             "docType" => "INV",
             "docNo" => (string) $invoice['serial_no'],
             "docDate" => date('d/m/Y', strtotime($invoice['invoice_date'])),
-            "fromGstin" => $invoice['fromGstin'],
+            "fromGstin" => $invoice['fromGstin'] ?: "URP",
             "fromTrdName" => $invoice['business_name'],
-            "fromAddr1" => $invoice['fromAddr1'],
+            "fromAddr1" => $fromAddrLines[0] ?: $invoice['location_name'],
+            "fromAddr2" => $fromAddrLines[1],
             "fromPlace" => $invoice['location_name'],
-            "fromPincode" => 110001, // Placeholder, should be from location
-            "fromStateCode" => 7, // Placeholder for Delhi
-            "toGstin" => $invoice['doc_no'] ?: "URP", // Using doc_no as GSTIN if customer_type is not retail
+            "fromPincode" => $fromPincode,
+            "fromStateCode" => $fromStateCode,
+            "actFromStateCode" => $fromStateCode,
+            "toGstin" => !empty($invoice['doc_no']) ? $invoice['doc_no'] : "URP",
             "toTrdName" => $invoice['name'],
-            "toAddr1" => $invoice['toAddr1'],
-            "toPlace" => $invoice['toCity'],
-            "toPincode" => (int) $invoice['toPincode'],
-            "toStateCode" => 7, // Placeholder
+            "toAddr1" => $invoice['toAddr1'] ?? '',
+            "toAddr2" => $invoice['toAddr2'] ?? '',
+            "toPlace" => $invoice['toCity'] ?? '',
+            "toPincode" => $toPincode,
+            "toStateCode" => $toStateCode,
+            "actToStateCode" => $toStateCode,
             "transactionType" => 1,
             "totalValue" => (float) $invoice['total_amount'],
-            "cgstValue" => (float) $invoice['total_cgst'],
-            "sgstValue" => (float) $invoice['total_dgst'],
-            "igstValue" => (float) $invoice['total_igst'],
+            "cgstValue" => (float) ($invoice['total_cgst'] ?? 0),
+            "sgstValue" => (float) ($invoice['total_dgst'] ?? 0),
+            "igstValue" => (float) ($invoice['total_igst'] ?? 0),
+            "cessValue" => 0,
+            "cessNonAdvolValue" => 0,
             "totInvValue" => (float) $invoice['total_amount'],
-            "transMode" => $transport_details['transMode'],
-            "transDistance" => (string) $transport_details['transDistance'],
-            "vehicleNo" => $transport_details['vehicleNo'],
+            "transMode" => $transMode,
+            "transDistance" => (string) ($transport_details['transDistance'] ?? '0'),
+            "vehicleNo" => $transport_details['vehicleNo'] ?? '',
+            "vehicleType" => $vehicleType,
             "transporterId" => $transport_details['transporterId'] ?? '',
             "transporterName" => $transport_details['transporterName'] ?? '',
+            "transDocNo" => $transport_details['transDocNo'] ?? '',
+            "transDocDate" => $transport_details['transDocDate'] ?? '',
+            "dispatchFromGSTIN" => "",
+            "dispatchFromTradeName" => "",
+            "shipToGSTIN" => "",
+            "shipToTradeName" => "",
             "itemList" => $items
         ];
     }
@@ -194,7 +261,7 @@ class EwayBillController
     /**
      * Generate e-Way bill by calling external API
      */
-    public function generateEwayBill($invoice_id, $transport_details)
+    public function generateEwayBill($invoice_id, $transport_details, $payload_override = null)
     {
         $business_id = $_SESSION['business_id'];
         $auth = $this->authenticate($business_id);
@@ -204,14 +271,20 @@ class EwayBillController
         }
 
         $token = $auth['token'];
-        $payload = $this->prepareEwayBillData($invoice_id, $transport_details);
+        $payload = $payload_override !== null ? $payload_override : $this->prepareEwayBillData($invoice_id, $transport_details);
 
         if (!$payload) {
             return ['status' => false, 'message' => 'Failed to prepare e-Way Bill data. Check invoice details.'];
         }
 
-        // Log the request locally before sending
-        $this->logEWayBill($invoice_id, $transport_details, $payload);
+        $log_details = [
+            'transMode' => $payload['transMode'] ?? '1',
+            'transDistance' => $payload['transDistance'] ?? '',
+            'vehicleNo' => $payload['vehicleNo'] ?? '',
+            'transporterId' => $payload['transporterId'] ?? '',
+            'transporterName' => $payload['transporterName'] ?? '',
+        ];
+        $this->logEWayBill($invoice_id, $log_details, $payload);
 
         // Real API Call
         $settings = $this->getEwayBillSettings($business_id);
@@ -220,7 +293,8 @@ class EwayBillController
             'Authorization: Bearer ' . $token,
             'ip_address: ' . $_SERVER['SERVER_ADDR'],
             'client_id: ' . $settings['client_id'],
-            'client_secret: ' . $settings['client_secret']
+            'client_secret: ' . $settings['client_secret'],
+            'gstin: ' . $settings['gstin']
         ];
 
         $url = rtrim($this->api_base_url, '/') . '/' . ltrim($this->generate_path, '/') . '?email=' . urlencode($settings['api_email']);
@@ -248,10 +322,13 @@ class EwayBillController
             ];
         }
 
+        $msg = $result['message'] ?? $result['error'] ?? 'API Error (Code: ' . $http_code . ')';
         return [
             'status' => 'error',
-            'message' => $result['message'] ?? 'API Error (Code: ' . $http_code . ')',
-            'details' => $result
+            'message' => $msg,
+            'api_response' => $response,
+            'api_http_code' => $http_code,
+            'api_decoded' => $result
         ];
     }
 

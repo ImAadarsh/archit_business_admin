@@ -7,6 +7,10 @@ include 'controller/EwayBillController.php';
 $business_id = $_SESSION['business_id'];
 $controller = new EwayBillController($connect);
 
+if (isset($_GET['success'])) {
+    $success_message = $_GET['success'];
+}
+
 // Handle Generation Request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway'])) {
     $invoice_id = $_POST['invoice_id'];
@@ -23,6 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway'])) {
         $success_message = "e-Way Bill generated successfully! Number: " . $response['ewayBillNo'];
     } else {
         $error_message = "Failed to generate e-Way Bill: " . $response['message'];
+        if (isset($response['api_http_code'])) {
+            $error_message .= " (HTTP " . (int)$response['api_http_code'] . ")";
+        }
     }
 }
 
@@ -208,7 +215,19 @@ while ($t = $transporters_res->fetch_assoc()) {
 
                         <?php if (isset($error_message)): ?>
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <?php echo $error_message; ?>
+                                <div><?php echo $error_message; ?></div>
+                                <?php if (isset($response) && (!empty($response['api_response']) || !empty($response['api_decoded']))): ?>
+                                    <details class="mt-2 mb-0">
+                                        <summary class="small">API response</summary>
+                                        <pre class="small bg-dark text-light p-2 rounded mt-1 mb-0" style="max-height:200px;overflow:auto;"><?php
+                                            if (!empty($response['api_decoded'])) {
+                                                echo htmlspecialchars(json_encode($response['api_decoded'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                                            } else {
+                                                echo htmlspecialchars($response['api_response']);
+                                            }
+                                        ?></pre>
+                                    </details>
+                                <?php endif; ?>
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -379,79 +398,10 @@ while ($t = $transporters_res->fetch_assoc()) {
                                                             <?php echo number_format($row['total_amount'], 2); ?>
                                                         </td>
                                                         <td>
-                                                            <button class="btn btn-primary btn-sm" data-toggle="modal"
-                                                                data-target="#genModal<?php echo $row['id']; ?>">
-                                                                <i class="fe fe-plus"></i> Generate
-                                                            </button>
-
-                                                            <!-- Generation Modal -->
-                                                            <div class="modal fade" id="genModal<?php echo $row['id']; ?>"
-                                                                tabindex="-1" role="dialog">
-                                                                <div class="modal-dialog" role="document">
-                                                                    <div class="modal-content">
-                                                                        <form method="POST">
-                                                                            <input type="hidden" name="invoice_id"
-                                                                                value="<?php echo $row['id']; ?>">
-                                                                            <div class="modal-header">
-                                                                                <h5 class="modal-title">Generate e-Way Bill
-                                                                                    for #
-                                                                                    <?php echo $row['serial_no']; ?>
-                                                                                </h5>
-                                                                                <button type="button" class="close"
-                                                                                    data-dismiss="modal">&times;</button>
-                                                                            </div>
-                                                                            <div class="modal-body">
-                                                                                <div class="form-group">
-                                                                                    <label>Transport Mode</label>
-                                                                                    <select class="form-control"
-                                                                                        name="trans_mode" required>
-                                                                                        <option value="1">Road</option>
-                                                                                        <option value="2">Rail</option>
-                                                                                        <option value="3">Air</option>
-                                                                                        <option value="4">Ship</option>
-                                                                                    </select>
-                                                                                </div>
-                                                                                <div class="form-group">
-                                                                                    <label>Approx. Distance (km)</label>
-                                                                                    <input type="number"
-                                                                                        class="form-control"
-                                                                                        name="trans_distance"
-                                                                                        placeholder="e.g. 250" required>
-                                                                                </div>
-                                                                                <div class="form-group">
-                                                                                    <label>Vehicle Number</label>
-                                                                                    <input type="text" class="form-control"
-                                                                                        name="vehicle_no"
-                                                                                        placeholder="XX00XX0000" required>
-                                                                                </div>
-                                                                                <div class="form-group">
-                                                                                    <label>Select Transporter
-                                                                                        (Optional)</label>
-                                                                                    <select class="form-control"
-                                                                                        name="transporter_id">
-                                                                                        <option value="">-- No Transporter
-                                                                                            --</option>
-                                                                                        <?php foreach ($transporters as $t): ?>
-                                                                                            <option
-                                                                                                value="<?php echo $t['transporter_id']; ?>">
-                                                                                                <?php echo $t['transporter_name']; ?>
-                                                                                            </option>
-                                                                                        <?php endforeach; ?>
-                                                                                    </select>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="modal-footer">
-                                                                                <button type="button"
-                                                                                    class="btn btn-secondary"
-                                                                                    data-dismiss="modal">Close</button>
-                                                                                <button type="submit" name="generate_eway"
-                                                                                    class="btn btn-primary">Generate e-Way
-                                                                                    Bill</button>
-                                                                            </div>
-                                                                        </form>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                                            <a href="eway-bill-generate.php?invoice_id=<?php echo (int)$row['id']; ?>"
+                                                                class="btn btn-primary btn-sm">
+                                                                <i class="fe fe-plus"></i> Generate (Full Form)
+                                                            </a>
                                                         </td>
                                                     </tr>
                                                 <?php endwhile; ?>
