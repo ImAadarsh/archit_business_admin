@@ -18,9 +18,21 @@ if (!$invoice_id) {
     exit;
 }
 
+// 1. Verify Invoice belongs to Business
+$stmt = $connect->prepare("SELECT business_id FROM invoices WHERE id = ?");
+$stmt->bind_param("i", $invoice_id);
+$stmt->execute();
+$res = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$res || (int) $res['business_id'] !== (int) $business_id) {
+    echo json_encode(['status' => 'error', 'message' => 'Invoice not found or access denied for this business.']);
+    exit;
+}
+
 $controller = new EwayBillController($connect);
 
-// 1. Prepare Invoice Data
+// 2. Prepare Invoice Data
 $default_transport = [
     'transMode' => '1',
     'transDistance' => '0',
