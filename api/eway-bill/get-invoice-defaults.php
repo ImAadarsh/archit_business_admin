@@ -1,7 +1,6 @@
 <?php
 // business/api/eway-bill/get-invoice-defaults.php
 include '../../admin/connect.php';
-include '../../admin/session.php';
 include '../../controller/EwayBillController.php';
 
 header('Content-Type: application/json');
