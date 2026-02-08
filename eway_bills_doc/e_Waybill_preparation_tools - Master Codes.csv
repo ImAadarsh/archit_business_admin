@@ -1,0 +1,111 @@
+  ,,Master Codes
+,,
+Master Name,Code,Description
+Supply Type,I,Inward
+,O,Outward
+Subsupply Type,1,Supply
+,2,Import
+,3,Export
+,4,Job Work
+,5,For Own Use
+,6,Job work Returns
+,7,Sales Return
+,8,Others
+,9,SKD/CKD/Lots
+,10,Line Sales
+,11,Recipient Not Known
+,12,Exhibition or Fairs
+Document Type,INV,Tax Invoice
+,BIL,Bill of Supply
+,BOE,Bill of Entry
+,CHL,Delivery Challan
+,OTH,Others
+Transportation Mode,1,Road
+,2,Rail
+,3,Air
+,4,Ship
+,5,inTransit
+Consignment Status,M,inMovement
+,T,inTransit
+Unit,BAG,BAGS
+,BAL,BALE
+,BDL,BUNDLES
+,BKL,BUCKLES
+,BOU,BILLION OF UNITS
+,BOX,BOX
+,BTL,BOTTLES
+,BUN,BUNCHES
+,CAN,CANS
+,CBM,CUBIC METERS
+,CCM,CUBIC CENTIMETERS
+,CMS,CENTI METERS
+,CTN,CARTONS
+,DOZ,DOZENS
+,DRM,DRUMS
+,GGK,GREAT GROSS
+,GMS,GRAMMES
+,GRS,GROSS
+,GYD,GROSS YARDS
+,KGS,KILOGRAMS
+,KLR,KILOLITRE
+,KME,KILOMETRE
+,LTR,LITRES
+,MTR,METERS
+,MLT,MILILITRE
+,MTS,METRIC TON
+,NOS,NUMBERS
+,OTH,OTHERS
+,PAC,PACKS
+,PCS,PIECES
+,PRS,PAIRS
+,QTL,QUINTAL
+,ROL,ROLLS
+,SET,SETS
+,SQF,SQUARE FEET
+,SQM,SQUARE METERS
+,SQY,SQUARE YARDS
+,TBS,TABLETS
+,TGM,TEN GROSS
+,THD,THOUSANDS
+,TON,TONNES
+,TUB,TUBES
+,UGS,US GALLONS
+,UNT,UNITS
+,YDS,YARDS
+Reason codes for Vehicle Update and Regeneration of Consolidated E Way Bill,1,Due to Break Down
+,2,Due to Transshipment
+,3,Others (Pls. Specify)
+,4,First Time
+Mode of generation code,API,Application Programming Interface
+,Exc,Bulk Upload
+,SMS,SMS Facility
+,APP,Mobile APP
+,WEB,Web based system
+Valid Formats of Vehicle Numbers,,AB121234 (First 2 char are State Code)
+,,AB12A1234 (First 2 char are State Code)
+,,AB12AB1234 (First 2 char are State Code)
+,,ABC1234
+,,AB123A1234 (First 2 char are State Code)
+,,AB12ABC1234 (First 2 char are State Code)
+,,DFXXXXXX (Defence Vehicle)
+,,TMXXXXXXXXXXXXX (Temp RC) At least 7 characters
+,,BPXXXXXXXXXXXXX (Bhutan Vehicle) At least 7 characters
+,,NPXXXXXXXXXXXXX (Nepal Vehicle) At least 7 characters
+E-way Bill Status,ACT,Active
+,CNL,Cancelled
+,DIS,Discarded
+Cancellation -Reason Codes,1,Duplicate
+,2,Order Cancelled
+,3,Data Entry mistake
+,4,Others
+Vehicle Type,R,Regular
+,O,ODC(Over Dimentional Cargo)
+Reasons for extension of validity,1,Natural Calamity
+,2,Law and Order Situation
+,4,Transshipment
+,5,Accident
+,99,Others
+Transaction Types,1,Regular
+,2,Bill To - Ship To
+,3,Bill From - Dispatch From
+,4,Combination of 2 and 3

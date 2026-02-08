@@ -1,0 +1,205 @@
+                                                                            E-waybill  Specification and Validation.,,,,,,,
+,,,,,,,
+,Column Name,Type,Description,Column Value,Mandatory Column,,Validations on Columns
+,supplyType,Text (7),Supply whether it is outward/inward,Refer Master codes,Yes,,Only Inward or Outward is allowed
+,subSupplyType,Text(20),Sub types of Supply,Refer Master codes,Yes,,Selection based on Inward or Outward transaction.
+,docType,Text(16),Document Type,Refer Master codes,Yes,,Only Document Type with the corresponding Sub-Type is allowed.Refer Table 2 in the Validation sheet.
+,docNo,Text(16),Document Number,78656,Yes,,"Only alpha numeric keys and  - (hyphen),   / (slash) and .(dot) are allowed."
+,docDate,Text(10),Document Date,02/02/2018,Yes,,Document Date should be in DD/MM/YYYY format
+,fromTrdName,Text(100),LegalName of consignor,Ambuja Private Ltd,Yes,,Only alpha numeric keys and  - (hyphen)  / (slash) and .(dot) are allowed.
+,fromGstin,Text(15),GSTIN of the Consignor,29AAACG0569P1Z3,Yes,,Only valid GSTIN are allowed.
+,fromAddr1,Text(120),Address of consignor - Line 1,BEML ROAD,Yes,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,fromAddr2,Text(120),Address of consignor - Line 2,KG ROAD,Yes,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,fromPlace,Text(50),Place of consignor,BANGALORE,Yes,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,fromPincode,Number(6),Pincode of consignor,560090,Yes,,"Only 6 digits number is allowed, From_Pin Code should belongs  to  From_State."
+,fromStateCode,Text(50),State of consignor,Refer Master codes,Yes,,Only valid states are allowed.
+,actFromStateCode,Text(50),State from where it is being dispatched,Refer Master codes,Yes,,Only valid states are allowed.
+,toTrdName,Text(100),LegalName of consignee,HUKKERI PVT LTD,Yes,,Only alpha numeric keys and  - (hyphen)  / (slash) and .(dot) are allowed.
+,toGstin,Text(15),GSTIN of consignee,URP,Yes,,Only valid GSTIN are allowed.
+,toAddr1,Text(120),Address of consignee - Line 1,VIDYARANYAPUR ROAD,Yes,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,toAddr2,Text(120),Address of consignee- Line 2,MG ROAD,Yes,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,toPlace,Text(50),Place of consignee,BANGALORE,Yes,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,toPincode,Number(6),Pincode of the consignee,560090,Yes,,"Only 6 digits number is allowed, To_Pin Code should belongs  to  To_State."
+,toStateCode,Text(50),State of the consignee,Refer Master codes,Yes,,Only valid states are allowed.
+,actToStateCode,Text(50),State to where it is being shipped,Refer Master codes,Yes,,Only valid states are allowed.
+,productName,Text(100),Name of the Product,IRON,Yes,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,productDesc,Text(100),Description of the Product,IRON PYRITES,Yes,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,hsnCode,Number(8),HSN Code of the Product,1005,Yes,,Valid 4 digits or 8 digits HSN code is allowed.
+,qtyUnit,Text(20),Unit of the Product,Refer Master codes,Yes,,Valid Unit is allowed.
+,quantity,Number(12),Quantity of Product,12,Yes,,Only numbers are allowed.
+,totalValue,Number(18),Assessable Value,31,Yes,,Only numbers are allowed.
+,"sgstRate,cgstRate,igstRate",Text(20),sgst tax rate,,Yes,,Only Standard Tax Rates are allowed(Refer Table 1 in the Validation sheet).
+,cgstValue,Number(18),CGST Amount,7,Yes,It's mandoatory when you generate e-waybill for same state,Only numbers are allowed.
+,sgstValue,Number(18),SGST Amount,8,Yes,It's mandoatory when you generate e-waybill for same state,Only numbers are allowed.
+,igstValue,Number(18),IGST Amount,9,Yes, It's mandoatory when you generate e-waybill from one to another state,Only numbers are allowed.
+,cessValue,Number(18),CESS Amount,1,No,,Only numbers are allowed.
+,cessNonAdvolValue,Number(18),CESS Non Advol Amount,1,No,,Only numbers are allowed.
+,Others,Number(18),Other chareges,1,No,,Negative and Non negative numbers are allowed.
+,totInvValue ,Number(18),"Sum of assessable value , tax value and other charges",65,Yes,,"Sum of Assessable value, CGST Amount, SGST Amount, IGST Amount, CESS Amount, CESS Non Advol Amount and Others  should be lesser than or equal to  the Total Invoice Value.(Only 2 Rupee difference is allowed)"
+,transMode,Text(10),Mode of transportation,Refer Master codes,yes,Its mandatory when generating part B,Only valid Trans Mode is allowed.
+,transDistance,Number(4),Distance of transportation,80,Yes,,Only numbers are allowed. Distance should be lesser than or equal to 4000 KM.
+,transporterName,Text(100),Transporter Name,TAKRE PVT LTD,No,,"Only alpha numeric keys and  @,  # , -,  /,, &, . are allowed."
+,transporterId,Text(15),Transporter Id,28ASDRF0767H1V4,Conditional,"To generate only Part A slip, Transporter ID is mandatory",Only valid GSTIN are allowed.
+,transDocNo,Text(15),Transporter Document Number,4567,Conditional,Mandatory if Trans mode is Rail/Air/Ship,"Only alpha numeric keys and  - (hyphen),   / (slash) and .(dot) are allowed."
+,transDocDate,Text(10),Transporter Doc Date,02/03/2018,Conditional,Mandatory if Trans mode is Rail/Air/Ship,Trans Date should be in DD/MM/YYYY format.
+,vehicleNo,Text(15),Vehicle Number,"KA12KA1234          OR
+KA12K1234             OR   
+KA123456                OR
+KAR1234                  OR              KA123K1234           OR 
+KA12KAR1234        OR   DFXXXXXX               OR         TRXXXXXX               OR           BPXXXXXX               OR  NPXXXXXX",Conditional,Mandatory if Mode of transportation is Road and Trans DocNo is not entered ,Only valid vehicle numbers are allowed.
+,vehicleType,Text(10),Vehicle Type,Regular                                     ODC,Conditional,Mandatory If Trans Mode is Road,Only Regular or ODC (Over Dimentional Cargo) are allowed.
+,taxableAmount,Number(18),taxable amount,31,Yes,,Only Standard Tax Rates are allowed(Refer Table 1 in the Validation sheet).
+,transactionType,Number,transaction type,4,Yes,,only numbers are allowed.
+,,,,,,,
+,,,,,,Validations,
+,,,,,,,
+,1)Generation of E Way Bill using the E Way Bill API System will be blocked for the following scenarios where the Supplier is enabled for E Invoice. Such E Way Bills need to be generated either along with the IRN generation or with reference to the IRN using E Invoice System only />,,,,,,
+,• B2B and Export transactions where document date is equal to or greater than 01/10/2020 • Document type - Tax Invoice,,,,,,
+,,,,,,,
+,,,,,,,
+,"2)If the other party GSTIN is cancelled, generation of E Way Bill is allowed if the document date is within the period during which the GSTIN was active",,,,,,
+,,,,,,,
+,,,,,,,
+,"3)If the distance is passed as ‘0’ (Zero) and the distance between the PIN codes provided is available in E Way Bill database, the system will replace the distance as per the database. Passing ‘0’ is an indication that the user wants the system to take the distance as per the E Way Bill database",,,,,,
+,,,,,,,
+,,,,,,,
+,"4)If the distance is passed and is differing by more than ±10% of the pin to pin distance stored in system, the response will have corresponding error code",,,,,,
+,,,,,,,
+,,,,,,,
+,"5)If the distance is passed and the actual distance in database is less that 100 kms, the distance passed has to be less than distance in database plus 10% of the distance. (Ex. If the distance is 60 kms, distance up to 66kms is allowed)",,,,,,
+,,,,,,,
+,,,,,,,
+,"6)If the distance between the two pin-codes provided is not available in E Way Bill database, E-waybill will be generated with an alert message as ""The distance between the given PIN codes are not available in the system."" and it’s a responsibility of the generator to provide correct distance in such cases.",,,,,,
+,,,,,,,
+,"7)If fromPincode and toPincode are same then, maximum distance allowed is 100 kms. If the supply type is ‘Line Sales’, it can be up to 300 kms",,,,,,
+,,,,,,,
+,,,,,,,
+,8)The actual distance from source to destination cannot be greater than 4000.,,,,,,
+,,,,,,,
+,"9)PIN Codes are validated against the State they belong to, actFromStateCode- fromPincode and actToStateCode- toPincod",,,,,,
+,If the PIN Code does not exist in the master database of the E Way Bill System and the first 3 digits of the PIN code matches with the respective State as per the,,,,,,
+,,,,,,,
+,,,,,,,
+,"10)pattern of PIN code-to-State mapping pattern defined by postal department, then E Way Bill gets generated",,,,,,
+,,,,,,,
+,,,,,,,
+,"11)For ‘Other Country’, State code as 96 as well as 99 are accepted but system stores the state code as 99",,,,,,
+,,,,,,,
+,"12)Generation of duplicate E-waybills for the same document by Consignee and Transporter is not allowed hence forth, hence now onwards neither Consignor nor Consignee nor Transporter can generate duplicate E-waybills for the same document.",,,,,,
+,,,,,,,
+,,,,,,,
+,"13)For SKD/CKD/Lots movement in multiple vehicles, you have to generate a delivery challan for each of the vehicle containing the items being moved in the respective vehicles, the last vehicle should carry the original invoice.",,,,,,
+,,,,,,,
+,,,,,,,
+,"14)Regeneration of e-waybill is possible for the cancelled e-waybill as well as for the E-waybill having status ""DIS"".",,,,,,
+,,,,,,,
+,,,,,,,
+,"15)For Outward, if Bill To GSTIN(toGstin) belongs to SEZ, Bill To state(toState) should be Other Country and ship to statecode (actTostatecode) should be the actual state code.",,,,,,
+,,,,,,,
+,"16)Similarly for Inward, if Bill From GSTIN(fromGstin) belongs to SEZ, Bill From state(fromState) should be Other Country and Dispatch from statecode (actFromstatecode) should be the actual state code.",,,,,,
+,17)Tax rates are being validated. Only the allowed tax rates will be accepted.,,,,,,
+,,,,,,,
+,"18)Document type is validated against the supply and sub supply type. Accordingly, the type of Consigner and Consignee is allowed.",,,,,,
+,,,,,,,
+,,,,,,,
+,"19)The system checks for the duplicate e-way bill on the same document number of the consignor. If already one e-way bill exists with same document number, the system will not allow generating one more e-way bill on the same number. That is, if the consignor is trying to generate multiple e-way bills based on one document number, the system throws error. Even if the consignee or transporter tries to generate an E Way Bill for the same document number, system will not allow generation of E Way Bill as consigner himself has used the document number for generation of E Way Bill.",,,,,,
+,"However, if consignee or transporter tries to generate the multiple e-way bills on the same document number of the consignor, provided the consigner has not used the document number already to generate E Way Bill, the system will generate E Way Bill and alert through API to the consignee or transporter that already there is one e-way bill with that document number.",,,,,,
+,,,,,,,
+,,,,,,,
+,"20)To identify the type of movement of goods, type of transaction is being captured.",,,,,,
+,,,,,,,
+,,,,,,,
+,21)Additional fields for cessNonAdvolValue and otherValue have been introduced to enter CESS Non Advol amount and any other charges (+/-) written in invoice.,,,,,,
+,,,,,,,
+,,,,,,,
+,"22)Sum of totalValue, cgstValue, sgstValue, igstValue, cessValue , otherValue and cessNonAdvolValue should be equal to or less than totInvValue with a grace value of Rs. 2.00.",,,,,,
+,,,,,,,
+,,,,,,,
+,23)We have added a new Status DIS for such E Way bills that have been generated with only Part A and Part B is not updated even after 15 days of generation of this temporary number.,,,,,,
+,,,,,,,
+,,,,,,,
+,"24)Passing transporterId is mandatory for generating Part A Slip and transDocNo, transMode and vehicleNo should be blank.",,,,,,
+,,,,,,,
+,"25)Alerting the generator of the E-Way Bill through SMS message, in case the total invoice value is more than Rs. 10 Crores.",,,,,,
+,,,,,,,
+,,,,,,,
+,"26)GSTR1 fields (cgstValue, sgstValue, igstValue, cessValue, totalValue, otherValue and totInvValue in main object and cgstRate, sgstRate, igstRate, cessRate, cessNonAdvol, taxableAmount) are mandatory as per the intrastate or interstate transaction.",,,,,,
+,,,,,,,
+,,,,,,,
+,27)Maximum number of items in each invoice should not exceed more than 250 items.,,,,,,
+,,,,,,,
+,,,,,,,
+,"28)In case of tax payer generating as supplier, the GSTIN of the requesting tax payer should be fromGstin",,,,,,
+,,,,,,,
+,,,,,,,
+,"29)In case of tax payer generating as recipient, the GSTIN of the requesting tax payer should be - toGstin",,,,,,
+,,,,,,,
+,,,,,,,
+,"30)In case of transporter(enrolled transporter / GSTIN updated as transporter in e-way bill portal) generating e-way bill, the GSTIN/TRANSIN of the requesting person should be -transporterId",,,,,,
+,,,,,,,
+,,,,,,,
+,31)Enrolled transporter(TRANSIN) cannot be supplier (- fromGstin) or buyer (- toGstin),,,,,,
+,,,,,,,
+,,,,,,,
+,32)The following fields should have the one of the values given in the master codes,,,,,,
+,1. Supply Type 2. Sub Supply Type 3. Document Type 4. Transportation Mode 5. Unit Quantity Code,,,,,,
+,,,,,,,
+,,,,,,,
+,33)The Document Date should be less than or equal to current date,,,,,,
+,,,,,,,
+,,,,,,,
+,34)The Transport document Date should be greater than equal to document date,,,,,,
+,,,,,,,
+,,,,,,,
+,"35)- fromGstin and - toGstin should be valid GSTIN number of the supplier and recipient. In case of unregistered person involved in the transaction, pass URP in these fields.",,,,,,
+,,,,,,,
+,,,,,,,
+,"36)In case of ‘Bill to – ship to’ transaction, - toGstin,- toTrdName and - toStateCode should be passed with ‘Bill To’ party and - toAddr1, - toAddr2, - toPlace, - toPincode and - actToStateCode values should be passed with ‘Ship To’ party.",,,,,,
+,,,,,,,
+,,,,,,,
+,"37)In case of ‘Bill From – Dispatch From’ transaction, - fromGstin, - fromTrdName and - fromStateCode should be passed with ‘Bill From’ party and - fromAddr1, - fromAddr2, - fromPlace, - fromPincode and - actFromStateCode values should be passed with ‘Dispatch from’ party.",,,,,,
+,,,,,,,
+,,,,,,,
+,"38)e-Way Bill cannot be generated with only SAC codes(99) for Services, minimum one HSN code belonging to Goods is mandatory.",,,,,,
+,,,,,,,
+,,,,,,,
+,39)HSN Code should be valid as per the GST master,,,,,,
+,,,,,,,
+,,,,,,,
+,"40)In case of intra-state transaction, where both - fromGstin and - toGstin belong to same state(fromStateCode and toStateCode should be same), the SGST and CGST tax rate and value has to be passed",,,,,,
+,,,,,,,
+,,,,,,,
+,"41)In case of inter-state transaction, where both - fromGstin and - toGstin belong to different states(fromStateCode and toStateCode should be different), the IGST tax rate and value has to be passed",,,,,,
+,,,,,,,
+,,,,,,,
+,"42)In case of one of the party is SEZ unit, then IGST tax rate and value has to be passed",,,,,,
+,,,,,,,
+,,,,,,,
+,"43)In case of road is a transportation mode , the vehicle number should be passed and transport document number is optional",,,,,,
+,,,,,,,
+,,,,,,,
+,"44)In case of rail, air or ship is a transportation mode, the transport document number is must",,,,,,
+,,,,,,,
+,,,,,,,
+,"45)If the transportation is done through the transporter, trans_id field should have valid TRANSID or GSTIN",,,,,,
+,,,,,,,
+,,,,,,,
+,"46)In case of road transportation, if the vehicle is ‘over dimension cargo’, pass O, otherwise R (regular).",,,,,,
+,,,,,,,
+,,,,,,,
+,"47)Vehicle type ODC is provisioned for transport mode 'Ship' 48)If Mode transportation is selected has ship, the vehicle type can be ODC and Vehicle Number has to be provided",,,,,,
+,,,,,,,
+,,,,,,,
+,49)UQC Code while Initializing multi-vehicle movement UQC value is not validating against the UQC provided while generating Eway bill,,,,,,
+,,,,,,,
+,,,,,,,
+,"50)If vehicle number is passed, the format of the vehicle should be valid and as per the format",,,,,,
+,,,,,,,
+,,,,,,,
+,"51)For temporary registered vehicles, the registration number format should be ‘TMXXXXXX’",,,,,,
+,,,,,,,
+,,,,,,,
+,"52)In case of sub supply type is others, then pass the - subSupplyDesc accordingly.",,,,,,
+,,,,,,,
+,,,,,,,
+,"53)In case of import or export, the actual distance being travelled in the country has to be passed.",,,,,,

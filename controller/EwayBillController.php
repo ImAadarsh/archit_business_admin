@@ -5,9 +5,10 @@ class EwayBillController
 {
     private $connect;
     // Base URL for the 3rd party vendor API.
-    private $api_base_url = "https://api.invoicemate.in/public/api/";
+    private $api_base_url = "https://apisandbox.whitebooks.in/";
     private $auth_path = "ewaybillapi/v1.03/authenticate";
     private $generate_path = "ewaybillapi/v1.03/ewayapi/genewaybill";
+    private $get_gstin_details_path = "ewaybillapi/v1.03/ewayapi/getgstindetails";
 
     public function __construct($connect)
     {
@@ -51,7 +52,7 @@ class EwayBillController
         ];
 
         $headers = [
-            'ip_address: ' . $_SERVER['SERVER_ADDR'], // Server IP
+            'ip_address: ' . ($settings['ip_address'] ?? $_SERVER['SERVER_ADDR']),
             'client_id: ' . $settings['client_id'],
             'client_secret: ' . $settings['client_secret'],
             'gstin: ' . $settings['gstin']
@@ -99,20 +100,53 @@ class EwayBillController
      */
     public function stateNameToCode($stateName)
     {
-        if (empty($stateName)) return 7;
+        if (empty($stateName))
+            return 7;
         $map = [
-            'Jammu' => 1, 'Kashmir' => 1, 'Himachal' => 2, 'Punjab' => 3, 'Chandigarh' => 4,
-            'Uttarakhand' => 5, 'Haryana' => 6, 'Delhi' => 7, 'Rajasthan' => 8, 'Uttar Pradesh' => 9,
-            'Bihar' => 10, 'Sikkim' => 11, 'Arunachal' => 12, 'Nagaland' => 13, 'Manipur' => 14,
-            'Mizoram' => 15, 'Tripura' => 16, 'Meghalaya' => 17, 'Assam' => 18, 'West Bengal' => 19,
-            'Jharkhand' => 20, 'Odisha' => 21, 'Chhattisgarh' => 22, 'Madhya Pradesh' => 23,
-            'Gujarat' => 24, 'Daman' => 25, 'Dadra' => 26, 'Maharashtra' => 27, 'Maharastra' => 27,
-            'Karnataka' => 29, 'Goa' => 30, 'Lakshadweep' => 31, 'Kerala' => 32, 'Tamil Nadu' => 33,
-            'Puducherry' => 34, 'Andaman' => 35, 'Telangana' => 36, 'Andhra Pradesh' => 37, 'Ladakh' => 38,
+            'Jammu' => 1,
+            'Kashmir' => 1,
+            'Himachal' => 2,
+            'Punjab' => 3,
+            'Chandigarh' => 4,
+            'Uttarakhand' => 5,
+            'Haryana' => 6,
+            'Delhi' => 7,
+            'Rajasthan' => 8,
+            'Uttar Pradesh' => 9,
+            'Bihar' => 10,
+            'Sikkim' => 11,
+            'Arunachal' => 12,
+            'Nagaland' => 13,
+            'Manipur' => 14,
+            'Mizoram' => 15,
+            'Tripura' => 16,
+            'Meghalaya' => 17,
+            'Assam' => 18,
+            'West Bengal' => 19,
+            'Jharkhand' => 20,
+            'Odisha' => 21,
+            'Chhattisgarh' => 22,
+            'Madhya Pradesh' => 23,
+            'Gujarat' => 24,
+            'Daman' => 25,
+            'Dadra' => 26,
+            'Maharashtra' => 27,
+            'Maharastra' => 27,
+            'Karnataka' => 29,
+            'Goa' => 30,
+            'Lakshadweep' => 31,
+            'Kerala' => 32,
+            'Tamil Nadu' => 33,
+            'Puducherry' => 34,
+            'Andaman' => 35,
+            'Telangana' => 36,
+            'Andhra Pradesh' => 37,
+            'Ladakh' => 38,
         ];
         $key = trim($stateName);
         foreach ($map as $name => $code) {
-            if (stripos($key, $name) !== false || stripos($name, $key) !== false) return $code;
+            if (stripos($key, $name) !== false || stripos($name, $key) !== false)
+                return $code;
         }
         return 7;
     }
@@ -122,7 +156,8 @@ class EwayBillController
      */
     private function parseAddressLines($address)
     {
-        if (empty($address)) return ['', ''];
+        if (empty($address))
+            return ['', ''];
         $text = trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $address)));
         $lines = preg_split('/\n+/', $text, 2);
         return [
@@ -161,7 +196,8 @@ class EwayBillController
         $fromStateCode = $this->stateNameToCode($invoice['fromState'] ?? '');
         $toStateCode = $this->stateNameToCode($invoice['toState'] ?? '');
         $toPincode = (int) ($invoice['toPincode'] ?? 0);
-        if ($toPincode < 100000) $toPincode = 110001;
+        if ($toPincode < 100000)
+            $toPincode = 110001;
         $fromPincode = 110001; // locations table has no pincode; override in form if needed
 
         // Fetch items
@@ -196,6 +232,11 @@ class EwayBillController
         $transMode = $transport_details['transMode'] ?? '1';
         $vehicleType = ($transMode === '1') ? 'R' : (($transMode === '2') ? 'R' : (($transMode === '3') ? 'A' : 'S'));
 
+        $totalTaxable = 0;
+        foreach ($items as $it) {
+            $totalTaxable += (float) $it['taxableAmount'];
+        }
+
         return [
             "supplyType" => "O",
             "subSupplyType" => "1",
@@ -220,7 +261,7 @@ class EwayBillController
             "toStateCode" => $toStateCode,
             "actToStateCode" => $toStateCode,
             "transactionType" => 1,
-            "totalValue" => (float) $invoice['total_amount'],
+            "totalValue" => (float) $totalTaxable,
             "cgstValue" => (float) ($invoice['total_cgst'] ?? 0),
             "sgstValue" => (float) ($invoice['total_dgst'] ?? 0),
             "igstValue" => (float) ($invoice['total_igst'] ?? 0),
@@ -244,20 +285,6 @@ class EwayBillController
     }
 
     /**
-     * Get list of saved transporters for a business
-     */
-    public function getTransporters($business_id)
-    {
-        $sql = "SELECT * FROM transporters WHERE business_id = ? AND is_active = 1";
-        $stmt = $this->connect->prepare($sql);
-        if (!$stmt) {
-            die("Error preparing statement (getTransporters): " . $this->connect->error);
-        }
-        $stmt->bind_param("i", $business_id);
-        $stmt->execute();
-        return $stmt->get_result();
-    }
-
     /**
      * Generate e-Way bill by calling external API
      */
@@ -291,7 +318,7 @@ class EwayBillController
         $headers = [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $token,
-            'ip_address: ' . $_SERVER['SERVER_ADDR'],
+            'ip_address: ' . ($settings['ip_address'] ?? $_SERVER['SERVER_ADDR']),
             'client_id: ' . $settings['client_id'],
             'client_secret: ' . $settings['client_secret'],
             'gstin: ' . $settings['gstin']
@@ -359,5 +386,95 @@ class EwayBillController
         $stmt->bind_param("ssssi", $response['ewayBillNo'], $response['ewayBillDate'], $response['validUpto'], $res_json, $invoice_id);
         $stmt->execute();
         $stmt->close();
+    }
+
+    /**
+     * Get defaults for a specific form and business
+     */
+    public function getFormDefaults($business_id, $form_key)
+    {
+        $sql = "SELECT field_key, field_value FROM business_form_defaults WHERE business_id = ? AND form_key = ?";
+        $stmt = $this->connect->prepare($sql);
+        if (!$stmt)
+            return [];
+        $stmt->bind_param("is", $business_id, $form_key);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $defaults = [];
+        while ($row = $res->fetch_assoc()) {
+            $defaults[$row['field_key']] = $row['field_value'];
+        }
+        $stmt->close();
+        return $defaults;
+    }
+
+    /**
+     * Save/Update a default value for a form field
+     */
+    public function saveFormDefault($business_id, $form_key, $field_key, $field_value)
+    {
+        $sql = "INSERT INTO business_form_defaults (business_id, form_key, field_key, field_value) 
+                VALUES (?, ?, ?, ?) 
+                ON DUPLICATE KEY UPDATE field_value = VALUES(field_value)";
+        $stmt = $this->connect->prepare($sql);
+        if (!$stmt)
+            return false;
+        $stmt->bind_param("isss", $business_id, $form_key, $field_key, $field_value);
+        $success = $stmt->execute();
+        $stmt->close();
+        return $success;
+    }
+
+    /**
+     * Fetch GST details for a given GSTIN
+     */
+    public function getGstDetails($business_id, $targetGstin)
+    {
+        $settings = $this->getEwayBillSettings($business_id);
+        if (!$settings) {
+            return ['status' => 'error', 'message' => 'e-Way Bill settings not found for this business.'];
+        }
+
+        $params = [
+            'email' => $settings['api_email'],
+            'GSTIN' => $targetGstin
+        ];
+
+        $headers = [
+            'ip_address: ' . ($settings['ip_address'] ?? $_SERVER['SERVER_ADDR']),
+            'client_id: ' . $settings['client_id'],
+            'client_secret: ' . $settings['client_secret'],
+            'gstin: ' . $settings['gstin']
+        ];
+
+        // Using user provided URL base if needed, but standardizing on controller base
+        $url = rtrim($this->api_base_url, '/') . '/' . ltrim($this->get_gstin_details_path, '/') . '?' . http_build_query($params);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $result = json_decode($response, true);
+
+        if ($http_code === 200 && isset($result['status_cd']) && $result['status_cd'] === '1') {
+            return [
+                'status' => 'success',
+                'data' => $result['data']
+            ];
+        }
+
+        $msg = $result['status_desc'] ?? $result['message'] ?? $result['error'] ?? 'API Error (Code: ' . $http_code . ')';
+        return [
+            'status' => 'error',
+            'message' => $msg,
+            'api_response' => $response,
+            'api_http_code' => $http_code,
+            'api_decoded' => $result
+        ];
     }
 }
