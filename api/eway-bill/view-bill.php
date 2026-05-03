@@ -36,4 +36,31 @@ if (!$ok) {
 }
 
 $controller = new EwayBillController($connect);
-echo json_encode($controller->viewEwayBill($business_id, $ebnClean), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$result = $controller->viewEwayBill($business_id, $ebnClean);
+
+if (is_array($result) && ($result['status'] ?? '') === 'success') {
+    $masterFile = dirname(__DIR__, 2) . '/eway_bills_doc/eway_master_codes.php';
+    $mc = (is_readable($masterFile) && is_array($m = include $masterFile)) ? $m : [];
+    $result['master_codes'] = $mc;
+    $result['display_code_labels'] = [
+        'status' => [
+            'ACT' => 'Active',
+            'CNL' => 'Cancelled',
+            'REJ' => 'Rejected by other party',
+        ],
+        'rejectStatus' => [
+            'N' => 'Not rejected',
+            'Y' => 'Rejected by other party',
+        ],
+        'genMode' => [
+            'API' => 'API',
+            'PORTAL' => 'NIC Portal',
+            'MOBILE' => 'Mobile App',
+            'SMS' => 'SMS',
+            'BULK' => 'Bulk Upload',
+            'TAX-PAYER' => 'Tax payer',
+        ],
+    ];
+}
+
+echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

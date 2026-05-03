@@ -39,7 +39,27 @@ Fetch legal name and address for any GSTIN.
 
 ---
 
-## 2. Get Invoice Defaults & Master Codes
+## 2. Master codes (dropdowns)
+Returns the same NIC master lists used on the website (`eway_master_codes.php`), without needing an invoice. Use for Part-B / vehicle update spinners: **`transMode`**, **`stateCode`**, **`vehUpdateReason`** (reasons 1–4 for vehicle updates). Other keys (`supplyType`, `cancelReason`, etc.) are included for reuse.
+
+- **Endpoint**: `master-codes.php`
+- **Method**: `GET`
+- **Parameters**: none
+- **Success Response**:
+```json
+{
+  "status": "success",
+  "master_codes": {
+    "transMode": { "1": "Road", "2": "Rail", ... },
+    "stateCode": { "7": "Delhi", ... },
+    "vehUpdateReason": { "1": "Due to Break Down", ... }
+  }
+}
+```
+
+---
+
+## 3. Get Invoice Defaults & Master Codes
 Use this to pre-fill the e-Way Bill generation form on the app. It returns the invoice data, business-specific settings, and dropdown options (Master Codes).
 
 - **Endpoint**: `get-invoice-defaults.php`
@@ -131,7 +151,7 @@ Use this to pre-fill the e-Way Bill generation form on the app. It returns the i
 
 ---
 
-## 3. Generate e-Way Bill
+## 4. Generate e-Way Bill
 Perform the final generation call.
 
 - **Endpoint**: `generate-eway-bill.php`
@@ -159,6 +179,22 @@ Perform the final generation call.
   "message": "Detailed error description from API"
 }
 ```
+
+---
+
+## View e-Way Bill
+Fetch NIC bill details for a number already linked to your business.
+
+- **Endpoint**: `view-bill.php`
+- **Method**: `GET` (or JSON body)
+- **Parameters**: `business_id`, `ebn` (12-digit e-Way no.)
+
+On **success**, the response includes:
+- **`data`**: NIC payload (same fields as the portal).
+- **`master_codes`**: full `eway_master_codes.php` map so the app can show **code — description** everywhere (supply type, states, transaction type, units, etc.).
+- **`display_code_labels`**: short maps for **status**, **rejectStatus**, **genMode** (aligned with the dashboard viewer).
+
+If you build a “full form” UI, use `data` for values and `master_codes` / `display_code_labels` for labels. Older clients can ignore the new keys.
 
 ---
 
