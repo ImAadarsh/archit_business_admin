@@ -1,9 +1,17 @@
 <?php
-$bid = $_SESSION['business_id'];
-$sql = "SELECT logo FROM businessses WHERE id = $bid";
-$result = $connect->query($sql);
-$business = $result->fetch_assoc();
-$logo = $business['logo'] ? $uri . $business['logo'] : 'assets/images/invoice_mate.svg';
+$bid = isset($_SESSION['business_id']) ? (int) $_SESSION['business_id'] : 0;
+$logo = 'assets/images/invoice_mate.svg';
+$base_uri = isset($uri) ? $uri : '';
+if ($bid > 0 && isset($connect) && $connect instanceof mysqli) {
+    $sql = 'SELECT logo FROM businessses WHERE id = ' . $bid;
+    $result = $connect->query($sql);
+    if ($result) {
+        $business = $result->fetch_assoc();
+        if (!empty($business['logo'])) {
+            $logo = $base_uri . $business['logo'];
+        }
+    }
+}
 ?>
 <nav class="topnav navbar navbar-light">
     <button type="button" class="navbar-toggler text-muted mt-2 p-0 mr-3 collapseSidebar">

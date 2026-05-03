@@ -5,6 +5,15 @@ if (defined('CASHFREE_CONFIG_LOADED')) {
 }
 define('CASHFREE_CONFIG_LOADED', true);
 
+/** @return bool True when global $connect is a live mysqli instance (not false from failed connect). */
+if (!function_exists('subscription_db_ok')) {
+    function subscription_db_ok()
+    {
+        global $connect;
+        return isset($connect) && $connect instanceof mysqli;
+    }
+}
+
 // Cashfree Configuration for Business
 define('CASHFREE_CLIENT_ID', 'TEST108162956a8ed7c31b33fa15f63f59261801');
 define('CASHFREE_CLIENT_SECRET', 'cfsk_ma_test_c2c13226a4c8c3a197c0c64dcd71270f_e929b4e6');
@@ -112,6 +121,9 @@ function manageCashfreeSubscription($subscriptionId, $action, $actionDetails = n
 if (!function_exists('getAllPlans')) {
 function getAllPlans() {
     global $connect;
+    if (!subscription_db_ok()) {
+        return [];
+    }
     $sql = "SELECT * FROM subscription_plans WHERE is_active = 1 AND is_public = 1 ORDER BY display_order, created_at ASC";
     $result = $connect->query($sql);
     $plans = [];
@@ -130,6 +142,9 @@ function getAllPlans() {
 if (!function_exists('getBusinessSubscription')) {
 function getBusinessSubscription($businessId) {
     global $connect;
+    if (!subscription_db_ok()) {
+        return null;
+    }
     $sql = "SELECT s.*, sp.name as plan_name, sp.code as plan_code, sp.features_json 
             FROM subscriptions s 
             JOIN subscription_plans sp ON s.plan_id = sp.id 
@@ -138,6 +153,9 @@ function getBusinessSubscription($businessId) {
             LIMIT 1";
     
     $stmt = $connect->prepare($sql);
+    if (!$stmt) {
+        return null;
+    }
     $stmt->bind_param("i", $businessId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -152,7 +170,9 @@ function getBusinessSubscription($businessId) {
 if (!function_exists('hasActiveSubscription')) {
 function hasActiveSubscription($businessId) {
     global $connect;
-    
+    if (!subscription_db_ok()) {
+        return false;
+    }
     // Check if business has active subscription
     $sql = "SELECT s.*, sp.trial_days, sp.features_json 
             FROM subscriptions s 
@@ -163,6 +183,9 @@ function hasActiveSubscription($businessId) {
             LIMIT 1";
     
     $stmt = $connect->prepare($sql);
+    if (!$stmt) {
+        return false;
+    }
     $stmt->bind_param("i", $businessId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -212,7 +235,15 @@ function canAccessFeature($businessId, $feature) {
 if (!function_exists('getBusinessSubscriptionStatus')) {
 function getBusinessSubscriptionStatus($businessId) {
     global $connect;
-    
+    if (!subscription_db_ok()) {
+        return [
+            'status' => 'none',
+            'plan_name' => 'No Plan',
+            'trial_remaining' => 0,
+            'features' => [],
+        ];
+    }
+
     $sql = "SELECT s.*, sp.name as plan_name, sp.trial_days, sp.features_json,
                    b.trial_ends_at as business_trial_ends
             FROM subscriptions s 
@@ -223,6 +254,14 @@ function getBusinessSubscriptionStatus($businessId) {
             LIMIT 1";
     
     $stmt = $connect->prepare($sql);
+    if (!$stmt) {
+        return [
+            'status' => 'none',
+            'plan_name' => 'No Plan',
+            'trial_remaining' => 0,
+            'features' => [],
+        ];
+    }
     $stmt->bind_param("i", $businessId);
     $stmt->execute();
     $result = $stmt->get_result();

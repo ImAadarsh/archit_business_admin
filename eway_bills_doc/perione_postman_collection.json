@@ -1,0 +1,341 @@
+{
+  "info": {
+    "_postman_id": "perione-eway-archit-2026",
+    "name": "Perione e-Way Bill (Archit)",
+    "description": "Perione NIC v1.03 e-Way Bill API. Pre-request script base64-encodes the inner NIC JSON into the outer GENEWAYBILL envelope. Configure values in the matching environment file. See https://docs.ewaybillgst.gov.in/apidocs/version1.03/generate-eway-bill.html#requestSampleJSON",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "perione_base_url",
+      "value": "https://api.perione.in",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "1. Authenticate",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "ip_address", "value": "{{ip_address}}" },
+          { "key": "client_id", "value": "{{client_id}}" },
+          { "key": "client_secret", "value": "{{client_secret}}" },
+          { "key": "gstin", "value": "{{gstin}}" }
+        ],
+        "url": {
+          "raw": "{{perione_base_url}}/ewaybillapi/v1.03/authenticate?email={{api_email}}&username={{api_username}}&password={{api_password}}",
+          "host": ["{{perione_base_url}}"],
+          "path": ["ewaybillapi", "v1.03", "authenticate"],
+          "query": [
+            { "key": "email", "value": "{{api_email}}" },
+            { "key": "username", "value": "{{api_username}}" },
+            { "key": "password", "value": "{{api_password}}" }
+          ]
+        },
+        "description": "Perione authenticate. status_cd:\"1\" => OK; some accounts also return a token to send back as `auth-token` header."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const j = pm.response.json();",
+              "pm.test('status_cd is 1', () => pm.expect(String(j.status_cd)).to.equal('1'));",
+              "if (j && j.token) { pm.environment.set('auth_token', j.token); }",
+              "else if (j && j.auth_token) { pm.environment.set('auth_token', j.auth_token); }",
+              "else if (j && j.header && j.header.txn) { pm.environment.set('auth_token', j.header.txn); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Get GSTIN Details (consignee/transporter/ship-to)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "ip_address", "value": "{{ip_address}}" },
+          { "key": "client_id", "value": "{{client_id}}" },
+          { "key": "client_secret", "value": "{{client_secret}}" },
+          { "key": "gstin", "value": "{{gstin}}" },
+          { "key": "auth-token", "value": "{{auth_token}}", "disabled": true, "description": "Enable if your account requires it after authenticate." }
+        ],
+        "url": {
+          "raw": "{{perione_base_url}}/ewaybillapi/v1.03/ewayapi/getgstindetails?email={{api_email}}&GSTIN=29AACCG0527D1Z0",
+          "host": ["{{perione_base_url}}"],
+          "path": ["ewaybillapi", "v1.03", "ewayapi", "getgstindetails"],
+          "query": [
+            { "key": "email", "value": "{{api_email}}" },
+            { "key": "GSTIN", "value": "29AACCG0527D1Z0", "description": "Target GSTIN to look up" }
+          ]
+        },
+        "description": "GSTIN registry lookup. Default value uses Google India. Replace `GSTIN` query param to test other parties."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const j = pm.response.json();",
+              "pm.test('status_cd is 1', () => pm.expect(String(j.status_cd)).to.equal('1'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Generate e-Way Bill (GENEWAYBILL)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Perione genewaybill expects RAW NIC JSON as body (not the {action,data:base64} envelope).",
+              "// transporterId is mandatory (NIC 619). transMode is OPTIONAL — only include it if you also fill vehicleNo/transDocNo (NIC 303).",
+              "// Edit `inner` below to change the bill being generated.",
+              "const pad = (x) => String(x).padStart(2, '0');",
+              "const today = (() => { const d = new Date(); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); })();",
+              "const fromGstin = pm.environment.get('gstin');",
+              "const inner = {",
+              "    supplyType: 'O',",
+              "    subSupplyType: '1',",
+              "    subSupplyDesc: '',",
+              "    docType: 'INV',",
+              "    docNo: 'PMAN-' + Date.now(),",
+              "    docDate: today,",
+              "    fromGstin: fromGstin,",
+              "    fromTrdName: 'Archit Art',",
+              "    fromAddr1: 'Shop number 28, Furniture Block, Kirti Nagar Industrial Area, Kirti Nagar, New Delhi, Delhi, 110015',",
+              "    fromAddr2: '',",
+              "    fromPlace: 'Main Gallery',",
+              "    fromPincode: 110015,",
+              "    actFromStateCode: 7,",
+              "    fromStateCode: 7,",
+              "    toGstin: '29AACCG0527D1Z0',",
+              "    toTrdName: 'GOOGLE INDIA PRIVATE LIMITED',",
+              "    toAddr1: 'RMZ INFINITY TOWERSNo. 3, TOWER -E4Bangalore',",
+              "    toAddr2: 'OLD MADRAS ROAD',",
+              "    toPlace: 'Bangalore',",
+              "    toPincode: 560016,",
+              "    actToStateCode: 29,",
+              "    toStateCode: 29,",
+              "    transactionType: 1,",
+              "    otherValue: 0,",
+              "    totalValue: 10,",
+              "    cgstValue: 0,",
+              "    sgstValue: 0,",
+              "    igstValue: 0.5,",
+              "    cessValue: 0,",
+              "    cessNonAdvolValue: 0,",
+              "    totInvValue: 10.5,",
+              "    transporterId: fromGstin,",
+              "    transporterName: '',",
+              "    transDocNo: '',",
+              "    transDistance: '0',",
+              "    transDocDate: '',",
+              "    vehicleNo: '',",
+              "    vehicleType: 'R',",
+              "    itemList: [",
+              "        {",
+              "            productName: 'Handmade Painting',",
+              "            productDesc: 'Handmade Painting',",
+              "            hsnCode: 9701,",
+              "            quantity: 1,",
+              "            qtyUnit: 'NOS',",
+              "            taxableAmount: 10,",
+              "            sgstRate: 0,",
+              "            cgstRate: 0,",
+              "            igstRate: 5,",
+              "            cessRate: 0,",
+              "            cessNonadvol: 0",
+              "        }",
+              "    ]",
+              "};",
+              "pm.variables.set('eway_raw_body', JSON.stringify(inner));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const j = pm.response.json();",
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if (j && String(j.status_cd) === '1' && j.data) {",
+              "    const inner = (typeof j.data === 'object') ? j.data : (function () { try { return JSON.parse(j.data); } catch (e) { return {}; } })();",
+              "    console.log('e-Way Bill generated:', inner);",
+              "    if (inner.ewayBillNo) pm.environment.set('last_ewb_no', String(inner.ewayBillNo));",
+              "    pm.test('Inner has ewayBillNo', () => pm.expect(inner.ewayBillNo).to.exist);",
+              "} else if (j && j.error) {",
+              "    let codes = '';",
+              "    try { codes = (typeof j.error.message === 'string') ? JSON.parse(j.error.message).errorCodes : (j.error.errorCodes || ''); } catch (e) { codes = j.error.errorCodes || ''; }",
+              "    console.log('NIC errorCodes:', codes, j.error);",
+              "    pm.test('Has explanatory error code', () => pm.expect(codes).to.not.equal(''));",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "ip_address", "value": "{{ip_address}}" },
+          { "key": "client_id", "value": "{{client_id}}" },
+          { "key": "client_secret", "value": "{{client_secret}}" },
+          { "key": "gstin", "value": "{{gstin}}" },
+          { "key": "username", "value": "{{api_username}}" },
+          { "key": "auth-token", "value": "{{auth_token}}", "disabled": true, "description": "Enable if your account requires session token after authenticate." }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{{eway_raw_body}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{perione_base_url}}/ewaybillapi/v1.03/ewayapi/genewaybill?email={{api_email}}",
+          "host": ["{{perione_base_url}}"],
+          "path": ["ewaybillapi", "v1.03", "ewayapi", "genewaybill"],
+          "query": [
+            { "key": "email", "value": "{{api_email}}" }
+          ]
+        },
+        "description": "Generate e-Way Bill. Body is the RAW NIC JSON (no `{action, data:base64}` wrapper — that returns 207 from this gateway). Pre-request script builds today's-dated bill with a unique docNo and `transporterId` defaulted to your own GSTIN (NIC 619). Edit the `inner` object to change the bill content."
+      }
+    },
+    {
+      "name": "3a. Generate e-Way Bill (working sample, raw body)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "ip_address", "value": "{{ip_address}}" },
+          { "key": "client_id", "value": "{{client_id}}" },
+          { "key": "client_secret", "value": "{{client_secret}}" },
+          { "key": "gstin", "value": "{{gstin}}" },
+          { "key": "username", "value": "{{api_username}}" },
+          { "key": "auth-token", "value": "{{auth_token}}", "disabled": true }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"supplyType\": \"O\",\n    \"subSupplyType\": \"1\",\n    \"subSupplyDesc\": \"\",\n    \"docType\": \"INV\",\n    \"docNo\": \"11524\",\n    \"docDate\": \"03/05/2026\",\n    \"fromGstin\": \"07AADPA2039E1ZF\",\n    \"fromTrdName\": \"Archit Art\",\n    \"fromAddr1\": \"Shop number 28, Furniture Block, Kirti Nagar Industrial Area, Kirti Nagar, New Delhi, Delhi, 110015\",\n    \"fromAddr2\": \"\",\n    \"fromPlace\": \"Main Gallery\",\n    \"fromPincode\": 110001,\n    \"actFromStateCode\": 7,\n    \"fromStateCode\": 7,\n    \"toGstin\": \"29AACCG0527D1Z0\",\n    \"toTrdName\": \"GOOGLE INDIA PRIVATE LIMITED\",\n    \"toAddr1\": \"RMZ INFINITY TOWERSNo. 3, TOWER -E4Bangalore\",\n    \"toAddr2\": \"OLD MADRAS ROAD\",\n    \"toPlace\": \"OLD MADRAS ROAD\",\n    \"toPincode\": 560016,\n    \"actToStateCode\": 29,\n    \"toStateCode\": 29,\n    \"transactionType\": 1,\n    \"otherValue\": 0,\n    \"totalValue\": 10,\n    \"cgstValue\": 0,\n    \"sgstValue\": 0,\n    \"igstValue\": 0.5,\n    \"cessValue\": 0,\n    \"cessNonAdvolValue\": 0,\n    \"totInvValue\": 10.5,\n    \"transporterId\": \"07AADPA2039E1ZF\",\n    \"transporterName\": \"\",\n    \"transDocNo\": \"\",\n    \"transDistance\": \"0\",\n    \"transDocDate\": \"\",\n    \"vehicleNo\": \"\",\n    \"vehicleType\": \"R\",\n    \"itemList\": [\n        {\n            \"productName\": \"Handmade Painting\",\n            \"productDesc\": \"Handmade Painting\",\n            \"hsnCode\": 9701,\n            \"quantity\": 1,\n            \"qtyUnit\": \"NOS\",\n            \"taxableAmount\": 10,\n            \"sgstRate\": 0,\n            \"cgstRate\": 0,\n            \"igstRate\": 5,\n            \"cessRate\": 0,\n            \"cessNonadvol\": 0\n        }\n    ]\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{perione_base_url}}/ewaybillapi/v1.03/ewayapi/genewaybill?email={{api_email}}",
+          "host": ["{{perione_base_url}}"],
+          "path": ["ewaybillapi", "v1.03", "ewayapi", "genewaybill"],
+          "query": [
+            { "key": "email", "value": "{{api_email}}" }
+          ]
+        },
+        "description": "Brijesh's verified working sample (HTTP 200, status_cd:1). Note: docNo 11524 may already be used; change before re-running."
+      }
+    },
+    {
+      "name": "4. Get e-Way Bill (by EBN)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "ip_address", "value": "{{ip_address}}" },
+          { "key": "client_id", "value": "{{client_id}}" },
+          { "key": "client_secret", "value": "{{client_secret}}" },
+          { "key": "gstin", "value": "{{gstin}}" },
+          { "key": "auth-token", "value": "{{auth_token}}", "disabled": true }
+        ],
+        "url": {
+          "raw": "{{perione_base_url}}/ewaybillapi/v1.03/ewayapi/getewaybill?email={{api_email}}&ewbNo={{last_ewb_no}}",
+          "host": ["{{perione_base_url}}"],
+          "path": ["ewaybillapi", "v1.03", "ewayapi", "getewaybill"],
+          "query": [
+            { "key": "email", "value": "{{api_email}}" },
+            { "key": "ewbNo", "value": "{{last_ewb_no}}", "description": "Auto-set by Generate request when it succeeds." }
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Cancel e-Way Bill",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const ebn = pm.environment.get('last_ewb_no') || '';",
+              "const inner = { ewbNo: Number(ebn) || ebn, cancelRsnCode: 1, cancelRmrk: 'Test cancel via Postman' };",
+              "pm.variables.set('eway_raw_body', JSON.stringify(inner));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "ip_address", "value": "{{ip_address}}" },
+          { "key": "client_id", "value": "{{client_id}}" },
+          { "key": "client_secret", "value": "{{client_secret}}" },
+          { "key": "gstin", "value": "{{gstin}}" },
+          { "key": "username", "value": "{{api_username}}" },
+          { "key": "auth-token", "value": "{{auth_token}}", "disabled": true }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{{eway_raw_body}}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{perione_base_url}}/ewaybillapi/v1.03/ewayapi/canewb?email={{api_email}}",
+          "host": ["{{perione_base_url}}"],
+          "path": ["ewaybillapi", "v1.03", "ewayapi", "canewb"],
+          "query": [
+            { "key": "email", "value": "{{api_email}}" }
+          ]
+        },
+        "description": "Cancel an e-way bill (within 24 hours per NIC rules). Body is raw NIC JSON. Reason codes: 1 Duplicate, 2 Order cancelled, 3 Data entry mistake, 4 Others."
+      }
+    },
+    {
+      "name": "6. Get HSN Details (by HSN Code)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "ip_address", "value": "{{ip_address}}" },
+          { "key": "client_id", "value": "{{client_id}}" },
+          { "key": "client_secret", "value": "{{client_secret}}" },
+          { "key": "gstin", "value": "{{gstin}}" },
+          { "key": "auth-token", "value": "{{auth_token}}", "disabled": true }
+        ],
+        "url": {
+          "raw": "{{perione_base_url}}/ewaybillapi/v1.03/ewayapi/gethsndetailsbyhsncode?email={{api_email}}&hsnCode=9701",
+          "host": ["{{perione_base_url}}"],
+          "path": ["ewaybillapi", "v1.03", "ewayapi", "gethsndetailsbyhsncode"],
+          "query": [
+            { "key": "email", "value": "{{api_email}}" },
+            { "key": "hsnCode", "value": "9701" }
+          ]
+        }
+      }
+    }
+  ]
+}

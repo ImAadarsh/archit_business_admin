@@ -83,7 +83,10 @@ function isTrialExpiringSoon($businessId) {
 if (!function_exists('isTrialApproved')) {
 function isTrialApproved($businessId) {
     global $connect;
-    
+    if (!isset($connect) || !($connect instanceof mysqli)) {
+        return false;
+    }
+
     $sql = "SELECT authorization_status, authorization_time 
             FROM subscriptions 
             WHERE business_id = ? 
@@ -91,6 +94,9 @@ function isTrialApproved($businessId) {
             LIMIT 1";
     
     $stmt = $connect->prepare($sql);
+    if (!$stmt) {
+        return false;
+    }
     $stmt->bind_param("i", $businessId);
     $stmt->execute();
     $result = $stmt->get_result();

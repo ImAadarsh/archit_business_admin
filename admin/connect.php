@@ -5,11 +5,14 @@ if (defined('CONNECT_LOADED')) {
 }
 define('CONNECT_LOADED', true);
 
-$host = "82.180.142.204";
+$host = "82.25.121.166";
 $user = "u954141192_archit";
 $password = "Endeavour@2023";
 $dbname = "u954141192_archit";
-$connect = mysqli_connect($host,$user,$password,$dbname);
+$connect = mysqli_connect($host, $user, $password, $dbname);
+if ($connect === false) {
+    error_log('business/admin/connect.php: mysqli_connect failed — ' . mysqli_connect_error());
+}
 $uri = 'https://api.invoicemate.in/storage/app/';
 if (!function_exists('callAPI')) {
 function callAPI($method, $urlpoint, $data, $token){

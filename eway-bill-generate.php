@@ -6,6 +6,7 @@ include 'controller/EwayBillController.php';
 
 $business_id = $_SESSION['business_id'];
 $controller = new EwayBillController($connect);
+$db_connected = isset($connect) && $connect instanceof mysqli;
 
 $invoice_id = isset($_GET['invoice_id']) ? (int) $_GET['invoice_id'] : (isset($_POST['invoice_id']) ? (int) $_POST['invoice_id'] : 0);
 if (!$invoice_id) {
@@ -13,8 +14,17 @@ if (!$invoice_id) {
     exit;
 }
 
+if (!$db_connected) {
+    header('Location: eway-bill.php?db_error=1');
+    exit;
+}
+
 // Verify invoice belongs to business
 $chk = $connect->prepare("SELECT id, serial_no FROM invoices WHERE id = ? AND business_id = ?");
+if (!$chk) {
+    header('Location: eway-bill.php?db_error=1');
+    exit;
+}
 $chk->bind_param("ii", $invoice_id, $business_id);
 $chk->execute();
 $inv_row = $chk->get_result()->fetch_assoc();
@@ -26,6 +36,8 @@ if (!$inv_row) {
 
 $success_message = null;
 $error_message = null;
+/** @var array|null Set when generate succeeds — stay on page to show full Perione API log */
+$eway_generate_success = null;
 
 // Build payload from form and generate
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])) {
@@ -39,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
     $payload = [
         'supplyType' => $_POST['supplyType'] ?? 'O',
         'subSupplyType' => $_POST['subSupplyType'] ?? '1',
-        'subSupplyDesc' => $_POST['subSupplyDesc'] ?? ' ',
+        'subSupplyDesc' => $_POST['subSupplyDesc'] ?? '',
         'docType' => $_POST['docType'] ?? 'INV',
         'docNo' => $_POST['docNo'] ?? '',
         'docDate' => $_POST['docDate'] ?? '',
@@ -60,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
         'toStateCode' => (int) ($_POST['toStateCode'] ?? 7),
         'actToStateCode' => (int) ($_POST['actToStateCode'] ?? 7),
         'transactionType' => (int) ($_POST['transactionType'] ?? 1),
+        'otherValue' => (float) ($_POST['otherValue'] ?? 0),
         'totalValue' => (float) ($_POST['totalValue'] ?? 0),
         'cgstValue' => (float) ($_POST['cgstValue'] ?? 0),
         'sgstValue' => (float) ($_POST['sgstValue'] ?? 0),
@@ -67,11 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
         'cessValue' => (float) ($_POST['cessValue'] ?? 0),
         'cessNonAdvolValue' => (float) ($_POST['cessNonAdvolValue'] ?? 0),
         'totInvValue' => (float) ($_POST['totInvValue'] ?? 0),
-        'transMode' => $_POST['transMode'] ?? '1',
+        'transMode' => $_POST['transMode'] ?? '',
         'transDistance' => (string) ($_POST['transDistance'] ?? '0'),
         'vehicleNo' => $_POST['vehicleNo'] ?? '',
         'vehicleType' => $_POST['vehicleType'] ?? 'R',
-        'transporterId' => $_POST['transporterId'] ?? '',
+        'transporterId' => trim((string) ($_POST['transporterId'] ?? ($_POST['fromGstin'] ?? ''))),
         'transporterName' => $_POST['transporterName'] ?? '',
         'transDocNo' => $_POST['transDocNo'] ?? '',
         'transDocDate' => $_POST['transDocDate'] ?? '',
@@ -84,13 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
 
     $response = $controller->generateEwayBill($invoice_id, [], $payload);
     if ($response['status'] === 'success') {
-        header('Location: eway-bill.php?success=' . urlencode('e-Way Bill generated! Number: ' . $response['ewayBillNo']));
-        exit;
+        $eway_generate_success = $response;
+    } else {
+        $error_message = $response['message'] ?? 'Generation failed';
+        if (isset($response['api_http_code']))
+            $error_message .= ' (HTTP ' . (int) $response['api_http_code'] . ')';
+        $api_response = $response;
     }
-    $error_message = $response['message'] ?? 'Generation failed';
-    if (isset($response['api_http_code']))
-        $error_message .= ' (HTTP ' . (int) $response['api_http_code'] . ')';
-    $api_response = $response; // for showing API response in error details
 }
 
 // Load form data (auto-populate). On POST after error, re-use POST so user doesn't lose edits.
@@ -103,11 +116,12 @@ $default_transport = [
     'transDocNo' => '',
     'transDocDate' => '',
 ];
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full']) && isset($error_message)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
+    && (($error_message ?? '') !== '' || $eway_generate_success !== null)) {
     $form = [
         'supplyType' => $_POST['supplyType'] ?? 'O',
         'subSupplyType' => $_POST['subSupplyType'] ?? '1',
-        'subSupplyDesc' => $_POST['subSupplyDesc'] ?? ' ',
+        'subSupplyDesc' => $_POST['subSupplyDesc'] ?? '',
         'docType' => $_POST['docType'] ?? 'INV',
         'docNo' => $_POST['docNo'] ?? '',
         'docDate' => $_POST['docDate'] ?? '',
@@ -128,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
         'toStateCode' => $_POST['toStateCode'] ?? 7,
         'actToStateCode' => $_POST['actToStateCode'] ?? 7,
         'transactionType' => $_POST['transactionType'] ?? 1,
+        'otherValue' => $_POST['otherValue'] ?? 0,
         'totalValue' => $_POST['totalValue'] ?? 0,
         'cgstValue' => $_POST['cgstValue'] ?? 0,
         'sgstValue' => $_POST['sgstValue'] ?? 0,
@@ -135,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
         'cessValue' => $_POST['cessValue'] ?? 0,
         'cessNonAdvolValue' => $_POST['cessNonAdvolValue'] ?? 0,
         'totInvValue' => $_POST['totInvValue'] ?? 0,
-        'transMode' => $_POST['transMode'] ?? '1',
+        'transMode' => $_POST['transMode'] ?? '',
         'transDistance' => $_POST['transDistance'] ?? '0',
         'vehicleNo' => $_POST['vehicleNo'] ?? '',
         'vehicleType' => $_POST['vehicleType'] ?? 'R',
@@ -157,14 +172,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
     }
 }
 
-// Load business defaults and merge into $form
+// Load business defaults and merge into $form (invoice data wins; defaults fill missing/static values).
 $defaults = $controller->getFormDefaults($business_id, 'eway_bill_form');
+$applied_defaults = [];
 foreach ($defaults as $key => $val) {
-    // Only apply default if the field is empty or follows the standard default from prepareEwayBillData
-    // We prioritize invoice data over defaults, but defaults over the static values in prepareEwayBillData if the invoice data is missing.
     if (empty($form[$key]) || $form[$key] === '1' || $form[$key] === 'O' || $form[$key] === 'INV') {
         $form[$key] = $val;
+        $applied_defaults[$key] = $val;
     }
+}
+
+/**
+ * NIC sub_supply 3 = Export and 2 = Import. If a saved business default seeds these values
+ * for a domestic sale, the gateway returns 207 / 450. Strip them here and warn the user.
+ */
+$saved_default_warnings = [];
+if (isset($applied_defaults['subSupplyType']) && in_array((string) $applied_defaults['subSupplyType'], ['2', '3'], true)) {
+    $saved_default_warnings[] = 'A saved Form Default set Sub Supply Type to "'
+        . htmlspecialchars((string) $applied_defaults['subSupplyType'])
+        . '" (Import/Export). This forces NIC to expect URP/SEZ on To GSTIN and state 96. We have reset Sub Supply Type to "1" (Supply) for this bill. Save defaults again from this page to update.';
+    $form['subSupplyType'] = '1';
 }
 
 // Master codes for dropdowns (from eway_bills_doc)
@@ -195,6 +222,30 @@ function master_options($list, $selected, $empty_label = '')
     }
     return $out;
 }
+
+/** Render structured Perione API debug steps (from EwayBillController::api_communication_log). */
+function render_eway_api_communication_log($log)
+{
+    if (!is_array($log) || count($log) === 0) {
+        return '<p class="text-muted small mb-0">No API steps recorded for this attempt.</p>';
+    }
+    $out = '';
+    $n = 0;
+    foreach ($log as $entry) {
+        if (!is_array($entry)) {
+            continue;
+        }
+        $n++;
+        $title = isset($entry['step']) ? (string) $entry['step'] : ('Step ' . $n);
+        $json = json_encode($entry, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($json === false) {
+            $json = print_r($entry, true);
+        }
+        $out .= '<details class="mb-2 border rounded p-2 bg-light eway-api-debug-step"><summary class="small font-weight-bold cursor-pointer">' . htmlspecialchars($title) . '</summary>';
+        $out .= '<pre class="small bg-dark text-light p-2 rounded mt-2 mb-0" style="max-height:480px; overflow:auto; white-space:pre-wrap; word-break:break-word;">' . htmlspecialchars($json) . '</pre></details>';
+    }
+    return $out !== '' ? $out : '<p class="text-muted small mb-0">No API steps recorded.</p>';
+}
 ?>
 
 <body class="vertical light">
@@ -206,17 +257,70 @@ function master_options($list, $selected, $empty_label = '')
                 <?php if (isset($_GET['success'])): ?>
                     <div class="alert alert-success"><?php echo htmlspecialchars($_GET['success']); ?></div>
                 <?php endif; ?>
+                <?php if (!empty($saved_default_warnings)): ?>
+                    <div class="alert alert-warning">
+                        <strong>Form defaults adjusted</strong>
+                        <ul class="mb-0">
+                            <?php foreach ($saved_default_warnings as $msg): ?>
+                                <li class="small"><?php echo $msg; /* already escaped above */ ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+                <?php if (!empty($eway_generate_success) && is_array($eway_generate_success)): ?>
+                    <div class="alert alert-success">
+                        <strong>e-Way Bill generated.</strong>
+                        Number: <?php echo htmlspecialchars((string) ($eway_generate_success['ewayBillNo'] ?? '')); ?>
+                        <?php if (!empty($eway_generate_success['ewayBillDate'])): ?>
+                            — Date: <?php echo htmlspecialchars((string) $eway_generate_success['ewayBillDate']); ?>
+                        <?php endif; ?>
+                        <?php if (!empty($eway_generate_success['validUpto'])): ?>
+                            — Valid up to: <?php echo htmlspecialchars((string) $eway_generate_success['validUpto']); ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="card shadow mb-4 border-success">
+                        <div class="card-header bg-success text-white"><strong>Perione API — full log</strong> <span
+                                class="small font-weight-normal">(exactly what was sent and received, in order)</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted">URLs and headers redact passwords and shorten secrets. <code>inner_eway_json_sent_to_gateway</code>
+                                is the NIC-style JSON before base64 in <code>data</code>.</p>
+                            <?php echo render_eway_api_communication_log($eway_generate_success['api_communication_log'] ?? []); ?>
+                            <a href="eway-bill.php" class="btn btn-primary mt-3">Back to e-Way Bill list</a>
+                        </div>
+                    </div>
+                <?php endif; ?>
                 <?php if ($error_message): ?>
                     <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?>
                         <?php if (isset($api_response) && !empty($api_response['api_decoded'])): ?>
                             <details class="mt-2">
-                                <summary class="small">API response</summary>
+                                <summary class="small">Parsed API error / envelope (api_decoded)</summary>
                                 <pre
-                                    class="small bg-dark text-light p-2 rounded"><?php echo htmlspecialchars(json_encode($api_response['api_decoded'], JSON_PRETTY_PRINT)); ?></pre>
+                                    class="small bg-dark text-light p-2 rounded"><?php echo htmlspecialchars(json_encode($api_response['api_decoded'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); ?></pre>
                             </details>
                         <?php endif; ?>
                     </div>
+                    <?php if (isset($api_response) && !empty($api_response['api_communication_log'])): ?>
+                        <div class="card shadow mb-4 border-danger">
+                            <div class="card-header"><strong>Perione API — full request / response log</strong> <span
+                                    class="small text-muted">(all steps)</span></div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">Each block is one call (generate or authenticate). Compare
+                                    <code>request</code> vs <code>response</code> for that step.</p>
+                                <?php echo render_eway_api_communication_log($api_response['api_communication_log']); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
+
+                <div class="card shadow mb-3 border-info" id="ewayGstFetchDebug" style="display:none;">
+                    <div class="card-header bg-light"><strong>Last GSTIN lookup (Perione)</strong> <span
+                            class="small text-muted">— request / response log</span></div>
+                    <div class="card-body py-2">
+                        <pre id="ewayGstFetchDebugPre"
+                            class="small bg-dark text-light p-2 rounded mb-0" style="max-height:400px; overflow:auto; white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
 
                 <div class="row mb-3">
                     <div class="col">
@@ -232,7 +336,7 @@ function master_options($list, $selected, $empty_label = '')
                 <form method="post" id="ewayFullForm">
                     <input type="hidden" name="invoice_id" value="<?php echo $invoice_id; ?>">
                     <input type="hidden" name="itemList_json" id="itemList_json"
-                        value="<?php echo htmlspecialchars(json_encode($form['itemList'] ?? [])); ?>">
+                        value="<?php echo htmlspecialchars(json_encode($form['itemList'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); ?>">
 
                     <div class="card shadow mb-3">
                         <div class="card-header"><strong>Document</strong> <span class="small text-muted">(Refer Master
@@ -246,8 +350,11 @@ function master_options($list, $selected, $empty_label = '')
                                 </div>
                                 <div class="col-md-2">
                                     <label>Sub Supply Type <span class="text-danger">*</span></label>
-                                    <select name="subSupplyType" class="form-control"
+                                    <select name="subSupplyType" id="subSupplyType" class="form-control"
                                         required><?php echo master_options($master['subSupplyType'] ?? [], fv($form, 'subSupplyType', '1')); ?></select>
+                                    <small class="form-text text-muted">Domestic sale = <strong>1 Supply</strong>. Use 3
+                                        only for cross-border export (To GSTIN must be URP/SEZ + State 96 +
+                                        Pincode 999999).</small>
                                 </div>
                                 <div class="col-md-2">
                                     <label>Document Type <span class="text-danger">*</span></label>
@@ -259,12 +366,16 @@ function master_options($list, $selected, $empty_label = '')
                                         value="<?php echo fv($form, 'docNo'); ?>" maxlength="16"
                                         placeholder="Alphanumeric, / - ." required></div>
                                 <div class="col-md-2"><label>Doc Date (DD/MM/YYYY) <span
-                                            class="text-danger">*</span></label><input type="text" name="docDate"
-                                        class="form-control" value="<?php echo fv($form, 'docDate'); ?>"
-                                        placeholder="05/02/2020" required></div>
+                                            class="text-danger">*</span></label>
+                                    <small class="form-text text-muted d-block mb-1">Must match the printed tax invoice;
+                                        not in the future; on/after 01/07/2017; within the last <strong>180
+                                            days</strong> (NIC).</small>
+                                    <input type="text" name="docDate" class="form-control"
+                                        value="<?php echo fv($form, 'docDate'); ?>" placeholder="03/05/2026" required>
+                                </div>
                                 <div class="col-md-2"><label>Sub Supply Desc</label><input type="text"
                                         name="subSupplyDesc" class="form-control"
-                                        value="<?php echo fv($form, 'subSupplyDesc', ' '); ?>" maxlength="20"
+                                        value="<?php echo fv($form, 'subSupplyDesc', ''); ?>" maxlength="20"
                                         placeholder="If Sub Supply = Others"></div>
                             </div>
                         </div>
@@ -382,6 +493,9 @@ function master_options($list, $selected, $empty_label = '')
                                             class="text-danger">*</span></label><input type="number" step="0.01"
                                         name="totInvValue" class="form-control"
                                         value="<?php echo fv($form, 'totInvValue'); ?>" required></div>
+                                <div class="col-md-2"><label>Other charges</label><input type="number" step="0.01"
+                                        name="otherValue" class="form-control"
+                                        value="<?php echo fv($form, 'otherValue', '0'); ?>"></div>
                                 <div class="col-md-2"><label>Cess Value</label><input type="number" step="0.01"
                                         name="cessValue" class="form-control"
                                         value="<?php echo fv($form, 'cessValue'); ?>"></div>
@@ -398,9 +512,13 @@ function master_options($list, $selected, $empty_label = '')
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-2">
-                                    <label>Transport Mode <span class="text-danger">*</span></label>
-                                    <select name="transMode" class="form-control"
-                                        required><?php echo master_options($master['transMode'] ?? [], fv($form, 'transMode', '1')); ?></select>
+                                    <label>Transport Mode</label>
+                                    <select name="transMode" class="form-control">
+                                        <option value="">— Not selected —</option>
+                                        <?php echo master_options($master['transMode'] ?? [], fv($form, 'transMode', '')); ?>
+                                    </select>
+                                    <small class="form-text text-muted">Optional. NIC error 303: if you pick a mode you
+                                        must also enter Vehicle No or Trans Doc No.</small>
                                 </div>
                                 <div class="col-md-2"><label>Distance (km, max 4000)</label><input type="number"
                                         name="transDistance" class="form-control"
@@ -415,15 +533,19 @@ function master_options($list, $selected, $empty_label = '')
                                         class="form-control"><?php echo master_options($master['vehicleType'] ?? [], fv($form, 'vehicleType', 'R')); ?></select>
                                 </div>
                                 <div class="col-md-2">
-                                    <label>Transporter ID (GSTIN/TRANSIN)</label>
+                                    <label>Transporter ID (GSTIN/TRANSIN) <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <input type="text" name="transporterId" id="transporterId" class="form-control"
-                                            value="<?php echo fv($form, 'transporterId'); ?>" maxlength="15">
+                                            value="<?php echo fv($form, 'transporterId', fv($form, 'fromGstin')); ?>"
+                                            maxlength="15" required>
                                         <div class="input-group-append">
-                                            <button class="btn btn-outline-primary" type="button" id="fetchTransBtn"><i
+                                            <button class="btn btn-outline-primary" type="button" id="fetchTransBtn"
+                                                title="Fetch trade name from GSTIN / TRANSIN (Perione)"><i
                                                     class="fe fe-search"></i></button>
                                         </div>
                                     </div>
+                                    <small class="form-text text-muted">NIC error 619: required. Defaults to your own
+                                        GSTIN if you are arranging transport yourself.</small>
                                 </div>
                                 <div class="col-md-2"><label>Transporter Name</label><input type="text"
                                         name="transporterName" id="transporterName" class="form-control"
@@ -442,11 +564,20 @@ function master_options($list, $selected, $empty_label = '')
                                 <div class="col-md-6"><label>Dispatch From Trade Name</label><input type="text"
                                         name="dispatchFromTradeName" class="form-control"
                                         value="<?php echo fv($form, 'dispatchFromTradeName'); ?>" maxlength="100"></div>
-                                <div class="col-md-6"><label>Ship To GSTIN</label><input type="text" name="shipToGSTIN"
-                                        class="form-control" value="<?php echo fv($form, 'shipToGSTIN'); ?>"
-                                        maxlength="15"></div>
+                                <div class="col-md-6">
+                                    <label>Ship To GSTIN</label>
+                                    <div class="input-group">
+                                        <input type="text" name="shipToGSTIN" id="shipToGSTIN" class="form-control"
+                                            value="<?php echo fv($form, 'shipToGSTIN'); ?>" maxlength="15">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-primary" type="button" id="fetchShipBtn"
+                                                title="Fetch ship-to trade name from GSTIN (Perione)"><i
+                                                    class="fe fe-search"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-md-6"><label>Ship To Trade Name</label><input type="text"
-                                        name="shipToTradeName" class="form-control"
+                                        name="shipToTradeName" id="shipToTradeName" class="form-control"
                                         value="<?php echo fv($form, 'shipToTradeName'); ?>" maxlength="100"></div>
                             </div>
                         </div>
@@ -516,8 +647,8 @@ function master_options($list, $selected, $empty_label = '')
         (function () {
             var el = document.getElementById('itemList_json');
             var table = document.getElementById('ewayItemTable');
-            if (!el || !table) return;
             function syncItemListJson() {
+                if (!el || !table) return;
                 try {
                     var list = JSON.parse(el.value || '[]');
                     var rows = table.querySelectorAll('tbody tr[data-item-index]');
@@ -529,11 +660,103 @@ function master_options($list, $selected, $empty_label = '')
                     el.value = JSON.stringify(list);
                 } catch (e) { }
             }
-            table.addEventListener('change', function (ev) {
-                if (ev.target.classList.contains('item-qty-unit')) syncItemListJson();
-            });
+            if (table) {
+                table.addEventListener('change', function (ev) {
+                    if (ev.target.classList.contains('item-qty-unit')) syncItemListJson();
+                });
+            }
 
-            // Fetch GST Details Logic
+            /** Mirror server-side validateNicPayloadBusinessRules so the user sees errors before POST. */
+            var ewayForm = document.getElementById('ewayFullForm');
+            if (ewayForm) {
+                ewayForm.addEventListener('submit', function (ev) {
+                    function val(name) {
+                        var n = ewayForm.querySelector('[name="' + name + '"]');
+                        return n ? String(n.value || '').trim() : '';
+                    }
+                    var supplyType = val('supplyType').toUpperCase();
+                    var subSupplyType = val('subSupplyType');
+                    var toGstin = val('toGstin').toUpperCase().replace(/\s+/g, '');
+                    var transporterId = val('transporterId').toUpperCase().replace(/\s+/g, '');
+                    var transMode = val('transMode');
+                    var vehicleNo = val('vehicleNo');
+                    var transDocNo = val('transDocNo');
+                    var msg = '';
+
+                    if (transporterId === '') {
+                        msg = 'Transporter ID (GSTIN/TRANSIN) is required by NIC (error 619). ' +
+                            'Enter the transporter\'s GSTIN, or leave default to use your own GSTIN.';
+                    }
+                    if (!msg && transMode !== '' && vehicleNo === '' && transDocNo === '') {
+                        msg = 'NIC error 303: when Transport Mode is selected, you must also fill Vehicle No or Trans Doc No. ' +
+                            'Either fill those, or clear Transport Mode.';
+                    }
+                    if (!msg && supplyType === 'O' && subSupplyType === '1' && toGstin && toGstin !== 'URP'
+                        && (toGstin.length !== 15 || !/^[0-9A-Z]{15}$/.test(toGstin))) {
+                        msg = 'To GSTIN "' + toGstin + '" is not a valid 15-character GSTIN. Use URP for unregistered party.';
+                    }
+
+                    if (msg) {
+                        ev.preventDefault();
+                        alert(msg);
+                    }
+                });
+            }
+
+            function showGstApiCommunicationLog(res) {
+                var box = document.getElementById('ewayGstFetchDebug');
+                var pre = document.getElementById('ewayGstFetchDebugPre');
+                if (!box || !pre) return;
+                if (res.api_communication_log && res.api_communication_log.length) {
+                    box.style.display = 'block';
+                    pre.textContent = JSON.stringify(res.api_communication_log, null, 2);
+                    try { box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) { }
+                }
+            }
+
+            /** Map Perione getgstindetails row to consignee address fields (handles pin merged into address2). */
+            function gstDetailsToConsigneeFields(d) {
+                var pin = ((d.pinCode || '') + '').replace(/\D/g, '').substring(0, 6);
+                var a1 = (d.address1 || '').trim();
+                var a2 = (d.address2 || '').trim();
+                if (pin && a2.indexOf(pin) === 0) {
+                    a2 = a2.substring(pin.length).trim();
+                }
+                var place = '';
+                if (a2.length > 0 && a2.length <= 50) {
+                    place = a2;
+                } else {
+                    var firstSeg = (a1.split(',')[0] || a1).trim();
+                    place = firstSeg.substring(0, 50);
+                }
+                return {
+                    toGstin: (d.gstin || '').trim().toUpperCase(),
+                    toTrdName: (d.tradeName || d.legalName || '').trim().substring(0, 100),
+                    toAddr1: a1.substring(0, 120),
+                    toAddr2: a2.substring(0, 120),
+                    toPlace: place.substring(0, 50),
+                    toPincode: pin ? parseInt(pin, 10) : '',
+                    stateCode: (d.stateCode != null && d.stateCode !== '') ? String(d.stateCode).trim() : ''
+                };
+            }
+
+            function applyConsigneeFromGst(d) {
+                var m = gstDetailsToConsigneeFields(d);
+                if (document.getElementById('toGstin') && m.toGstin) document.getElementById('toGstin').value = m.toGstin;
+                if (document.getElementById('toTrdName')) document.getElementById('toTrdName').value = m.toTrdName;
+                if (document.getElementById('toAddr1')) document.getElementById('toAddr1').value = m.toAddr1;
+                if (document.getElementById('toAddr2')) document.getElementById('toAddr2').value = m.toAddr2;
+                if (document.getElementById('toPlace')) document.getElementById('toPlace').value = m.toPlace;
+                if (document.getElementById('toPincode') && m.toPincode !== '') document.getElementById('toPincode').value = m.toPincode;
+                if (m.stateCode) {
+                    var sc = document.getElementById('toStateCode');
+                    var ac = document.getElementById('actToStateCode');
+                    if (sc) sc.value = m.stateCode;
+                    if (ac) ac.value = m.stateCode;
+                }
+            }
+
+            // Fetch GST Details Logic (consignee)
             var fetchBtn = document.getElementById('fetchGstBtn');
             if (fetchBtn) {
                 fetchBtn.addEventListener('click', function () {
@@ -552,18 +775,11 @@ function master_options($list, $selected, $empty_label = '')
                         .then(res => {
                             fetchBtn.disabled = false;
                             fetchBtn.innerHTML = 'Fetch GST Details';
+                            showGstApiCommunicationLog(res);
 
                             if (res.status === 'success' && res.data) {
-                                var d = res.data;
-                                if (document.getElementById('toTrdName')) document.getElementById('toTrdName').value = d.tradeName || d.legalName || '';
-                                if (document.getElementById('toPlace')) document.getElementById('toPlace').value = d.address2 || '';
-                                if (document.getElementById('toAddr1')) document.getElementById('toAddr1').value = d.address1 || '';
-                                if (document.getElementById('toAddr2')) document.getElementById('toAddr2').value = d.address2 || '';
-                                if (document.getElementById('toPincode')) document.getElementById('toPincode').value = d.pinCode || '';
-                                if (document.getElementById('toStateCode')) document.getElementById('toStateCode').value = d.stateCode || '7';
-                                if (document.getElementById('actToStateCode')) document.getElementById('actToStateCode').value = d.stateCode || '7';
-
-                                alert('GST details fetched and populated!');
+                                applyConsigneeFromGst(res.data);
+                                alert('Consignee details fetched from GSTIN registry.');
                             } else {
                                 alert('Error: ' + (res.message || 'Could not fetch GST details.'));
                             }
@@ -596,13 +812,16 @@ function master_options($list, $selected, $empty_label = '')
                         .then(res => {
                             fetchTransBtn.disabled = false;
                             fetchTransBtn.innerHTML = '<i class="fe fe-search"></i>';
+                            showGstApiCommunicationLog(res);
 
                             if (res.status === 'success' && res.data) {
                                 var d = res.data;
+                                var tid = document.getElementById('transporterId');
+                                if (tid && d.gstin) tid.value = String(d.gstin).trim().toUpperCase();
                                 if (document.getElementById('transporterName')) {
-                                    document.getElementById('transporterName').value = d.tradeName || d.legalName || '';
+                                    document.getElementById('transporterName').value = (d.tradeName || d.legalName || '').trim().substring(0, 100);
                                 }
-                                alert('Transporter details fetched!');
+                                alert('Transporter details fetched from GSTIN / TRANSIN registry.');
                             } else {
                                 alert('Error: ' + (res.message || 'Could not fetch Transporter details.'));
                             }
@@ -610,6 +829,48 @@ function master_options($list, $selected, $empty_label = '')
                         .catch(err => {
                             fetchTransBtn.disabled = false;
                             fetchTransBtn.innerHTML = '<i class="fe fe-search"></i>';
+                            alert('An error occurred during fetch.');
+                            console.error(err);
+                        });
+                });
+            }
+
+            // Fetch Ship-To Details Logic
+            var fetchShipBtn = document.getElementById('fetchShipBtn');
+            if (fetchShipBtn) {
+                fetchShipBtn.addEventListener('click', function () {
+                    var gstinInput = document.getElementById('shipToGSTIN');
+                    var gstin = gstinInput ? gstinInput.value.trim() : '';
+                    if (!gstin) {
+                        alert('Please enter a Ship-To GSTIN first.');
+                        return;
+                    }
+
+                    fetchShipBtn.disabled = true;
+                    fetchShipBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+                    fetch('ajax_fetch_gst.php?gstin=' + encodeURIComponent(gstin))
+                        .then(response => response.json())
+                        .then(res => {
+                            fetchShipBtn.disabled = false;
+                            fetchShipBtn.innerHTML = '<i class="fe fe-search"></i>';
+                            showGstApiCommunicationLog(res);
+
+                            if (res.status === 'success' && res.data) {
+                                var d = res.data;
+                                var sg = document.getElementById('shipToGSTIN');
+                                if (sg && d.gstin) sg.value = String(d.gstin).trim().toUpperCase();
+                                if (document.getElementById('shipToTradeName')) {
+                                    document.getElementById('shipToTradeName').value = (d.tradeName || d.legalName || '').trim().substring(0, 100);
+                                }
+                                alert('Ship-to party details fetched from GSTIN registry.');
+                            } else {
+                                alert('Error: ' + (res.message || 'Could not fetch Ship-To details.'));
+                            }
+                        })
+                        .catch(err => {
+                            fetchShipBtn.disabled = false;
+                            fetchShipBtn.innerHTML = '<i class="fe fe-search"></i>';
                             alert('An error occurred during fetch.');
                             console.error(err);
                         });

@@ -108,6 +108,22 @@ return [
         'YDS' => 'YARDS',
     ],
 
+    // Reason codes for Update PART-B / Vehicle Number (vehewb)
+    'vehUpdateReason' => [
+        '1' => 'Due to Break Down',
+        '2' => 'Due to Trans Shipment',
+        '3' => 'Others',
+        '4' => 'First Time',
+    ],
+
+    // Reason codes for Cancel e-Way Bill (canewb)
+    'cancelReason' => [
+        '1' => 'Duplicate',
+        '2' => 'Order Cancelled',
+        '3' => 'Data Entry Mistake',
+        '4' => 'Others',
+    ],
+
     // GST State Codes (Code => State/UT Name) - for fromStateCode, toStateCode, actFromStateCode, actToStateCode
     'stateCode' => [
         1 => 'Jammu & Kashmir',

@@ -49,17 +49,33 @@ if (!$formData) {
     exit;
 }
 
-// 2. Load Business Defaults
+// 2. Load Business Defaults and Merge
 $businessDefaults = $controller->getFormDefaults($business_id, 'eway_bill_form');
+foreach ($businessDefaults as $key => $val) {
+    // Only apply default if the field is empty or follows the standard default from prepareEwayBillData
+    // We prioritize invoice data over defaults, but defaults over the static values in prepareEwayBillData
+    if (empty($formData[$key]) || $formData[$key] === '1' || $formData[$key] === 'O' || $formData[$key] === 'INV') {
+        $formData[$key] = $val;
+    }
+}
 
 // 3. Load Master Codes
 $master_file = dirname(__DIR__, 2) . '/eway_bills_doc/eway_master_codes.php';
 $master = is_readable($master_file) ? include $master_file : [];
 $master = is_array($master) ? $master : [];
 
+// Fetch settings to return credentials needed for the frontend
+$settings = $controller->getEwayBillSettings($business_id) ?? [];
+
 echo json_encode([
     'status' => 'success',
     'invoice_data' => $formData,
-    'business_defaults' => $businessDefaults,
-    'master_codes' => $master
+    'business_defaults' => $businessDefaults, // still returning for reference
+    'master_codes' => $master,
+    'service' => 'ewaybill',
+    'environment' => !empty($settings['environment']) ? $settings['environment'] : 'production',
+    'client_key' => $settings['client_id'] ?? '',
+    'client_secret' => $settings['client_secret'] ?? '',
+    'gstin' => $settings['gstin'] ?? '',
+    'api_username' => $settings['api_username'] ?? ''
 ]);
