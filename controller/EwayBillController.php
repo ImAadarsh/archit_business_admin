@@ -1045,13 +1045,16 @@ class EwayBillController
      * Generate e-Way bill via Perione: POST GENEWAYBILL (base64-wrapped body).
      * Does not call the authenticate API first; on auth-like failure, calls authenticate then retries once.
      */
-    public function generateEwayBill($invoice_id, $transport_details, $payload_override = null)
+    public function generateEwayBill($invoice_id, $transport_details, $payload_override = null, ?int $business_id = null)
     {
-        $business_id = $_SESSION['business_id'];
+        $bid = ($business_id !== null && (int) $business_id > 0) ? (int) $business_id : (int) ($_SESSION['business_id'] ?? 0);
+        if ($bid <= 0) {
+            return ['status' => 'error', 'message' => 'Business context missing.', 'api_communication_log' => []];
+        }
         if (!$this->dbOk()) {
             return ['status' => 'error', 'message' => 'Database connection unavailable.', 'api_communication_log' => []];
         }
-        $settings = $this->getEwayBillSettings($business_id);
+        $settings = $this->getEwayBillSettings($bid);
         if (!$settings) {
             return ['status' => 'error', 'message' => 'e-Way Bill settings not found for this business.', 'api_communication_log' => []];
         }
@@ -1068,7 +1071,7 @@ class EwayBillController
             'transporterId' => $payload['transporterId'] ?? '',
             'transporterName' => $payload['transporterName'] ?? '',
         ];
-        $this->logEWayBill($invoice_id, $log_details, $payload);
+        $this->logEWayBill($invoice_id, $log_details, $payload, $bid);
 
         $apiPayload = $this->sanitizeEwayGeneratePayload($payload);
 
@@ -1132,7 +1135,7 @@ class EwayBillController
             }
 
             if ($this->shouldRetryGenerateAfterAuth($res['http_code'], $res['decoded'])) {
-                $auth = $this->authenticate($business_id, true);
+                $auth = $this->authenticate($bid, true);
                 if (!$auth['status']) {
                     return $this->withApiCommunicationLog([
                         'status' => 'error',
@@ -1142,7 +1145,7 @@ class EwayBillController
                         'api_decoded' => $auth['api_decoded'] ?? null,
                     ]);
                 }
-                $settings = $this->getEwayBillSettings($business_id);
+                $settings = $this->getEwayBillSettings($bid);
                 if (!$settings) {
                     return $this->withApiCommunicationLog(['status' => 'error', 'message' => 'e-Way Bill settings lost after authentication.']);
                 }
@@ -1177,12 +1180,11 @@ class EwayBillController
         }
     }
 
-    private function logEWayBill($invoice_id, $details, $payload)
+    private function logEWayBill($invoice_id, $details, $payload, int $business_id)
     {
         if (!$this->dbOk()) {
             return;
         }
-        $business_id = $_SESSION['business_id'];
         $sql = "INSERT INTO eway_bills (business_id, invoice_id, trans_mode, trans_distance, vehicle_no, transporter_id, request_payload, status) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')";
         $stmt = $this->connect->prepare($sql);
