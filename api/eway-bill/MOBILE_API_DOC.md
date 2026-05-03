@@ -28,14 +28,19 @@ Fetch legal name and address for any GSTIN.
   "data": {
     "gstin": "...",
     "tradeName": "Company Name",
-    "addr1": "Address Line 1",
-    "place": "City",
-    "pincode": 123456,
-    "stateCode": 7,
-    "state": "DELHI"
+    "legalName": "Company Name",
+    "address1": "Address line 1",
+    "address2": "Address line 2",
+    "addr1": "Same as address1",
+    "addr2": "Same as address2",
+    "stateCode": "29",
+    "pinCode": "560016",
+    "pincode": "560016",
+    "place": ""
   }
 }
 ```
+Perione returns `address1`, `address2`, `pinCode`. The API also exposes `addr1` / `addr2` / `pincode` aliases for older clients.
 
 ---
 

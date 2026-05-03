@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_eway_full'])
 
 // Load form data (auto-populate). On POST after error, re-use POST so user doesn't lose edits.
 $default_transport = [
-    'transMode' => '1',
+    'transMode' => '',
     'transDistance' => '0',
     'vehicleNo' => '',
     'transporterId' => '',

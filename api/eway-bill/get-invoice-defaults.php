@@ -34,7 +34,7 @@ $controller = new EwayBillController($connect);
 
 // 2. Prepare Invoice Data
 $default_transport = [
-    'transMode' => '1',
+    'transMode' => '',
     'transDistance' => '0',
     'vehicleNo' => '',
     'transporterId' => '',
