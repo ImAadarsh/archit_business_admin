@@ -44,6 +44,18 @@ if (!is_array($result) || ($result['status'] ?? '') !== 'success' || !is_array($
 
 $data = $result['data'];
 
+$masterCodesFile = dirname(__DIR__, 2) . '/eway_bills_doc/eway_master_codes.php';
+$masterCodes = is_file($masterCodesFile) ? (include $masterCodesFile) : [];
+if (!is_array($masterCodes)) $masterCodes = [];
+$codeLabel = static function ($group, $code) use ($masterCodes) {
+    if ($code === null || $code === '') return '';
+    $g = $masterCodes[$group] ?? [];
+    if (isset($g[$code])) return (string) $code . ' — ' . (string) $g[$code];
+    if (isset($g[(string) $code])) return (string) $code . ' — ' . (string) $g[(string) $code];
+    if (isset($g[(int) $code])) return (string) $code . ' — ' . (string) $g[(int) $code];
+    return (string) $code;
+};
+
 $businessName = 'InvoiceMate';
 $logoRel = '';
 $bq = $connect->prepare('SELECT business_name, logo FROM businessses WHERE id = ? LIMIT 1');
@@ -165,10 +177,87 @@ foreach ($rows as $r) {
 }
 $html .= '</table>';
 
+$vehicleList = $pick($data, ['VehiclListDetails', 'vehicleListDetails', 'VehicleListDetails'], []);
+if (!is_array($vehicleList)) $vehicleList = [];
+
+$topVehicleNo = trim((string) $pick($data, ['vehicleNo', 'vehNo'], ''));
+$topTransMode = trim((string) $pick($data, ['transMode'], ''));
+$topFromPlace = trim((string) $pick($data, ['fromPlace'], ''));
+$topFromState = trim((string) $pick($data, ['fromStateCode', 'fromStateName'], ''));
+$topTransDocNo = trim((string) $pick($data, ['transDocNo'], ''));
+$topTransDocDate = trim((string) $pick($data, ['transDocDate'], ''));
+$topUpdatedDate = trim((string) $pick($data, ['ewayBillDate', 'genDate'], ''));
+
+if (empty($vehicleList) && ($topVehicleNo !== '' || $topTransMode !== '' || $topTransDocNo !== '')) {
+    $vehicleList = [[
+        'updatedDate' => $topUpdatedDate,
+        'updMode' => $pick($data, ['genMode'], ''),
+        'vehicleNo' => $topVehicleNo,
+        'fromPlace' => $topFromPlace,
+        'fromState' => $topFromState,
+        'transMode' => $topTransMode,
+        'transDocNo' => $topTransDocNo,
+        'transDocDate' => $topTransDocDate,
+    ]];
+}
+
+$html .= '<br><br><h2 style="text-align:center;font-size:16px;">Part - B</h2>';
+if (!empty($vehicleList)) {
+    $html .= '<table border="1" cellpadding="5" cellspacing="0" width="100%">';
+    $html .= '<tr style="background-color:#f2f2f2;">'
+        . '<th width="5%"><b>#</b></th>'
+        . '<th width="18%"><b>Mode</b></th>'
+        . '<th width="18%"><b>Vehicle No / Trans Doc</b></th>'
+        . '<th width="22%"><b>From</b></th>'
+        . '<th width="20%"><b>Entered Date</b></th>'
+        . '<th width="17%"><b>Updated By</b></th>'
+        . '</tr>';
+    $sno = 0;
+    foreach ($vehicleList as $v) {
+        if (!is_array($v)) continue;
+        $sno++;
+        $vMode = $codeLabel('transMode', $pick($v, ['transMode'], ''));
+        $vVeh = trim((string) $pick($v, ['vehicleNo', 'vehNo'], ''));
+        $vTransDocNo = trim((string) $pick($v, ['transDocNo'], ''));
+        $vTransDocDate = trim((string) $pick($v, ['transDocDate'], ''));
+        $vehCell = $vVeh;
+        if ($vTransDocNo !== '') {
+            $vehCell .= ($vehCell !== '' ? ' / ' : '') . $vTransDocNo;
+            if ($vTransDocDate !== '') $vehCell .= ' (' . $fmtDate($vTransDocDate) . ')';
+        }
+        if ($vehCell === '') $vehCell = '—';
+
+        $vFromPlace = trim((string) $pick($v, ['fromPlace'], ''));
+        $vFromState = $codeLabel('stateCode', $pick($v, ['fromState', 'fromStateCode'], ''));
+        $fromCell = $vFromPlace;
+        if ($vFromState !== '') $fromCell .= ($fromCell !== '' ? ', ' : '') . $vFromState;
+        if ($fromCell === '') $fromCell = '—';
+
+        $vUpdated = $pick($v, ['updatedDate', 'enteredDate', 'genDate'], '');
+        $vUpdatedTxt = $vUpdated !== '' ? $fmtDateTime($vUpdated) : '—';
+        $vUpdMode = trim((string) $pick($v, ['updMode', 'userGstin'], ''));
+        if ($vUpdMode === '') $vUpdMode = '—';
+
+        $html .= '<tr>'
+            . '<td>' . $sno . '</td>'
+            . '<td>' . $clean($vMode !== '' ? $vMode : '—') . '</td>'
+            . '<td>' . $clean($vehCell) . '</td>'
+            . '<td>' . $clean($fromCell) . '</td>'
+            . '<td>' . $clean($vUpdatedTxt) . '</td>'
+            . '<td>' . $clean($vUpdMode) . '</td>'
+            . '</tr>';
+    }
+    $html .= '</table>';
+} else {
+    $html .= '<table border="1" cellpadding="6" cellspacing="0" width="100%">'
+        . '<tr><td align="center"><i>Part-B is not entered. This e-Way Bill is not valid for movement until vehicle details are updated.</i></td></tr>'
+        . '</table>';
+}
+
 $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 $pdf->SetCreator('InvoiceMate');
 $pdf->SetAuthor($businessName);
-$pdf->SetTitle('Eway Part-A Slip ' . $no);
+$pdf->SetTitle('Eway Bill ' . $no);
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(10, 12, 10);
@@ -211,7 +300,7 @@ $pdf->SetFont('helvetica', '', 8);
 $pdf->MultiCell(0, 5, "Note: If any discrepancy in information please try after sometimes.", 0, 'L', false, 1);
 
 header('Content-Type: application/pdf');
-header('Content-Disposition: attachment; filename="eway-parta-' . preg_replace('/\D+/', '', $no) . '.pdf"');
-$pdf->Output('eway-parta-' . $no . '.pdf', 'I');
+header('Content-Disposition: attachment; filename="eway-bill-' . preg_replace('/\D+/', '', $no) . '.pdf"');
+$pdf->Output('eway-bill-' . $no . '.pdf', 'I');
 exit;
 
