@@ -6,6 +6,7 @@ set_time_limit(300);
 
 // Include database connection
 require_once('admin/connect.php');
+require_once('admin/ai_generation_log.php');
 
 // Configuration
 $GEMINI_API_KEY = $_GET['GEMINI_API_KEY'];
@@ -180,7 +181,7 @@ function downloadImage($imageUrl, $destinationPath) {
 }
 
 // Resize image before sending to AI to reduce payload/cost
-function resizeImageForAI($sourcePath, $maxDim = 1024) {
+function resizeImageForAI($sourcePath, $maxDim = 768) {
     if (!file_exists($sourcePath)) {
         logMessage("  ERROR: resizeImageForAI missing file {$sourcePath}");
         return false;
@@ -275,27 +276,21 @@ function generateJustProductImage($apiKey, $artworkPath, $outputPath, $productIn
     // Check if framed
     $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
     $frameInfo = $isFramed 
-        ? "This artwork HAS A FRAME. You must keep the frame intact and visible in the output. Remove only the background behind the frame. IMPORTANT: Remove any black corners or shadows from the frame edges." 
-        : "This artwork is FRAMELESS (canvas or unframed print). Remove the background but keep the artwork edges clean.";
+        ? "HAS A FRAME: keep frame intact; remove black corners/shadows on frame edges." 
+        : "FRAMELESS: remove background; keep artwork edges clean.";
     
     // Check orientation
     $orientation = $productInfo['orientation'] ?? 'horizontal';
     $orientationInfo = strtoupper($orientation);
     
-    // Build comprehensive prompt for clean product image
-    $prompt = "Create a clean, professional product image of this artwork by removing the background. {$dimensions} {$frameInfo}
-
-CRITICAL REQUIREMENTS:
-1. ORIENTATION: The artwork is {$orientationInfo}. DO NOT change, rotate, or flip the orientation under any circumstances.
-2. FRAME: " . ($isFramed ? "This artwork HAS A FRAME - keep the entire frame visible and intact. CRITICAL: Remove any black corners, shadows, or dark artifacts from the frame edges. The frame should have clean, crisp edges against the white background. Only remove the background behind the framed artwork." : "This artwork is FRAMELESS - remove the background but preserve the artwork edges exactly as they are.") . "
-3. BLACK CORNERS: " . ($isFramed ? "If the frame has any black corners or dark shadows at the edges, remove them completely. The frame edges must be clean and sharp." : "Remove any dark corners or shadows from the artwork edges.") . "
-4. BACKGROUND: Remove all background elements. Replace with a clean pure white background (RGB 255,255,255).
-5. NO MOCKUP: Do NOT place the artwork in any room, wall, or scene. This is just a product shot.
-6. NO MODIFICATIONS: Do not crop, resize, add effects, or modify the artwork itself in any way. Only remove the background and clean up the edges.
-7. CENTERING: Center the artwork in the frame with appropriate padding.
-8. QUALITY: Maintain the highest quality and color accuracy of the original artwork.
-
-The output should look like a professional e-commerce product photo - just the artwork (with frame if applicable) on a clean pure white background with no shadows, black corners, or artifacts, ready for an online store listing.";
+    // Compact prompt for clean product image
+    $prompt = "Create a clean e-commerce product photo of this artwork on pure white background (RGB 255,255,255). {$dimensions} {$frameInfo}
+CRITICAL:
+1. Orientation is {$orientationInfo} — do not rotate or flip.
+2. " . ($isFramed
+        ? "Keep the full frame; remove black corners/shadows on frame edges; remove only background behind the frame."
+        : "Frameless: remove background; keep artwork edges clean.") . "
+3. No room/mockup scene. Do not crop or alter the artwork. Center with light padding.";
     
     // Call Gemini Image Generation API
     $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=" . $apiKey;
@@ -678,12 +673,12 @@ logMessage("");
 
 // Step 4: Resize artwork for AI
 logMessage("Optimizing artwork for AI payload...");
-$optimizedArtworkData = resizeImageForAI($originalImagePath, 1024);
+$optimizedArtworkData = resizeImageForAI($originalImagePath, 768);
 if (!$optimizedArtworkData) {
     logMessage("ERROR: Failed to optimize artwork for AI usage");
     exit;
 }
-logMessage("Artwork optimized (max dimension 1024px) for AI request.");
+logMessage("Artwork optimized (max dimension 768px) for AI request.");
 logMessage("");
 
 // Step 5: Prepare product info
@@ -746,8 +741,26 @@ $uploadSuccess = false;
 if ($uploadResult['success']) {
     logMessage("✓ Upload successful!");
     $uploadSuccess = true;
+    $uploadedImagePath = $uploadResult['response']['data'][0]['image'] ?? '';
+    logAIImageGeneration($connect, [
+        'product_id' => $product['id'],
+        'generation_type' => 'just_product',
+        'model_name' => 'gemini-2.5-flash-image',
+        'image_path' => $uploadedImagePath,
+        'images_count' => 1,
+        'status' => 'success',
+        'source' => 'live',
+    ]);
 } else {
     logMessage("✗ Upload failed: " . ($uploadResult['error'] ?? 'Unknown error'));
+    logAIImageGeneration($connect, [
+        'product_id' => $product['id'],
+        'generation_type' => 'just_product',
+        'model_name' => 'gemini-2.5-flash-image',
+        'images_count' => 0,
+        'status' => 'failed',
+        'source' => 'live',
+    ]);
 }
 
 // Step 8: Clean up temporary files
@@ -796,6 +809,7 @@ if ($uploadSuccess) {
 }
 
 // Summary
+$remainingAfter = max(0, ($remainingProducts ?? 0) - ($uploadSuccess ? 1 : 0));
 logMessage("");
 logMessage("=== Processing Complete ===");
 logMessage("Product ID: {$product['id']}");
@@ -803,6 +817,7 @@ logMessage("Product Name: {$product['name']}");
 logMessage("Image Generated: " . ($success ? "Yes" : "No"));
 logMessage("Image Uploaded: " . ($uploadSuccess ? "Yes" : "No"));
 logMessage("Status: " . ($uploadSuccess ? "Marked as processed" : "NOT processed - will retry in next run"));
+logMessage("Products remaining after this run: {$remainingAfter}");
 logMessage("");
 
 mysqli_close($connect);
@@ -816,6 +831,7 @@ echo "<li>Product Name: {$product['name']}</li>";
 echo "<li>Image Generated: <span class='" . ($success ? "success" : "error") . "'>" . ($success ? "Yes" : "No") . "</span></li>";
 echo "<li>Image Uploaded: <span class='" . ($uploadSuccess ? "success" : "error") . "'>" . ($uploadSuccess ? "Yes" : "No") . "</span></li>";
 echo "<li>Status: <span class='" . ($uploadSuccess ? "success" : "error") . "'>" . ($uploadSuccess ? "Processed" : "NOT Processed - Will Retry") . "</span></li>";
+echo "<li>Products remaining: <span class='info'>{$remainingAfter}</span> (was " . ($remainingProducts ?? '?') . ")</li>";
 echo "</ul>";
 echo "<p><a href='generate_just_product_images.php?GEMINI_API_KEY={$GEMINI_API_KEY}'>Process Next Product</a></p>";
 echo "</body></html>";

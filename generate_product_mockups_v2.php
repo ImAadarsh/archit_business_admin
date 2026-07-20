@@ -6,6 +6,7 @@ set_time_limit(300);
 
 // Include database connection
 require_once('admin/connect.php');
+require_once('admin/ai_generation_log.php');
 
 // Configuration
 $GEMINI_API_KEY = $_GET['GEMINI_API_KEY'];
@@ -253,6 +254,30 @@ function resizeImageForAI($sourcePath, $maxDim = 1024) {
     return $data;
 }
 
+// Skip AI naming when product already has a useful descriptive name
+function needsAIProductNaming($name) {
+    $name = trim((string) $name);
+    if ($name === '') {
+        return true;
+    }
+
+    $genericNames = [
+        'devotional', 'landscapes', 'landscape', 'animal', 'animals', 'figurative',
+        'modern art', 'abstract', 'portrait', 'portraits', 'nature', 'floral',
+        'religious', 'spiritual', 'cityscape', 'still life', 'product', 'untitled',
+        'art', 'painting', 'print', 'canvas'
+    ];
+
+    // Only spend a naming call on empty/generic placeholders
+    if (in_array(strtolower($name), $genericNames, true)) {
+        return true;
+    }
+
+    $wordCount = preg_match_all('/\S+/u', $name);
+    // Single-word non-listed names are still treated as placeholders
+    return $wordCount < 2;
+}
+
 // Function to generate AI product name and description using Gemini
 function generateAIProductNameAndDescription($apiKey, $artworkPath, $artworkData = null) {
     if ($artworkData === null) {
@@ -266,31 +291,14 @@ function generateAIProductNameAndDescription($apiKey, $artworkPath, $artworkData
 
     $imageBase64 = base64_encode($artworkData);
     
-    // Prompt for generating product name, description, and suitable_for
-    $prompt = "Analyze this artwork and generate:
-1. A short, descriptive product name (3-5 words maximum) - DO NOT use the word 'PRINT' in the name
-2. A product description (2 lines with bullet points)
-3. Suitable locations/rooms where this artwork would fit best (comma-separated list)
-
-IMPORTANT RULES:
-- The product name must NOT contain the word 'PRINT'
-- Focus on the artwork's subject, style, or mood instead
-
-Format your response EXACTLY as follows:
-NAME: [product name here - without the word PRINT]
-DESCRIPTION: [First line describing the artwork style and subject]
-• [Key feature or characteristic 1]
-• [Key feature or characteristic 2]
-• [Key feature or characteristic 3]
-SUITABLE_FOR: [comma-separated list of locations, e.g., living room, office, bedroom, dining room, corridor, entryway]
-
-Example:
-NAME: Modern Abstract Wall Art
-DESCRIPTION: A striking contemporary piece featuring bold geometric shapes and vibrant colors that add energy to any space.
-• Perfect for modern and minimalist interiors
-• High-quality canvas with vivid color reproduction
-• Ideal for living rooms, offices, and galleries
-SUITABLE_FOR: living room, office, bedroom, dining room";
+    // Compact prompt for name, description, and suitable_for
+    $prompt = "Analyze this artwork. Reply EXACTLY in this format:
+NAME: [3-5 word product name, no word PRINT]
+DESCRIPTION: [1 sentence style/subject]
+• [feature 1]
+• [feature 2]
+• [feature 3]
+SUITABLE_FOR: [comma-separated rooms]";
     
     // Prepare API request
     $requestBody = [
@@ -309,11 +317,11 @@ SUITABLE_FOR: living room, office, bedroom, dining room";
         ],
         'generationConfig' => [
             'temperature' => 0.7,
-            'maxOutputTokens' => 1000
+            'maxOutputTokens' => 400
         ]
     ];
     
-    $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-001:generateContent?key={$apiKey}");
+    $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key={$apiKey}");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
@@ -400,6 +408,155 @@ SUITABLE_FOR: living room, office, bedroom, dining room";
     return null;
 }
 
+// Ask AI which 2 room mockups best fit this artwork (cheap text model + small image)
+function selectMockupRoomsWithAI($apiKey, $artworkData, $orientation) {
+    $isVertical = (strtolower((string) $orientation) === 'vertical');
+    $allowed = $isVertical
+        ? ['corridor', 'staircase', 'entryway']
+        : ['living_room', 'dining_room', 'office', 'bedroom'];
+    $fallback = $isVertical
+        ? ['corridor', 'staircase']
+        : ['living_room', 'dining_room'];
+
+    if (!$artworkData) {
+        logMessage("  WARNING: No artwork data for room selection — using defaults");
+        return $fallback;
+    }
+
+    $allowedList = implode(', ', $allowed);
+    $prompt = "Analyze this artwork (orientation: " . ($isVertical ? 'VERTICAL' : 'HORIZONTAL') . ").
+Pick the 2 best room mockup settings for displaying this art.
+Allowed values ONLY: {$allowedList}
+Reply EXACTLY:
+ROOMS: room1, room2";
+
+    $requestBody = [
+        'contents' => [
+            [
+                'parts' => [
+                    ['text' => $prompt],
+                    [
+                        'inline_data' => [
+                            'mime_type' => 'image/jpeg',
+                            'data' => base64_encode($artworkData)
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        'generationConfig' => [
+            'temperature' => 0.3,
+            'maxOutputTokens' => 80
+        ]
+    ];
+
+    $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key={$apiKey}");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestBody));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode !== 200 || !$response) {
+        logMessage("  WARNING: Room selection API failed (HTTP {$httpCode}) — using defaults");
+        return $fallback;
+    }
+
+    $result = json_decode($response, true);
+    $text = trim($result['candidates'][0]['content']['parts'][0]['text'] ?? '');
+    if ($text === '') {
+        logMessage("  WARNING: Empty room selection response — using defaults");
+        return $fallback;
+    }
+
+    logMessage("  AI room selection raw: " . str_replace("\n", ' ', $text));
+
+    $selected = [];
+    if (preg_match('/ROOMS:\s*(.+)$/is', $text, $m)) {
+        $parts = preg_split('/[\s,]+/', strtolower(trim($m[1])));
+        foreach ($parts as $part) {
+            $part = trim($part);
+            $part = str_replace(['-', ' '], '_', $part);
+            if (in_array($part, $allowed, true) && !in_array($part, $selected, true)) {
+                $selected[] = $part;
+            }
+            if (count($selected) >= 2) {
+                break;
+            }
+        }
+    }
+
+    // Fill missing slots from fallback order
+    foreach ($fallback as $room) {
+        if (count($selected) >= 2) {
+            break;
+        }
+        if (!in_array($room, $selected, true)) {
+            $selected[] = $room;
+        }
+    }
+
+    if (count($selected) < 2) {
+        return $fallback;
+    }
+
+    return array_slice($selected, 0, 2);
+}
+
+// Shared tight prompts for all supported mockup rooms
+function getMockupRoomPrompts($productInfo) {
+    $dimensions = '';
+    if (!empty($productInfo['width']) && !empty($productInfo['height'])) {
+        $dimensions = "The artwork dimensions are {$productInfo['width']} x {$productInfo['height']}.";
+    }
+
+    $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
+    $frameInfo = $isFramed
+        ? "Framed artwork: keep the same frame visible; remove black corners from the frame."
+        : "Frameless artwork: do not crop or change orientation.";
+
+    $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
+    $orientLabel = $isVertical ? 'VERTICAL' : 'HORIZONTAL';
+    $orientRule = $isVertical
+        ? 'CRITICAL: Keep artwork VERTICAL — do not rotate or flip.'
+        : 'CRITICAL: Keep artwork HORIZONTAL — do not rotate or flip.';
+
+    return [
+        'corridor' => "Create a photorealistic modern corridor mockup with this {$orientLabel} artwork on the wall. {$dimensions} {$frameInfo}
+{$orientRule}
+Neutral wall toned to the art, wood floor, minimal decor/plant, natural light, artwork centered at eye level with realistic shadows. Preserve artwork pixels exactly.",
+
+        'staircase' => "Create a photorealistic elegant staircase mockup with this {$orientLabel} artwork on the wall. {$dimensions} {$frameInfo}
+{$orientRule}
+Warm neutral wall, wood or marble stairs, soft ambient light, subtle decor matching the palette. Hang artwork centered; preserve artwork exactly including orientation.",
+
+        'entryway' => "Create a photorealistic stylish entryway mockup with this {$orientLabel} artwork on the wall. {$dimensions} {$frameInfo}
+{$orientRule}
+Light neutral walls, high ceilings, plant/lighting accents matching the palette. Artwork centered at eye level with realistic shadows. Preserve artwork exactly.",
+
+        'living_room' => "Create a photorealistic living room mockup with this {$orientLabel} artwork on the wall. {$dimensions} {$frameInfo}
+{$orientRule}
+Warm neutral wall, wood floor, sofa and small decor echoing the palette, natural light, artwork centered at eye level with realistic shadows. Preserve artwork exactly.",
+
+        'dining_room' => "Create a photorealistic dining room mockup with this {$orientLabel} artwork on the wall. {$dimensions} {$frameInfo}
+{$orientRule}
+Warm neutral wall, wood dining table with chairs, soft ambient light, decor matching the art hues. Hang artwork centered; preserve artwork exactly including orientation.",
+
+        'office' => "Create a photorealistic contemporary office mockup with this {$orientLabel} artwork on the wall. {$dimensions} {$frameInfo}
+{$orientRule}
+Light neutral walls, modern desk, subtle accessories matching the palette. Artwork centered above desk with realistic shadows. Preserve artwork exactly.",
+
+        'bedroom' => "Create a photorealistic serene bedroom mockup with this {$orientLabel} artwork on the wall. {$dimensions} {$frameInfo}
+{$orientRule}
+Soft wall tone, bed/headboard accents matching the art, warm or cool light as fits the mood. Artwork centered above headboard with realistic shadows. Preserve artwork exactly."
+    ];
+}
+
 // Function to create multiple mockups in parallel using Gemini Image Generation API
 function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo, $productId, $artworkData = null) {
     global $TEMP_DIR;
@@ -415,79 +572,16 @@ function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo
     }
 
     $imageBase64 = base64_encode($artworkData);
-    
-    // Get dimensions and frame info
-    $dimensions = "";
-    if (!empty($productInfo['width']) && !empty($productInfo['height'])) {
-        $dimensions = "The artwork dimensions are {$productInfo['width']} x {$productInfo['height']}.";
-    }
-    
-    $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
-    $frameInfo = $isFramed ? "This artwork has a frame. Make sure the Same frame is visible in the mockup. and also remove the black croners from the frame." : "This is a frameless artwork (canvas or unframed print). Also make sure the artwork is not cropped or cut off and do not change the orientation of the artwork by your own.";
-    
-    // Check if vertical orientation
     $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
-    
-    // Build prompts for each room type - different prompts for vertical images
-    if ($isVertical) {
-        // Vertical-specific prompts with corridor/staircase/entryway themes
-        $prompts = [
-            'corridor' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic mockup featuring a modern corridor with clean lines and minimalistic decor, featuring a tall vertical painting on the wall. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is VERTICAL (portrait orientation) and MUST remain vertical in the mockup. Do not rotate, flip, or change it to horizontal/landscape orientation under any circumstances.
-
-The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, curated decor such as a potted plant or minimalist furniture that echoes the palette. Keep lighting natural and directional to highlight the vertical artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork EXACTLY as provided including its VERTICAL ORIENTATION and compose the corridor so all styling decisions feel intentionally inspired by the artwork.",
-            
-            'staircase' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic mockup featuring an elegant staircase area with warm lighting, showcasing a vertical painting that complements the ambiance. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is VERTICAL (portrait orientation) and MUST remain vertical in the mockup. Do not rotate, flip, or change it to horizontal/landscape orientation under any circumstances.
-
-Compose the scene with a warm neutral wall tuned to complement the art, elegant staircase with wooden or marble steps, and warm ambient lighting that highlights the vertical artwork. Include decorative elements such as plants or artwork accessories that mirror the artwork's hues. Hang the vertical artwork centered on the wall at proper height, taking advantage of the vertical space. Use soft ambient lighting with gentle shadows. The artwork itself must remain COMPLETELY UNCHANGED including its VERTICAL ORIENTATION—only integrate it seamlessly into this tailored staircase environment.",
-            
-            'entryway' => "Study the artwork's palette and atmosphere. Design a contemporary mockup featuring a stylish entryway with high ceilings, where a vertical painting adds character to the space. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is VERTICAL (portrait orientation) and MUST remain vertical in the mockup. Do not rotate, flip, or change it to horizontal/landscape orientation under any circumstances.
-
-The scene should include light neutral walls whose undertone complements the artwork, a modern entryway with high ceilings, and accessories such as plants, lighting fixtures, or decorative elements whose colors and materials mirror elements from the artwork. Ensure the vertical artwork is centered on the wall at an ergonomic viewing height with realistic shadowing, taking advantage of the vertical space. Preserve the artwork EXACTLY including its VERTICAL ORIENTATION—only style the entryway environment to look professionally curated around it with cohesive color accents and balanced lighting."
-        ];
-    } else {
-        // Standard horizontal/landscape prompts
-        $prompts = [
-            'living_room' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic living room mockup that complements the artwork. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is HORIZONTAL (landscape orientation) and MUST remain horizontal in the mockup. Do not rotate, flip, or change it to vertical/portrait orientation under any circumstances.
-
-The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, a contemporary sofa whose upholstery reflects one of the accent colors from the artwork, curated decor such as a potted plant, coffee table edge, or throw blanket that echoes the palette. Keep lighting natural and directional to highlight the artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork EXACTLY as provided including its HORIZONTAL ORIENTATION and compose the room so all styling decisions feel intentionally inspired by the artwork.",
-            
-            'dining_room' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic dining room mockup that feels custom-designed around the artwork. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is HORIZONTAL (landscape orientation) and MUST remain horizontal in the mockup. Do not rotate, flip, or change it to vertical/portrait orientation under any circumstances.
-
-Compose the scene with a warm neutral wall tuned to complement the art, a natural wood dining table with at least four upholstered chairs whose fabrics pick up secondary colors from the artwork, and a contemporary pendant light or chandelier centered above the table. Style the tabletop with dinnerware or minimalist centerpieces that mirror the artwork's hues. Include glimpses of a sideboard or cabinet styled with accessories influenced by the art. Hang the artwork centered above the sideboard or table at proper height. Use soft ambient lighting with gentle shadows. The artwork itself must remain COMPLETELY UNCHANGED including its HORIZONTAL ORIENTATION—only integrate it seamlessly into this tailored dining environment.",
-                    
-            'office' => "Study the artwork's palette and atmosphere. Design a contemporary office mockup that integrates the piece as a focal point. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is HORIZONTAL (landscape orientation) and MUST remain horizontal in the mockup. Do not rotate, flip, or change it to vertical/portrait orientation under any circumstances.
-
-The scene should include light neutral walls whose undertone complements the artwork, a modern desk with technology (laptop, monitor) arranged neatly, and accessories such as notebooks, lamp, or plant whose colors and materials mirror elements from the artwork. Ensure the artwork is centered above the desk at an ergonomic viewing height with realistic shadowing. Preserve the artwork EXACTLY including its HORIZONTAL ORIENTATION—only style the office environment to look professionally curated around it with cohesive color accents and balanced lighting.",
-            
-            'bedroom' => "Evaluate the artwork's color story, mood, and texture. Create a photorealistic serene bedroom mockup inspired by these qualities. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is HORIZONTAL (landscape orientation) and MUST remain horizontal in the mockup. Do not rotate, flip, or change it to vertical/portrait orientation under any circumstances.
-
-Feature a softly toned wall that harmonizes with the art, an upholstered headboard or bed linens that pick up secondary colors from the piece, and a wooden nightstand with lighting that reinforces the artwork's ambiance (warm for cozy scenes, cooler for calm minimalism). Include decor elements—pillows, throws, plants—that subtly reference the artwork. Position the artwork centered above the headboard with realistic shadows. Keep the artwork COMPLETELY UNTOUCHED including its HORIZONTAL ORIENTATION and ensure the entire bedroom styling feels intentionally derived from the artwork's design language."
-        ];
-    }
+    $prompts = getMockupRoomPrompts($productInfo);
     
     $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=" . $apiKey;
     
     // Prepare all curl handles
     $multiHandle = curl_multi_init();
     $curlHandles = [];
-    $mockupData = [];
     
     foreach ($mockupTypes as $mockupType) {
-        // Get default prompt based on orientation
         $defaultPrompt = $isVertical ? ($prompts['corridor'] ?? '') : ($prompts['living_room'] ?? '');
         $prompt = $prompts[$mockupType] ?? $defaultPrompt;
         $outputPath = $TEMP_DIR . "mockup_{$productId}_{$mockupType}_" . time() . "_" . uniqid() . ".jpg";
@@ -571,7 +665,6 @@ Feature a softly toned wall that harmonizes with the art, an upholstered headboa
         } else {
             logMessage("  ✗ {$mockupType} failed (HTTP {$httpCode})");
             
-            // Log full response for debugging (especially for 429 rate limit errors)
             if ($result) {
                 $errorResponse = json_decode($result, true);
                 if ($errorResponse) {
@@ -612,72 +705,9 @@ function createMockupWithGeminiAPI($apiKey, $artworkPath, $mockupType, $outputPa
     }
     
     $imageBase64 = base64_encode($artworkData);
-    
-    // Get dimensions
-    $dimensions = "";
-    if (!empty($productInfo['width']) && !empty($productInfo['height'])) {
-        $dimensions = "The artwork dimensions are {$productInfo['width']} x {$productInfo['height']}.";
-    }
-    
-    // Check if framed
-    $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
-    $frameInfo = $isFramed ? "This artwork has a frame. Make sure the Same frame is visible in the mockup. and also remove the black croners from the frame. Also Check the orientation of the artwork is according to the correct viewing angle of the artwork." : "This is a frameless artwork (canvas or unframed print).";
-    
-    // Check if vertical orientation
     $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
+    $prompts = getMockupRoomPrompts($productInfo);
     
-    // Build comprehensive prompt for each room type - different prompts for vertical images
-    if ($isVertical) {
-        // Vertical-specific prompts with corridor/staircase/entryway themes
-        $prompts = [
-            'corridor' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic mockup featuring a modern corridor with clean lines and minimalistic decor, featuring a tall vertical painting on the wall. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is VERTICAL (portrait orientation) and MUST remain vertical in the mockup. Do not rotate, flip, or change it to horizontal/landscape orientation under any circumstances.
-
-The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, curated decor such as a potted plant or minimalist furniture that echoes the palette. Keep lighting natural and directional to highlight the vertical artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork EXACTLY as provided including its VERTICAL ORIENTATION and compose the corridor so all styling decisions feel intentionally inspired by the artwork.",
-            
-            'staircase' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic mockup featuring an elegant staircase area with warm lighting, showcasing a vertical painting that complements the ambiance. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is VERTICAL (portrait orientation) and MUST remain vertical in the mockup. Do not rotate, flip, or change it to horizontal/landscape orientation under any circumstances.
-
-Compose the scene with a warm neutral wall tuned to complement the art, elegant staircase with wooden or marble steps, and warm ambient lighting that highlights the vertical artwork. Include decorative elements such as plants or artwork accessories that mirror the artwork's hues. Hang the vertical artwork centered on the wall at proper height, taking advantage of the vertical space. Use soft ambient lighting with gentle shadows. The artwork itself must remain COMPLETELY UNCHANGED including its VERTICAL ORIENTATION—only integrate it seamlessly into this tailored staircase environment.",
-            
-            'entryway' => "Study the artwork's palette and atmosphere. Design a contemporary mockup featuring a stylish entryway with high ceilings, where a vertical painting adds character to the space. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is VERTICAL (portrait orientation) and MUST remain vertical in the mockup. Do not rotate, flip, or change it to horizontal/landscape orientation under any circumstances.
-
-The scene should include light neutral walls whose undertone complements the artwork, a modern entryway with high ceilings, and accessories such as plants, lighting fixtures, or decorative elements whose colors and materials mirror elements from the artwork. Ensure the vertical artwork is centered on the wall at an ergonomic viewing height with realistic shadowing, taking advantage of the vertical space. Preserve the artwork EXACTLY including its VERTICAL ORIENTATION—only style the entryway environment to look professionally curated around it with cohesive color accents and balanced lighting."
-        ];
-    } else {
-        // Standard horizontal/landscape prompts
-        $prompts = [
-            'living_room' => "Analyze the provided artwork's colors, subject, mood, and style. Create a photorealistic living room mockup that complements the artwork. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is HORIZONTAL (landscape orientation) and MUST remain horizontal in the mockup. Do not rotate, flip, or change it to vertical/portrait orientation under any circumstances.
-
-The scene should include: a beige or warm neutral wall whose tone harmonizes with the dominant colors of the artwork, wooden flooring with visible planks, a contemporary sofa whose upholstery reflects one of the accent colors from the artwork, curated decor such as a potted plant, coffee table edge, or throw blanket that echoes the palette. Keep lighting natural and directional to highlight the artwork. Place the artwork centered on the wall at eye level with realistic shadows. Preserve the artwork EXACTLY as provided including its HORIZONTAL ORIENTATION and compose the room so all styling decisions feel intentionally inspired by the artwork.",
-            
-            'dining_room' => "Analyze the artwork's palette, mood, and visual style. Create a photorealistic dining room mockup that feels custom-designed around the artwork. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is HORIZONTAL (landscape orientation) and MUST remain horizontal in the mockup. Do not rotate, flip, or change it to vertical/portrait orientation under any circumstances.
-
-Compose the scene with a warm neutral wall tuned to complement the art, a natural wood dining table with at least four upholstered chairs whose fabrics pick up secondary colors from the artwork, and a contemporary pendant light or chandelier centered above the table. Style the tabletop with dinnerware or minimalist centerpieces that mirror the artwork's hues. Include glimpses of a sideboard or cabinet styled with accessories influenced by the art. Hang the artwork centered above the sideboard or table at proper height. Use soft ambient lighting with gentle shadows. The artwork itself must remain COMPLETELY UNCHANGED including its HORIZONTAL ORIENTATION—only integrate it seamlessly into this tailored dining environment.",
-            
-            'office' => "Study the artwork's palette and atmosphere. Design a contemporary office mockup that integrates the piece as a focal point. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is HORIZONTAL (landscape orientation) and MUST remain horizontal in the mockup. Do not rotate, flip, or change it to vertical/portrait orientation under any circumstances.
-
-The scene should include light neutral walls whose undertone complements the artwork, a modern desk with technology (laptop, monitor) arranged neatly, and accessories such as notebooks, lamp, or plant whose colors and materials mirror elements from the artwork. Ensure the artwork is centered above the desk at an ergonomic viewing height with realistic shadowing. Preserve the artwork EXACTLY including its HORIZONTAL ORIENTATION—only style the office environment to look professionally curated around it with cohesive color accents and balanced lighting.",
-            
-            'bedroom' => "Evaluate the artwork's color story, mood, and texture. Create a photorealistic serene bedroom mockup inspired by these qualities. {$dimensions} {$frameInfo} 
-
-CRITICAL: DO NOT CHANGE THE ORIENTATION OF THE ARTWORK. The artwork is HORIZONTAL (landscape orientation) and MUST remain horizontal in the mockup. Do not rotate, flip, or change it to vertical/portrait orientation under any circumstances.
-
-Feature a softly toned wall that harmonizes with the art, an upholstered headboard or bed linens that pick up secondary colors from the piece, and a wooden nightstand with lighting that reinforces the artwork's ambiance (warm for cozy scenes, cooler for calm minimalism). Include decor elements—pillows, throws, plants—that subtly reference the artwork. Position the artwork centered above the headboard with realistic shadows. Keep the artwork COMPLETELY UNTOUCHED including its HORIZONTAL ORIENTATION and ensure the entire bedroom styling feels intentionally derived from the artwork's design language."
-        ];
-    }
-    
-    // Get default prompt based on orientation
     $defaultPrompt = $isVertical ? ($prompts['corridor'] ?? '') : ($prompts['living_room'] ?? '');
     $prompt = $prompts[$mockupType] ?? $defaultPrompt;
     
@@ -727,29 +757,25 @@ Feature a softly toned wall that harmonizes with the art, an upholstered headboa
         if (!empty($curlError)) {
             logMessage("  CURL Error: {$curlError}");
         }
-        logMessage("  Response: " . substr($result, 0, 500));
         return false;
     }
     
-    // Parse response and extract image
     $response = json_decode($result, true);
     
     if (!isset($response['candidates'][0]['content']['parts'][0]['inlineData']['data'])) {
         logMessage("  ERROR: No image data in API response");
-        logMessage("  Response structure: " . json_encode(array_keys($response), JSON_PRETTY_PRINT));
         return false;
     }
     
-    // Decode and save the generated image
     $generatedImageData = base64_decode($response['candidates'][0]['content']['parts'][0]['inlineData']['data']);
     
     if (file_put_contents($outputPath, $generatedImageData)) {
         logMessage("  ✓ Mockup image generated successfully by Gemini AI");
         return true;
-    } else {
-        logMessage("  ERROR: Failed to save generated image");
-        return false;
     }
+    
+    logMessage("  ERROR: Failed to save generated image");
+    return false;
 }
 
 
@@ -877,12 +903,24 @@ logMessage("Temp Directory: " . $TEMP_DIR);
 logMessage("Log File: " . $LOG_FILE);
 logMessage("");
 
+// How many products still need mockups
+$remainingProducts = 0;
+$countResult = mysqli_query($connect, "SELECT COUNT(*) AS total FROM products WHERE is_temp = 0 AND is_processed = 0");
+if ($countResult) {
+    $remainingProducts = (int) (mysqli_fetch_assoc($countResult)['total'] ?? 0);
+    logMessage("Products remaining to process (mockups): {$remainingProducts}");
+    logMessage("");
+}
+
 // Step 1: Get one unprocessed product
 $query = "SELECT * FROM products WHERE is_temp = 0 AND is_processed = 0 LIMIT 1";
 $result = mysqli_query($connect, $query);
 
 if (!$result || mysqli_num_rows($result) === 0) {
     logMessage("No unprocessed products found.");
+    echo "</pre>";
+    echo "<p class='info'>No more products to process. Remaining: 0</p>";
+    echo "</body></html>";
     exit;
 }
 
@@ -931,7 +969,7 @@ if (!downloadImage($imageUrl, $originalImagePath)) {
 logMessage("Artwork downloaded successfully to: {$originalImagePath}");
 logMessage("");
 
-// Step 3.25: Resize artwork once for all AI calls
+// Step 3.25: Resize artwork once for mockup image calls (1024px)
 logMessage("Optimizing artwork for AI payload...");
 $optimizedArtworkData = resizeImageForAI($originalImagePath, 1024);
 if (!$optimizedArtworkData) {
@@ -941,33 +979,67 @@ if (!$optimizedArtworkData) {
 logMessage("Artwork optimized (max dimension 1024px) for AI requests.");
 logMessage("");
 
-// Step 3.5: Generate AI product name (3-5 words), description, and suitable_for
-logMessage("Generating AI-based product name, description, and suitable locations...");
-$aiGenerated = generateAIProductNameAndDescription($GEMINI_API_KEY, $originalImagePath, $optimizedArtworkData);
-if ($aiGenerated && isset($aiGenerated['name']) && isset($aiGenerated['description'])) {
-    logMessage("✓ AI Product Name Generated: {$aiGenerated['name']}");
-    logMessage("✓ AI Product Description Generated:");
-    // Log description with proper formatting
-    $descLines = explode("\n", $aiGenerated['description']);
-    foreach ($descLines as $line) {
-        logMessage("   " . $line);
-    }
-    $aiProductName = $aiGenerated['name'];
-    $aiProductDescription = $aiGenerated['description'];
-    
-    // Use AI-generated suitable_for if available
-    if (isset($aiGenerated['suitable_for']) && !empty($aiGenerated['suitable_for'])) {
-        $aiSuitableFor = $aiGenerated['suitable_for'];
-        logMessage("✓ AI Suitable For Generated: {$aiSuitableFor}");
+// Step 3.5: Generate AI product name only when current name is generic/empty
+$aiProductName = $product['name'];
+$aiProductDescription = $product['description'] ?? '';
+$aiSuitableFor = null;
+
+// Shared small image for cheap text calls (naming + room selection)
+$namingArtworkData = resizeImageForAI($originalImagePath, 512);
+if (!$namingArtworkData) {
+    $namingArtworkData = $optimizedArtworkData;
+}
+
+if (needsAIProductNaming($product['name'])) {
+    logMessage("Generating AI-based product name, description, and suitable locations...");
+    $aiGenerated = generateAIProductNameAndDescription($GEMINI_API_KEY, $originalImagePath, $namingArtworkData);
+    if ($aiGenerated && isset($aiGenerated['name']) && isset($aiGenerated['description'])) {
+        logMessage("✓ AI Product Name Generated: {$aiGenerated['name']}");
+        logMessage("✓ AI Product Description Generated:");
+        $descLines = explode("\n", $aiGenerated['description']);
+        foreach ($descLines as $line) {
+            logMessage("   " . $line);
+        }
+        $aiProductName = $aiGenerated['name'];
+        $aiProductDescription = $aiGenerated['description'];
+        
+        if (isset($aiGenerated['suitable_for']) && !empty($aiGenerated['suitable_for'])) {
+            $aiSuitableFor = $aiGenerated['suitable_for'];
+            logMessage("✓ AI Suitable For Generated: {$aiSuitableFor}");
+        } else {
+            logMessage("⚠ AI did not generate suitable_for, will use database value or default");
+        }
+        logAIImageGeneration($connect, [
+            'product_id' => $product['id'],
+            'generation_type' => 'name_description',
+            'prompt_text' => "NAME: {$aiProductName}",
+            'model_name' => 'gemini-2.5-flash-lite',
+            'images_count' => 0,
+            'status' => 'success',
+            'source' => 'live',
+        ]);
     } else {
-        $aiSuitableFor = null;
-        logMessage("⚠ AI did not generate suitable_for, will use database value or default");
+        logMessage("⚠ Using original product data");
+        logAIImageGeneration($connect, [
+            'product_id' => $product['id'],
+            'generation_type' => 'name_description',
+            'model_name' => 'gemini-2.5-flash-lite',
+            'images_count' => 0,
+            'status' => 'failed',
+            'source' => 'live',
+        ]);
     }
 } else {
-    logMessage("⚠ Using original product data");
-    $aiProductName = $product['name'];
-    $aiProductDescription = $product['description'] ?? '';
-    $aiSuitableFor = null;
+    logMessage("Skipping AI naming — product already has a descriptive name: {$product['name']}");
+    logAIImageGeneration($connect, [
+        'product_id' => $product['id'],
+        'generation_type' => 'name_description',
+        'prompt_text' => 'skipped — existing name: ' . $product['name'],
+        'model_name' => 'gemini-2.5-flash-lite',
+        'images_count' => 0,
+        'status' => 'skipped',
+        'source' => 'live',
+    ]);
 }
 logMessage("");
 
@@ -996,16 +1068,19 @@ logMessage("  - Suitable For: {$productInfo['suitable_for']}");
 logMessage("  - Orientation: " . ($productInfo['orientation'] ?? 'Not specified'));
 logMessage("");
 
-// Determine mockup types based on orientation
-$isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
-if ($isVertical) {
-    $mockupTypes = ['corridor', 'staircase', 'entryway'];
-    logMessage("Vertical artwork detected - generating vertical-specific mockups");
-} else {
-    $mockupTypes = ['living_room', 'dining_room', 'office', 'bedroom'];
-    logMessage("Horizontal/landscape artwork - generating standard room mockups");
-}
-logMessage("Generating mockup types: " . implode(', ', $mockupTypes));
+// AI picks the 2 best room mockups for this artwork
+logMessage("Asking AI which 2 mockup rooms to generate...");
+$mockupTypes = selectMockupRoomsWithAI($GEMINI_API_KEY, $namingArtworkData, $productInfo['orientation'] ?? '');
+logMessage("AI selected mockup types: " . implode(', ', $mockupTypes));
+logAIImageGeneration($connect, [
+    'product_id' => $product['id'],
+    'generation_type' => 'room_selection',
+    'prompt_text' => 'AI selected: ' . implode(', ', $mockupTypes),
+    'model_name' => 'gemini-2.5-flash-lite',
+    'images_count' => 0,
+    'status' => 'success',
+    'source' => 'live',
+]);
 logMessage("");
 
 // Step 5: Generate mockup images (ALL IN PARALLEL!)
@@ -1058,8 +1133,28 @@ if ($mockupsGenerated > 0) {
         if ($uploadResult['success']) {
             logMessage("  ✓ Upload successful!");
             $uploadedCount++;
+            $uploadedImagePath = $uploadResult['response']['data'][0]['image'] ?? '';
+            logAIImageGeneration($connect, [
+                'product_id' => $product['id'],
+                'generation_type' => 'mockup',
+                'mockup_type' => $mockupFile['type'],
+                'model_name' => 'gemini-2.5-flash-image',
+                'image_path' => $uploadedImagePath,
+                'images_count' => 1,
+                'status' => 'success',
+                'source' => 'live',
+            ]);
         } else {
             logMessage("  ✗ Upload failed: " . ($uploadResult['error'] ?? 'Unknown error'));
+            logAIImageGeneration($connect, [
+                'product_id' => $product['id'],
+                'generation_type' => 'mockup',
+                'mockup_type' => $mockupFile['type'],
+                'model_name' => 'gemini-2.5-flash-image',
+                'images_count' => 0,
+                'status' => 'failed',
+                'source' => 'live',
+            ]);
         }
         
         // Clean up temporary file
@@ -1118,6 +1213,7 @@ if ($uploadedCount > 0) {
 }
 
 // Summary
+$remainingAfter = max(0, $remainingProducts - ($uploadedCount > 0 ? 1 : 0));
 logMessage("");
 logMessage("=== Processing Complete ===");
 logMessage("Product ID: {$product['id']}");
@@ -1125,6 +1221,7 @@ logMessage("Product Name: {$product['name']}");
 logMessage("Mockups Generated: {$mockupsGenerated}");
 logMessage("Mockups Uploaded: {$uploadedCount}");
 logMessage("Status: " . ($uploadedCount > 0 ? "Marked as processed" : "NOT processed - will retry in next run"));
+logMessage("Products remaining after this run: {$remainingAfter}");
 logMessage("");
 logMessage("Temp Directory Location: {$TEMP_DIR}");
 
@@ -1139,8 +1236,9 @@ echo "<li>Product Name: {$product['name']}</li>";
 echo "<li>Mockups Generated: <span class='" . ($mockupsGenerated > 0 ? "success" : "error") . "'>{$mockupsGenerated}</span></li>";
 echo "<li>Mockups Uploaded: <span class='" . ($uploadedCount > 0 ? "success" : "error") . "'>{$uploadedCount}</span></li>";
 echo "<li>Status: <span class='" . ($uploadedCount > 0 ? "success" : "error") . "'>" . ($uploadedCount > 0 ? "Processed" : "NOT Processed - Will Retry") . "</span></li>";
+echo "<li>Products remaining: <span class='info'>{$remainingAfter}</span> (was {$remainingProducts})</li>";
 echo "</ul>";
-echo "<p><a href='generate_product_mockups_v2.php'>Process Next Product</a></p>";
+echo "<p><a href='generate_product_mockups_v2.php?GEMINI_API_KEY={$GEMINI_API_KEY}'>Process Next Product</a></p>";
 echo "</body></html>";
 ?>
 
