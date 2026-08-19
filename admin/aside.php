@@ -165,6 +165,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="gst-filing.php" aria-expanded="false" class="dropdown-toggle nav-link">
+                    <i class="fe fe-file-text fe-16"></i>
+                    <span class="ml-3 item-text">GST Filing Center</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="purchase.php" aria-expanded="false" class="dropdown-toggle nav-link">
                     <i class="fe fe-box fe-16"></i>
                     <span class="ml-3 item-text">Sales Report</span>

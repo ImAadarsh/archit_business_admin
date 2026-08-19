@@ -5,14 +5,45 @@ if (defined('CONNECT_LOADED')) {
 }
 define('CONNECT_LOADED', true);
 
-$host = "82.25.121.166";
-$user = "u954141192_archit";
-$password = "Endeavour@2023";
-$dbname = "u954141192_archit";
+$host = "82.25.121.184";
+$user = "u262009927_invoicemate";
+$password = "1@Endeavour07791";
+$dbname = "u262009927_invoicemate";
 $connect = mysqli_connect($host, $user, $password, $dbname);
 if ($connect === false) {
     error_log('business/admin/connect.php: mysqli_connect failed — ' . mysqli_connect_error());
 }
+
+/**
+ * Ping and reconnect if the remote MySQL session dropped
+ * (common after long OpenAI/Gemini waits — "MySQL server has gone away").
+ * Pass $connect by reference so callers keep the live handle.
+ */
+if (!function_exists('ensureMysqliConnection')) {
+function ensureMysqliConnection(&$connect) {
+    global $host, $user, $password, $dbname;
+
+    if ($connect instanceof mysqli) {
+        try {
+            // Avoid mysqli_ping() — deprecated in PHP 8.4
+            if (@mysqli_query($connect, 'SELECT 1')) {
+                return true;
+            }
+        } catch (Throwable $e) {
+            // fall through to reconnect
+        }
+        @mysqli_close($connect);
+    }
+
+    $connect = @mysqli_connect($host, $user, $password, $dbname);
+    if ($connect === false) {
+        error_log('ensureMysqliConnection: reconnect failed — ' . mysqli_connect_error());
+        return false;
+    }
+    return true;
+}
+}
+
 $uri = 'https://api.invoicemate.in/storage/app/';
 if (!function_exists('callAPI')) {
 function callAPI($method, $urlpoint, $data, $token){

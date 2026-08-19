@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `u954141192_archit`
+-- Database: `u262009927_invoicemate`
 --
 
 -- --------------------------------------------------------

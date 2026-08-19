@@ -18,14 +18,14 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `u954141192_archit`
+-- Database: `u262009927_invoicemate`
 --
 
 DELIMITER $$
 --
 -- Procedures
 --
-CREATE DEFINER=`u954141192_archit`@`127.0.0.1` PROCEDURE `RecordWebhookEvent` (IN `p_webhook_id` VARCHAR(100), IN `p_event_type` VARCHAR(100), IN `p_subscription_id` VARCHAR(100), IN `p_cf_subscription_id` VARCHAR(100), IN `p_payment_id` VARCHAR(100), IN `p_event_data` LONGTEXT)   BEGIN
+CREATE DEFINER=`u262009927_invoicemate`@`127.0.0.1` PROCEDURE `RecordWebhookEvent` (IN `p_webhook_id` VARCHAR(100), IN `p_event_type` VARCHAR(100), IN `p_subscription_id` VARCHAR(100), IN `p_cf_subscription_id` VARCHAR(100), IN `p_payment_id` VARCHAR(100), IN `p_event_data` LONGTEXT)   BEGIN
     INSERT INTO subscription_webhooks 
     (webhook_id, event_type, subscription_id, cf_subscription_id, payment_id, event_data)
     VALUES 
@@ -36,7 +36,7 @@ CREATE DEFINER=`u954141192_archit`@`127.0.0.1` PROCEDURE `RecordWebhookEvent` (I
     processed_at = NULL;
 END$$
 
-CREATE DEFINER=`u954141192_archit`@`127.0.0.1` PROCEDURE `UpdateSubscriptionStatus` (IN `p_subscription_id` BIGINT, IN `p_new_status` VARCHAR(50), IN `p_authorization_status` VARCHAR(50), IN `p_authorization_reference` VARCHAR(255), IN `p_changed_by` VARCHAR(20))   BEGIN
+CREATE DEFINER=`u262009927_invoicemate`@`127.0.0.1` PROCEDURE `UpdateSubscriptionStatus` (IN `p_subscription_id` BIGINT, IN `p_new_status` VARCHAR(50), IN `p_authorization_status` VARCHAR(50), IN `p_authorization_reference` VARCHAR(255), IN `p_changed_by` VARCHAR(20))   BEGIN
     DECLARE v_old_status VARCHAR(50);
     DECLARE v_business_id INT;
     
@@ -20897,7 +20897,7 @@ ALTER TABLE `user_inquiries`
 --
 DROP TABLE IF EXISTS `payment_overview`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`u954141192_archit`@`127.0.0.1` SQL SECURITY DEFINER VIEW `payment_overview`  AS SELECT `sp`.`id` AS `payment_id`, `sp`.`subscription_id` AS `subscription_id`, `s`.`business_id` AS `business_id`, `b`.`business_name` AS `business_name`, `sp`.`amount` AS `amount`, `sp`.`currency` AS `currency`, `sp`.`status` AS `status`, `sp`.`payment_method_type` AS `payment_method_type`, `sp`.`razorpay_payment_id` AS `cf_payment_id`, `sp`.`cashfree_payment_id` AS `cashfree_payment_id`, `sp`.`paid_at` AS `paid_at`, `sp`.`created_at` AS `created_at` FROM ((`subscription_payments` `sp` join `subscriptions` `s` on(`sp`.`subscription_id` = `s`.`id`)) join `businessses` `b` on(`s`.`business_id` = `b`.`id`)) ORDER BY `sp`.`created_at` DESC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`u262009927_invoicemate`@`127.0.0.1` SQL SECURITY DEFINER VIEW `payment_overview`  AS SELECT `sp`.`id` AS `payment_id`, `sp`.`subscription_id` AS `subscription_id`, `s`.`business_id` AS `business_id`, `b`.`business_name` AS `business_name`, `sp`.`amount` AS `amount`, `sp`.`currency` AS `currency`, `sp`.`status` AS `status`, `sp`.`payment_method_type` AS `payment_method_type`, `sp`.`razorpay_payment_id` AS `cf_payment_id`, `sp`.`cashfree_payment_id` AS `cashfree_payment_id`, `sp`.`paid_at` AS `paid_at`, `sp`.`created_at` AS `created_at` FROM ((`subscription_payments` `sp` join `subscriptions` `s` on(`sp`.`subscription_id` = `s`.`id`)) join `businessses` `b` on(`s`.`business_id` = `b`.`id`)) ORDER BY `sp`.`created_at` DESC ;
 
 -- --------------------------------------------------------
 
@@ -20906,7 +20906,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`u954141192_archit`@`127.0.0.1` SQL SECURITY 
 --
 DROP TABLE IF EXISTS `subscription_overview`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`u954141192_archit`@`127.0.0.1` SQL SECURITY DEFINER VIEW `subscription_overview`  AS SELECT `s`.`id` AS `id`, `s`.`business_id` AS `business_id`, `b`.`business_name` AS `business_name`, `b`.`email` AS `business_email`, `sp`.`name` AS `plan_name`, `sp`.`code` AS `plan_code`, `s`.`status` AS `status`, `s`.`authorization_status` AS `authorization_status`, `s`.`trial_ends_at` AS `trial_ends_at`, `s`.`current_period_start` AS `current_period_start`, `s`.`current_period_end` AS `current_period_end`, `s`.`next_charge_at` AS `next_charge_at`, `s`.`razorpay_subscription_id` AS `cf_subscription_id`, `s`.`cashfree_subscription_id` AS `cashfree_subscription_id`, `s`.`created_at` AS `created_at`, `s`.`updated_at` AS `updated_at` FROM ((`subscriptions` `s` join `businessses` `b` on(`s`.`business_id` = `b`.`id`)) join `subscription_plans` `sp` on(`s`.`plan_id` = `sp`.`id`)) ORDER BY `s`.`created_at` DESC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`u262009927_invoicemate`@`127.0.0.1` SQL SECURITY DEFINER VIEW `subscription_overview`  AS SELECT `s`.`id` AS `id`, `s`.`business_id` AS `business_id`, `b`.`business_name` AS `business_name`, `b`.`email` AS `business_email`, `sp`.`name` AS `plan_name`, `sp`.`code` AS `plan_code`, `s`.`status` AS `status`, `s`.`authorization_status` AS `authorization_status`, `s`.`trial_ends_at` AS `trial_ends_at`, `s`.`current_period_start` AS `current_period_start`, `s`.`current_period_end` AS `current_period_end`, `s`.`next_charge_at` AS `next_charge_at`, `s`.`razorpay_subscription_id` AS `cf_subscription_id`, `s`.`cashfree_subscription_id` AS `cashfree_subscription_id`, `s`.`created_at` AS `created_at`, `s`.`updated_at` AS `updated_at` FROM ((`subscriptions` `s` join `businessses` `b` on(`s`.`business_id` = `b`.`id`)) join `subscription_plans` `sp` on(`s`.`plan_id` = `sp`.`id`)) ORDER BY `s`.`created_at` DESC ;
 
 --
 -- Constraints for dumped tables

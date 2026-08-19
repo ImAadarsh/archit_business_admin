@@ -8,7 +8,7 @@ set_time_limit(240);
 require_once('admin/connect.php');
 require_once('admin/ai_generation_log.php');
 
-// CLI support: php generate_product_mockups_v2.php GEMINI_API_KEY=xxx IMAGE_MODEL=yyy
+// CLI: php generate_product_mockups_chatgpt.php OPENAI_API_KEY=sk-... IMAGE_MODEL=gpt-image-1-mini
 if (PHP_SAPI === 'cli' && !empty($argv)) {
     foreach (array_slice($argv, 1) as $arg) {
         if (strpos($arg, '=') === false) {
@@ -19,16 +19,36 @@ if (PHP_SAPI === 'cli' && !empty($argv)) {
     }
 }
 
-// Configuration
-$GEMINI_API_KEY = $_GET['GEMINI_API_KEY'] ?? '';
-if (!$GEMINI_API_KEY) {
-    die("GEMINI_API_KEY is required\n");
+// Configuration — prefer query/env; fallback to provided project key
+$OPENAI_API_KEY = $_GET['OPENAI_API_KEY'] ?? getenv('OPENAI_API_KEY') ?: '';
+if (!$OPENAI_API_KEY) {
+    die("OPENAI_API_KEY is required\n");
 }
 
-// Cheapest Gemini image model (Nano Banana 2 Lite). Override with ?IMAGE_MODEL=gemini-2.5-flash-image
-$GEMINI_IMAGE_MODEL = preg_replace('/[^a-zA-Z0-9._-]/', '', (string) ($_GET['IMAGE_MODEL'] ?? 'gemini-3.1-flash-lite-image'));
-if ($GEMINI_IMAGE_MODEL === '') {
-    $GEMINI_IMAGE_MODEL = 'gemini-3.1-flash-lite-image';
+// Image model: gpt-image-1 supports input_fidelity=high (keeps painting identical).
+// gpt-image-1-mini is cheaper but often redraws artwork — avoid for mockups.
+// Override: ?IMAGE_MODEL=gpt-image-1.5 or gpt-image-1-mini
+$OPENAI_IMAGE_MODEL = preg_replace('/[^a-zA-Z0-9._-]/', '', (string) ($_GET['IMAGE_MODEL'] ?? 'gpt-image-1'));
+if ($OPENAI_IMAGE_MODEL === '') {
+    $OPENAI_IMAGE_MODEL = 'gpt-image-1';
+}
+$OPENAI_TEXT_MODEL = preg_replace('/[^a-zA-Z0-9._-]/', '', (string) ($_GET['TEXT_MODEL'] ?? 'gpt-4o-mini'));
+if ($OPENAI_TEXT_MODEL === '') {
+    $OPENAI_TEXT_MODEL = 'gpt-4o-mini';
+}
+$OPENAI_IMAGE_QUALITY = preg_replace('/[^a-z]/', '', strtolower((string) ($_GET['IMAGE_QUALITY'] ?? 'medium')));
+if (!in_array($OPENAI_IMAGE_QUALITY, ['low', 'medium', 'high'], true)) {
+    $OPENAI_IMAGE_QUALITY = 'medium';
+}
+// high = preserve faces/figures/canvas; unsupported on gpt-image-1-mini
+$OPENAI_INPUT_FIDELITY = preg_replace('/[^a-z]/', '', strtolower((string) ($_GET['INPUT_FIDELITY'] ?? 'high')));
+if (!in_array($OPENAI_INPUT_FIDELITY, ['high', 'low'], true)) {
+    $OPENAI_INPUT_FIDELITY = 'high';
+}
+// low reduces false IMAGE_SAFETY blocks on classical/mythological art while preserving content
+$OPENAI_MODERATION = preg_replace('/[^a-z]/', '', strtolower((string) ($_GET['MODERATION'] ?? 'low')));
+if (!in_array($OPENAI_MODERATION, ['auto', 'low'], true)) {
+    $OPENAI_MODERATION = 'low';
 }
 
 // Helper function to create directory with proper permissions
@@ -70,9 +90,9 @@ function createWritableDir($path) {
 
 // Try multiple temp directory locations (project directory preferred)
 $tempDirOptions = [
-    __DIR__ . '/temp/product_mockups/',  // Project directory (preferred)
-    __DIR__ . '/tmp/product_mockups/',   // Alternative project location
-    __DIR__ . '/product_mockups_temp/',  // Direct in business folder
+    __DIR__ . '/temp/product_mockups_chatgpt/',
+    __DIR__ . '/tmp/product_mockups_chatgpt/',
+    __DIR__ . '/product_mockups_chatgpt_temp/',
 ];
 
 $TEMP_DIR = null;
@@ -103,7 +123,7 @@ if (!$TEMP_DIR) {
 }
 
 // Set log file location (same directory as temp)
-$LOG_FILE = dirname($TEMP_DIR) . '/mockup_generations_log.txt';
+$LOG_FILE = dirname($TEMP_DIR) . '/mockup_chatgpt_generations_log.txt';
 
 // Final verification
 if (!is_writable($TEMP_DIR)) {
@@ -364,10 +384,11 @@ function parseMockupRoomsFromText($text, $allowed, $fallback) {
 }
 
 /**
- * Single Gemini text call: room selection always; name/description only when requested.
- * Returns: name?, description?, suitable_for?, rooms[], naming_ok?
+ * Single OpenAI vision call: room selection always; name/description when requested.
  */
 function analyzeArtworkForMockups($apiKey, $artworkData, $orientation, $includeNaming = false) {
+    global $OPENAI_TEXT_MODEL;
+
     list($allowed, $fallback, $isVertical) = getMockupRoomDefaults($orientation);
     $result = [
         'name' => null,
@@ -408,52 +429,58 @@ ROOMS: room1, room2";
         $temperature = 0.3;
     }
 
+    $model = $OPENAI_TEXT_MODEL ?: 'gpt-4o-mini';
     $requestBody = [
-        'contents' => [
+        'model' => $model,
+        'temperature' => $temperature,
+        'max_tokens' => $maxTokens,
+        'messages' => [
             [
-                'parts' => [
-                    ['text' => $prompt],
+                'role' => 'user',
+                'content' => [
+                    ['type' => 'text', 'text' => $prompt],
                     [
-                        'inline_data' => [
-                            'mime_type' => 'image/jpeg',
-                            'data' => base64_encode($artworkData)
-                        ]
-                    ]
-                ]
-            ]
+                        'type' => 'image_url',
+                        'image_url' => [
+                            'url' => 'data:image/jpeg;base64,' . base64_encode($artworkData),
+                        ],
+                    ],
+                ],
+            ],
         ],
-        'generationConfig' => [
-            'temperature' => $temperature,
-            'maxOutputTokens' => $maxTokens
-        ]
     ];
 
-    $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={$apiKey}");
+    $ch = curl_init('https://api.openai.com/v1/chat/completions');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey,
+    ]);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestBody));
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($httpCode !== 200 || !$response) {
-        logMessage("  WARNING: Combined AI analysis failed (HTTP {$httpCode}) — using room defaults");
+        logMessage("  WARNING: OpenAI analysis failed (HTTP {$httpCode}) — using room defaults");
+        if ($response) {
+            logMessage("  " . substr($response, 0, 400));
+        }
         return $result;
     }
 
     $decoded = json_decode($response, true);
-    $generatedText = trim($decoded['candidates'][0]['content']['parts'][0]['text'] ?? '');
+    $generatedText = trim($decoded['choices'][0]['message']['content'] ?? '');
     if ($generatedText === '') {
-        logMessage("  WARNING: Empty AI analysis response — using room defaults");
+        logMessage("  WARNING: Empty OpenAI analysis response — using room defaults");
         return $result;
     }
 
     logMessage("  AI analysis raw: " . str_replace("\n", ' | ', $generatedText));
-
     $result['rooms'] = parseMockupRoomsFromText($generatedText, $allowed, $fallback);
 
     if ($includeNaming) {
@@ -484,8 +511,7 @@ ROOMS: room1, room2";
     return $result;
 }
 
-// Shared tight prompts for all supported mockup rooms
-// Keep wording mild — aggressive prompts often trigger IMAGE_SAFETY on product art.
+// Shared tight prompts — MUST keep the painting canvas identical (product mockup, not reinterpretation)
 function getMockupRoomPrompts($productInfo) {
     $dimensions = '';
     if (!empty($productInfo['width']) && !empty($productInfo['height'])) {
@@ -494,233 +520,80 @@ function getMockupRoomPrompts($productInfo) {
 
     $isFramed = (isset($productInfo['is_framed']) && $productInfo['is_framed'] == 1);
     $frameInfo = $isFramed
-        ? "Keep the existing frame visible; clean only black corner artifacts on the frame."
+        ? "Keep the same frame style from the photo; only remove black shipping corner protectors if present."
         : "Frameless piece; do not crop or change orientation.";
 
     $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
     $orientLabel = $isVertical ? 'vertical' : 'horizontal';
     $orientRule = "Keep the artwork {$orientLabel}; do not rotate or flip.";
 
-    $base = "Interior design visualization. Wall art placement only. Use the provided painting as-is. {$dimensions} {$frameInfo} {$orientRule} Soft natural light. Neutral interior. Photorealistic.";
+    $preserve = "PRODUCT MOCKUP ONLY. The input image is the exact product painting — preserve the canvas content IDENTICALLY: same people, animals, poses, clothing colors, jewelry, objects, and composition. Do NOT redraw, restyle, reinterpret, invent similar figures, or replace anyone in the painting. Do NOT change the art style. ONLY change the surroundings: hang that same framed painting on a wall in a realistic room and replace the shop/warehouse background. {$dimensions} {$frameInfo} {$orientRule} Soft natural light. Photorealistic interior photography.";
 
     return [
-        'corridor' => "{$base} Place it on a corridor / hallway wall at eye level.",
-        'staircase' => "{$base} Place it on a wall beside a staircase at eye level.",
-        'entryway' => "{$base} Place it on an entryway wall at eye level.",
-        'living_room' => "{$base} Place it on a living room wall above a sofa at eye level.",
-        'dining_room' => "{$base} Place it on a dining room wall near a table at eye level.",
-        'office' => "{$base} Place it on an office wall above a desk at eye level.",
-        'bedroom' => "{$base} Place it on a bedroom wall above a headboard at eye level.",
+        'corridor' => "{$preserve} Room: corridor / hallway wall at eye level.",
+        'staircase' => "{$preserve} Room: wall beside a staircase at eye level.",
+        'entryway' => "{$preserve} Room: entryway wall at eye level.",
+        'living_room' => "{$preserve} Room: living room wall above a sofa at eye level.",
+        'dining_room' => "{$preserve} Room: dining room wall near a table at eye level.",
+        'office' => "{$preserve} Room: office wall above a desk at eye level.",
+        'bedroom' => "{$preserve} Room: bedroom wall above a headboard at eye level.",
     ];
 }
 
-/** Extract base64 image bytes from a Gemini generateContent JSON response. */
-function extractGeminiImageBase64($responseJson) {
-    if (!is_array($responseJson)) {
-        return [null, 'invalid_json', ''];
-    }
-    if (isset($responseJson['error']['message'])) {
-        return [null, 'api_error', (string) $responseJson['error']['message']];
-    }
-    $candidate = $responseJson['candidates'][0] ?? null;
-    if (!$candidate) {
-        return [null, 'no_candidate', ''];
-    }
-    $finish = (string) ($candidate['finishReason'] ?? $candidate['finish_reason'] ?? '');
-    $finishMessage = (string) ($candidate['finishMessage'] ?? $candidate['finish_message'] ?? '');
-    if ($finish !== '' && strtoupper($finish) !== 'STOP') {
-        return [null, $finish, $finishMessage !== '' ? $finishMessage : $finish];
-    }
-
-    $content = $candidate['content'] ?? null;
-    $parts = [];
-    if (is_array($content) && isset($content['parts']) && is_array($content['parts'])) {
-        $parts = $content['parts'];
-    }
-
-    foreach ($parts as $part) {
-        if (isset($part['inlineData']['data'])) {
-            return [$part['inlineData']['data'], 'ok', ''];
-        }
-        if (isset($part['inline_data']['data'])) {
-            return [$part['inline_data']['data'], 'ok', ''];
-        }
-    }
-    return [null, 'no_image_parts', $finishMessage];
+function openaiImageEditSize($orientation) {
+    $isVertical = (strtolower((string) $orientation) === 'vertical');
+    return $isVertical ? '1024x1536' : '1536x1024';
 }
 
-function buildGeminiImageRequestBody($imageBase64, $prompt) {
-    return [
-        'contents' => [
-            [
-                'parts' => [
-                    [
-                        'inline_data' => [
-                            'mime_type' => 'image/jpeg',
-                            'data' => $imageBase64
-                        ]
-                    ],
-                    [
-                        'text' => $prompt
-                    ]
-                ]
-            ]
-        ],
-        'generationConfig' => [
-            'temperature' => 0.3,
-            'responseModalities' => ['IMAGE']
-        ]
-    ];
-}
-
-// Function to create multiple mockups in parallel (faster wall-clock; avoids gateway timeout)
-function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo, $productId, $artworkData = null) {
-    global $TEMP_DIR, $GEMINI_IMAGE_MODEL;
-
-    if ($artworkData === null) {
-        $artworkData = file_get_contents($artworkPath);
-    }
-
-    if (!$artworkData) {
-        logMessage("  ERROR: Could not load artwork data");
-        return [];
-    }
-
-    $imageBase64 = base64_encode($artworkData);
-    $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
-    $prompts = getMockupRoomPrompts($productInfo);
-    $model = $GEMINI_IMAGE_MODEL ?: 'gemini-3.1-flash-lite-image';
-    logMessage("  Image model: {$model}");
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $apiKey;
-
-    $multiHandle = curl_multi_init();
-    $curlHandles = [];
-
-    foreach ($mockupTypes as $mockupType) {
-        $defaultPrompt = $isVertical ? ($prompts['corridor'] ?? '') : ($prompts['living_room'] ?? '');
-        $prompt = $prompts[$mockupType] ?? $defaultPrompt;
-        $outputPath = $TEMP_DIR . "mockup_{$productId}_{$mockupType}_" . time() . "_" . uniqid() . ".jpg";
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(buildGeminiImageRequestBody($imageBase64, $prompt)));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 55);
-
-        curl_multi_add_handle($multiHandle, $ch);
-        $curlHandles[$mockupType] = [
-            'handle' => $ch,
-            'outputPath' => $outputPath,
-        ];
-    }
-
-    $running = null;
-    do {
-        curl_multi_exec($multiHandle, $running);
-        curl_multi_select($multiHandle);
-    } while ($running > 0);
-
-    $results = [];
-    foreach ($curlHandles as $mockupType => $data) {
-        $ch = $data['handle'];
-        $outputPath = $data['outputPath'];
-        $result = curl_multi_getcontent($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_multi_remove_handle($multiHandle, $ch);
-        curl_close($ch);
-
-        $saved = false;
-        $lastReason = 'unknown';
-        if ($httpCode === 200) {
-            $response = json_decode($result, true);
-            list($imageB64, $reason, $detail) = extractGeminiImageBase64($response);
-            if ($imageB64 !== null && file_put_contents($outputPath, base64_decode($imageB64))) {
-                logMessage("  ✓ {$mockupType} mockup generated successfully");
-                $results[] = ['type' => $mockupType, 'path' => $outputPath, 'success' => true];
-                $saved = true;
-            } else {
-                logMessage("  ✗ {$mockupType}: {$reason}" . ($detail ? " — " . substr($detail, 0, 180) : ''));
-                $lastReason = $reason;
-                if ($reason === 'IMAGE_SAFETY') {
-                    $safePrompt = "Interior design visualization. Wall art placement only. Use the provided painting as-is on a {$mockupType} wall. Do not alter the painting.";
-                    logMessage("  → Retrying {$mockupType} with safer prompt...");
-                    $ch2 = curl_init($url);
-                    curl_setopt($ch2, CURLOPT_POST, 1);
-                    curl_setopt($ch2, CURLOPT_POSTFIELDS, json_encode(buildGeminiImageRequestBody($imageBase64, $safePrompt)));
-                    curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch2, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-                    curl_setopt($ch2, CURLOPT_TIMEOUT, 55);
-                    $result2 = curl_exec($ch2);
-                    $http2 = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
-                    curl_close($ch2);
-                    if ($http2 === 200) {
-                        list($imageB64b, $reason2, $detail2) = extractGeminiImageBase64(json_decode($result2, true));
-                        $lastReason = $reason2;
-                        if ($imageB64b !== null && file_put_contents($outputPath, base64_decode($imageB64b))) {
-                            logMessage("  ✓ {$mockupType} mockup generated on safer retry");
-                            $results[] = ['type' => $mockupType, 'path' => $outputPath, 'success' => true];
-                            $saved = true;
-                        } else {
-                            logMessage("  ✗ {$mockupType} retry failed: {$reason2}" . ($detail2 ? " — " . substr($detail2, 0, 120) : ''));
-                        }
-                    } else {
-                        logMessage("  ✗ {$mockupType} retry HTTP {$http2}");
-                    }
-                }
-            }
-        } else {
-            $lastReason = 'http_' . $httpCode;
-            if ($httpCode === 429) {
-                logMessage("  ✗ {$mockupType} rate-limited (HTTP 429) — failing fast (no wait)");
-            } else {
-                logMessage("  ✗ {$mockupType} failed (HTTP {$httpCode})");
-            }
-            if ($result) {
-                logMessage("  ===== {$mockupType} Error Response =====");
-                logMessage("  " . substr($result, 0, 800));
-                logMessage("  ===== END Error Response =====");
-            }
-        }
-
-        if (!$saved) {
-            $results[] = ['type' => $mockupType, 'success' => false, 'reason' => $lastReason ?? 'unknown'];
-        }
-    }
-
-    curl_multi_close($multiHandle);
-    return $results;
-}
-
-// Function to create mockup using Gemini Image Generation API
-function createMockupWithGeminiAPI($apiKey, $artworkPath, $mockupType, $outputPath, $productInfo, $aiAnalysis = null, $artworkData = null) {
-    global $GEMINI_IMAGE_MODEL;
-
-    if ($artworkData === null) {
-        $artworkData = file_get_contents($artworkPath);
-    }
-
-    if (!$artworkData) {
-        logMessage("  ERROR: Could not load artwork data");
+function openaiModelSupportsInputFidelity($model) {
+    // Docs: input_fidelity supported on gpt-image-1 / gpt-image-1.5 (+ later), NOT gpt-image-1-mini
+    $m = strtolower((string) $model);
+    if ($m === '' || strpos($m, 'mini') !== false) {
         return false;
     }
+    return (strpos($m, 'gpt-image-1') === 0) || (strpos($m, 'gpt-image-1.5') === 0);
+}
 
-    $imageBase64 = base64_encode($artworkData);
-    $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
-    $prompts = getMockupRoomPrompts($productInfo);
+/**
+ * OpenAI Images Edits API — reference artwork + prompt → mockup.
+ * Returns [ok(bool), reason(string), detail(string)]
+ */
+function openaiEditImageToFile($apiKey, $artworkPath, $prompt, $outputPath, $orientation = '') {
+    global $OPENAI_IMAGE_MODEL, $OPENAI_IMAGE_QUALITY, $OPENAI_INPUT_FIDELITY, $OPENAI_MODERATION;
 
-    $defaultPrompt = $isVertical ? ($prompts['corridor'] ?? '') : ($prompts['living_room'] ?? '');
-    $prompt = $prompts[$mockupType] ?? $defaultPrompt;
+    $model = $OPENAI_IMAGE_MODEL ?: 'gpt-image-1';
+    $quality = $OPENAI_IMAGE_QUALITY ?: 'medium';
+    $size = openaiImageEditSize($orientation);
 
-    $model = $GEMINI_IMAGE_MODEL ?: 'gemini-3.1-flash-lite-image';
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . $apiKey;
+    if (!file_exists($artworkPath)) {
+        return [false, 'missing_artwork', $artworkPath];
+    }
 
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(buildGeminiImageRequestBody($imageBase64, $prompt)));
+    $postFields = [
+        'model' => $model,
+        'prompt' => $prompt,
+        'image' => new CURLFile($artworkPath, 'image/jpeg', basename($artworkPath)),
+        'quality' => $quality,
+        'size' => $size,
+        'n' => '1',
+        'moderation' => ($OPENAI_MODERATION ?: 'low'),
+    ];
+
+    // Critical for keeping the painting the same (faces/figures/canvas)
+    if (openaiModelSupportsInputFidelity($model)) {
+        $fidelity = $OPENAI_INPUT_FIDELITY ?: 'high';
+        $postFields['input_fidelity'] = $fidelity;
+    }
+
+    $ch = curl_init('https://api.openai.com/v1/images/edits');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 55);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $apiKey,
+    ]);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 180);
 
     $result = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -728,31 +601,108 @@ function createMockupWithGeminiAPI($apiKey, $artworkPath, $mockupType, $outputPa
     curl_close($ch);
 
     if ($httpCode !== 200) {
-        logMessage("  ✗ {$mockupType} failed (HTTP {$httpCode})");
-        if (!empty($curlError)) {
-            logMessage("  CURL Error: {$curlError}");
+        $decoded = json_decode($result, true);
+        $code = $decoded['error']['code'] ?? '';
+        $msg = $decoded['error']['message'] ?? ($curlError ?: substr((string) $result, 0, 300));
+        if ($code === 'moderation_blocked' || stripos($msg, 'safety') !== false || stripos($msg, 'moderation') !== false) {
+            return [false, 'IMAGE_SAFETY', $msg];
         }
-        if ($result) {
-            logMessage("  " . substr($result, 0, 800));
+        if ($httpCode === 429) {
+            return [false, 'http_429', $msg];
         }
-        return false;
+        return [false, 'http_' . $httpCode, $msg];
     }
 
-    list($imageB64, $reason, $detail) = extractGeminiImageBase64(json_decode($result, true));
-    if ($imageB64 === null) {
-        logMessage("  ✗ {$mockupType}: {$reason}" . ($detail ? " — " . substr($detail, 0, 180) : ''));
-        return false;
+    $decoded = json_decode($result, true);
+    $b64 = $decoded['data'][0]['b64_json'] ?? null;
+    if (!$b64) {
+        return [false, 'no_image_parts', substr((string) $result, 0, 300)];
     }
 
-    if (file_put_contents($outputPath, base64_decode($imageB64))) {
-        logMessage("  ✓ {$mockupType} mockup generated successfully");
-        return true;
+    if (!file_put_contents($outputPath, base64_decode($b64))) {
+        return [false, 'save_failed', $outputPath];
     }
-
-    logMessage("  ✗ {$mockupType}: Failed to save generated image");
-    return false;
+    return [true, 'ok', ''];
 }
 
+// Sequential mockups (OpenAI edits) — keeps gateway under control
+function createMockupsParallel($apiKey, $artworkPath, $mockupTypes, $productInfo, $productId, $artworkData = null) {
+    global $TEMP_DIR, $OPENAI_IMAGE_MODEL, $OPENAI_IMAGE_QUALITY, $OPENAI_INPUT_FIDELITY, $OPENAI_MODERATION;
+
+    $fidelityNote = openaiModelSupportsInputFidelity($OPENAI_IMAGE_MODEL)
+        ? "input_fidelity={$OPENAI_INPUT_FIDELITY}"
+        : 'input_fidelity=unsupported (mini may redraw artwork)';
+    logMessage("  Image model: {$OPENAI_IMAGE_MODEL} (quality={$OPENAI_IMAGE_QUALITY}, {$fidelityNote}, moderation={$OPENAI_MODERATION})");
+    if (!openaiModelSupportsInputFidelity($OPENAI_IMAGE_MODEL)) {
+        logMessage("  ⚠ gpt-image-1-mini often changes painting content — prefer IMAGE_MODEL=gpt-image-1");
+    }
+
+    // Write optimized bytes to a temp JPEG for the edits endpoint
+    $editSourcePath = $artworkPath;
+    if ($artworkData) {
+        $editSourcePath = $TEMP_DIR . "edit_src_{$productId}_" . uniqid() . ".jpg";
+        file_put_contents($editSourcePath, $artworkData);
+    }
+
+    $isVertical = (isset($productInfo['orientation']) && strtolower($productInfo['orientation']) === 'vertical');
+    $prompts = getMockupRoomPrompts($productInfo);
+    $results = [];
+    $index = 0;
+
+    foreach ($mockupTypes as $mockupType) {
+        if ($index > 0) {
+            usleep(300000);
+        }
+        $index++;
+
+        $defaultPrompt = $isVertical ? ($prompts['corridor'] ?? '') : ($prompts['living_room'] ?? '');
+        $prompt = $prompts[$mockupType] ?? $defaultPrompt;
+        $outputPath = $TEMP_DIR . "mockup_{$productId}_{$mockupType}_" . time() . "_" . uniqid() . ".jpg";
+
+        list($ok, $reason, $detail) = openaiEditImageToFile(
+            $apiKey,
+            $editSourcePath,
+            $prompt,
+            $outputPath,
+            $productInfo['orientation'] ?? ''
+        );
+        if ($ok) {
+            logMessage("  ✓ {$mockupType} mockup generated successfully");
+            $results[] = ['type' => $mockupType, 'path' => $outputPath, 'success' => true];
+            continue;
+        }
+
+        logMessage("  ✗ {$mockupType}: {$reason}" . ($detail ? " — " . substr($detail, 0, 180) : ''));
+
+        if ($reason === 'IMAGE_SAFETY') {
+            $safePrompt = "PRODUCT MOCKUP ONLY. Keep the painting canvas identical — same figures and colors. Only hang that same framed painting on a {$mockupType} wall. Do not redraw the art.";
+            logMessage("  → Retrying {$mockupType} with safer prompt...");
+            list($ok2, $reason2, $detail2) = openaiEditImageToFile(
+                $apiKey,
+                $editSourcePath,
+                $safePrompt,
+                $outputPath,
+                $productInfo['orientation'] ?? ''
+            );
+            if ($ok2) {
+                logMessage("  ✓ {$mockupType} mockup generated on safer retry");
+                $results[] = ['type' => $mockupType, 'path' => $outputPath, 'success' => true];
+                continue;
+            }
+            logMessage("  ✗ {$mockupType} retry failed: {$reason2}" . ($detail2 ? " — " . substr($detail2, 0, 120) : ''));
+            $results[] = ['type' => $mockupType, 'success' => false, 'reason' => $reason2];
+            continue;
+        }
+
+        $results[] = ['type' => $mockupType, 'success' => false, 'reason' => $reason];
+    }
+
+    if ($editSourcePath !== $artworkPath && file_exists($editSourcePath)) {
+        @unlink($editSourcePath);
+    }
+
+    return $results;
+}
 
 // Function to upload image using the API with metadata
 function uploadImageToProduct($productId, $imagePath, $mockupType, $productInfo, $token = '') {
@@ -867,13 +817,13 @@ function uploadImageToProduct($productId, $imagePath, $mockupType, $productInfo,
 // ==================== MAIN EXECUTION ====================
 
 // Output as HTML for better readability in browser
-echo "<!DOCTYPE html><html><head><title>Mockup Generator</title>";
+echo "<!DOCTYPE html><html><head><title>Mockup Generator (ChatGPT)</title>";
 echo "<style>body{font-family:monospace;padding:20px;background:#f5f5f5;}";
 echo ".success{color:green;}.error{color:red;}.info{color:blue;}</style></head><body>";
-echo "<h2>Product Mockup Generator V2</h2>";
+echo "<h2>Product Mockup Generator (ChatGPT)</h2>";
 echo "<pre>";
 
-logMessage("=== Product Mockup Generator V2 Started ===");
+logMessage("=== Product Mockup Generator (ChatGPT) Started ===");
 logMessage("Temp Directory: " . $TEMP_DIR);
 logMessage("Log File: " . $LOG_FILE);
 logMessage("");
@@ -948,7 +898,7 @@ if (!claimProductFlag($connect, $product['id'], 'is_processed')) {
     logMessage("SKIPPING: Product #{$product['id']} was already claimed by another run.");
     echo "</pre>";
     echo "<p class='info'>Product already in progress or processed. Trying next…</p>";
-    $nextUrl = 'generate_product_mockups_v2.php?GEMINI_API_KEY=' . urlencode($GEMINI_API_KEY);
+    $nextUrl = 'generate_product_mockups_chatgpt.php?OPENAI_API_KEY=' . urlencode($OPENAI_API_KEY);
     echo "<meta http-equiv='refresh' content='1;url={$nextUrl}'>";
     echo "<p><a href='{$nextUrl}'>Process Next Product</a></p>";
     echo "</body></html>";
@@ -978,7 +928,7 @@ if (!$imageResult || mysqli_num_rows($imageResult) === 0) {
     logMessage("✓ Product #{$product['id']} marked processed (no source images)");
     echo "</pre>";
     echo "<p class='error'>No images for product #{$product['id']} — skipped permanently.</p>";
-    $nextUrl = 'generate_product_mockups_v2.php?GEMINI_API_KEY=' . urlencode($GEMINI_API_KEY);
+    $nextUrl = 'generate_product_mockups_chatgpt.php?OPENAI_API_KEY=' . urlencode($OPENAI_API_KEY);
     echo "<meta http-equiv='refresh' content='1;url={$nextUrl}'>";
     echo "<p><a href='{$nextUrl}'>Process Next Product</a></p>";
     echo "</body></html>";
@@ -1019,7 +969,7 @@ if (!$optimizedArtworkData) {
 logMessage("Artwork optimized (max dimension 1024px) for AI requests.");
 logMessage("");
 
-// Step 3.5: One Gemini text call — rooms always; naming only when needed
+// Step 3.5: One OpenAI vision call — rooms always; naming only when needed
 $aiProductName = $product['name'];
 $aiProductDescription = $product['description'] ?? '';
 $aiSuitableFor = null;
@@ -1037,7 +987,7 @@ if ($needsNaming) {
 }
 
 $aiAnalysis = analyzeArtworkForMockups(
-    $GEMINI_API_KEY,
+    $OPENAI_API_KEY,
     $namingArtworkData,
     $product['orientation'] ?? '',
     $needsNaming
@@ -1060,7 +1010,7 @@ if ($needsNaming) {
             'product_id' => $product['id'],
             'generation_type' => 'name_description',
             'prompt_text' => "NAME: {$aiProductName} | ROOMS: " . implode(', ', $aiAnalysis['rooms']),
-            'model_name' => 'gemini-3.1-flash-lite',
+            'model_name' => 'gpt-4o-mini',
             'images_count' => 0,
             'status' => 'success',
             'source' => 'live',
@@ -1070,7 +1020,7 @@ if ($needsNaming) {
         logAIImageGeneration($connect, [
             'product_id' => $product['id'],
             'generation_type' => 'name_description',
-            'model_name' => 'gemini-3.1-flash-lite',
+            'model_name' => 'gpt-4o-mini',
             'images_count' => 0,
             'status' => 'failed',
             'source' => 'live',
@@ -1082,7 +1032,7 @@ if ($needsNaming) {
         'product_id' => $product['id'],
         'generation_type' => 'name_description',
         'prompt_text' => 'skipped — existing name: ' . $product['name'],
-        'model_name' => 'gemini-3.1-flash-lite',
+        'model_name' => 'gpt-4o-mini',
         'images_count' => 0,
         'status' => 'skipped',
         'source' => 'live',
@@ -1095,7 +1045,7 @@ logAIImageGeneration($connect, [
     'product_id' => $product['id'],
     'generation_type' => 'room_selection',
     'prompt_text' => 'AI selected: ' . implode(', ', $mockupTypes),
-    'model_name' => 'gemini-3.1-flash-lite',
+    'model_name' => 'gpt-4o-mini',
     'images_count' => 0,
     'status' => 'success',
     'source' => 'live',
@@ -1132,7 +1082,7 @@ $mockupCount = count($mockupTypes);
 logMessage("Generating all {$mockupCount} mockup images in parallel...");
 $startTime = time();
 
-$results = createMockupsParallel($GEMINI_API_KEY, $originalImagePath, $mockupTypes, $productInfo, $product['id'], $optimizedArtworkData);
+$results = createMockupsParallel($OPENAI_API_KEY, $originalImagePath, $mockupTypes, $productInfo, $product['id'], $optimizedArtworkData);
 
 $elapsedTime = time() - $startTime;
 logMessage("");
@@ -1155,7 +1105,7 @@ logMessage("");
 logMessage("Total mockups generated: {$mockupsGenerated}");
 logMessage("");
 
-// Reconnect before logging/DB work — long Gemini waits often exceed MySQL wait_timeout
+// Reconnect before logging/DB work — OpenAI waits often exceed MySQL wait_timeout
 if (!ensureMysqliConnection($connect)) {
     logMessage("⚠ Database reconnect failed after image generation — will retry logging/claims");
 }
@@ -1187,7 +1137,7 @@ if ($mockupsGenerated > 0) {
                 'product_id' => $product['id'],
                 'generation_type' => 'mockup',
                 'mockup_type' => $mockupFile['type'],
-                'model_name' => $GEMINI_IMAGE_MODEL,
+                'model_name' => $OPENAI_IMAGE_MODEL,
                 'image_path' => $uploadedImagePath,
                 'images_count' => 1,
                 'status' => 'success',
@@ -1199,7 +1149,7 @@ if ($mockupsGenerated > 0) {
                 'product_id' => $product['id'],
                 'generation_type' => 'mockup',
                 'mockup_type' => $mockupFile['type'],
-                'model_name' => $GEMINI_IMAGE_MODEL,
+                'model_name' => $OPENAI_IMAGE_MODEL,
                 'images_count' => 0,
                 'status' => 'failed',
                 'source' => 'live',
@@ -1240,11 +1190,11 @@ if ($uploadedCount === 0 && $mockupsGenerated === 0 && !empty($results)) {
 if ($uploadedCount > 0) {
     logMessage("✓ Product remains marked as processed (claimed at start)");
 } elseif ($safetySkip) {
-    logMessage("⚠ All mockups blocked by Gemini IMAGE_SAFETY — skipping product permanently so queue can continue");
+    logMessage("⚠ All mockups blocked by OpenAI moderation/IMAGE_SAFETY — skipping product permanently so queue can continue");
     logAIImageGeneration($connect, [
         'product_id' => $product['id'],
         'generation_type' => 'mockup',
-        'model_name' => $GEMINI_IMAGE_MODEL,
+        'model_name' => $OPENAI_IMAGE_MODEL,
         'images_count' => 0,
         'status' => 'failed',
         'source' => 'live',
@@ -1290,9 +1240,18 @@ echo "<li>Mockups Uploaded: <span class='" . ($uploadedCount > 0 ? "success" : "
 echo "<li>Status: <span class='" . (($uploadedCount > 0 || !empty($safetySkip)) ? "success" : "error") . "'>" . htmlspecialchars($statusLabel) . "</span></li>";
 echo "<li>Products remaining: <span class='info'>{$remainingAfter}</span> (was {$remainingProducts})</li>";
 echo "</ul>";
-$nextUrl = 'generate_product_mockups_v2.php?GEMINI_API_KEY=' . urlencode($GEMINI_API_KEY);
-if (!empty($GEMINI_IMAGE_MODEL)) {
-    $nextUrl .= '&IMAGE_MODEL=' . urlencode($GEMINI_IMAGE_MODEL);
+$nextUrl = 'generate_product_mockups_chatgpt.php?OPENAI_API_KEY=' . urlencode($OPENAI_API_KEY);
+if (!empty($OPENAI_IMAGE_MODEL)) {
+    $nextUrl .= '&IMAGE_MODEL=' . urlencode($OPENAI_IMAGE_MODEL);
+}
+if (!empty($OPENAI_IMAGE_QUALITY)) {
+    $nextUrl .= '&IMAGE_QUALITY=' . urlencode($OPENAI_IMAGE_QUALITY);
+}
+if (!empty($OPENAI_INPUT_FIDELITY)) {
+    $nextUrl .= '&INPUT_FIDELITY=' . urlencode($OPENAI_INPUT_FIDELITY);
+}
+if (!empty($OPENAI_MODERATION)) {
+    $nextUrl .= '&MODERATION=' . urlencode($OPENAI_MODERATION);
 }
 echo "<p><a href='{$nextUrl}'>Process Next Product</a></p>";
 echo "</body></html>";

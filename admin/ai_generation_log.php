@@ -49,11 +49,17 @@ function ensureAIImageGenerationsTable($connect) {
 
 if (!function_exists('logAIImageGeneration')) {
 /**
- * @param mysqli $connect
+ * @param mysqli $connect passed by ref so reconnect after "gone away" updates caller
  * @param array $data keys: product_id, generation_type, mockup_type?, prompt_text?,
  *               model_name?, image_path?, product_image_id?, images_count?, status?, source?, generated_at?
  */
-function logAIImageGeneration($connect, array $data) {
+function logAIImageGeneration(&$connect, array $data) {
+    // Reconnect if remote MySQL dropped during long AI waits
+    if (function_exists('ensureMysqliConnection')) {
+        if (!ensureMysqliConnection($connect)) {
+            return false;
+        }
+    }
     if (!$connect) {
         return false;
     }
@@ -95,56 +101,80 @@ function logAIImageGeneration($connect, array $data) {
         $source = 'live';
     }
 
-    if ($productImageId === null) {
-        $sql = "INSERT INTO ai_image_generations
-            (product_id, product_image_id, generation_type, mockup_type, prompt_text, model_name, image_path, images_count, status, source, generated_at)
-            VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = mysqli_prepare($connect, $sql);
-        if (!$stmt) {
-            return false;
-        }
-        mysqli_stmt_bind_param(
-            $stmt,
-            'isssssisss',
-            $productId,
-            $generationType,
-            $mockupType,
-            $promptText,
-            $modelName,
-            $imagePath,
-            $imagesCount,
-            $status,
-            $source,
-            $generatedAt
-        );
-    } else {
-        $sql = "INSERT INTO ai_image_generations
-            (product_id, product_image_id, generation_type, mockup_type, prompt_text, model_name, image_path, images_count, status, source, generated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = mysqli_prepare($connect, $sql);
-        if (!$stmt) {
-            return false;
-        }
-        mysqli_stmt_bind_param(
-            $stmt,
-            'iissssissss',
-            $productId,
-            $productImageId,
-            $generationType,
-            $mockupType,
-            $promptText,
-            $modelName,
-            $imagePath,
-            $imagesCount,
-            $status,
-            $source,
-            $generatedAt
-        );
-    }
+    $attempt = 0;
+    while ($attempt < 2) {
+        $attempt++;
+        try {
+            if ($productImageId === null) {
+                $sql = "INSERT INTO ai_image_generations
+                    (product_id, product_image_id, generation_type, mockup_type, prompt_text, model_name, image_path, images_count, status, source, generated_at)
+                    VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = mysqli_prepare($connect, $sql);
+                if (!$stmt) {
+                    throw new RuntimeException(mysqli_error($connect) ?: 'prepare failed');
+                }
+                mysqli_stmt_bind_param(
+                    $stmt,
+                    'isssssisss',
+                    $productId,
+                    $generationType,
+                    $mockupType,
+                    $promptText,
+                    $modelName,
+                    $imagePath,
+                    $imagesCount,
+                    $status,
+                    $source,
+                    $generatedAt
+                );
+            } else {
+                $sql = "INSERT INTO ai_image_generations
+                    (product_id, product_image_id, generation_type, mockup_type, prompt_text, model_name, image_path, images_count, status, source, generated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = mysqli_prepare($connect, $sql);
+                if (!$stmt) {
+                    throw new RuntimeException(mysqli_error($connect) ?: 'prepare failed');
+                }
+                mysqli_stmt_bind_param(
+                    $stmt,
+                    'iissssissss',
+                    $productId,
+                    $productImageId,
+                    $generationType,
+                    $mockupType,
+                    $promptText,
+                    $modelName,
+                    $imagePath,
+                    $imagesCount,
+                    $status,
+                    $source,
+                    $generatedAt
+                );
+            }
 
-    $ok = mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
-    return $ok;
+            $ok = mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            return $ok;
+        } catch (Throwable $e) {
+            $msg = $e->getMessage();
+            $goneAway = (stripos($msg, 'gone away') !== false)
+                || (stripos($msg, 'Lost connection') !== false)
+                || ((int) ($e->getCode() ?: 0) === 2006);
+            if (!$goneAway || $attempt >= 2 || !function_exists('ensureMysqliConnection')) {
+                error_log('logAIImageGeneration: ' . $msg);
+                return false;
+            }
+            // Force reconnect and retry once
+            if ($connect instanceof mysqli) {
+                @mysqli_close($connect);
+            }
+            $connect = null;
+            if (!ensureMysqliConnection($connect)) {
+                return false;
+            }
+        }
+    }
+    return false;
 }
 }
 

@@ -262,5 +262,100 @@
             "dimensions": "36.00 x 24.00"
         },
         "image_path": "public\/product_images\/product_124_1762257299_6909e993e21b7.jpg"
+    },
+    {
+        "timestamp": "2026-07-21 16:39:54",
+        "product_id": "4373",
+        "mockup_type": "Modern Corridor Setting",
+        "metadata": {
+            "mockup_type": "Modern Corridor Setting",
+            "product_name": "Flying Crane Duo Set",
+            "description": "A modern abstract diptych featuring graceful birds soaring against a textured blue and gold background.\n\u2022 Hand-painted style with rich impasto texture\n\u2022 Elegant blue, white, and metallic gold color palette\n\u2022 Sophisticated avian subject matter",
+            "suitable_for": "living room, dining room, office, bedroom",
+            "dimensions": "25.00 x 37.00"
+        },
+        "image_path": "public\/product_images\/product_4373_1784651994_6a5fa0da3d278.jpg"
+    },
+    {
+        "timestamp": "2026-07-21 16:39:55",
+        "product_id": "4373",
+        "mockup_type": "Stylish Entryway Setting",
+        "metadata": {
+            "mockup_type": "Stylish Entryway Setting",
+            "product_name": "Flying Crane Duo Set",
+            "description": "A modern abstract diptych featuring graceful birds soaring against a textured blue and gold background.\n\u2022 Hand-painted style with rich impasto texture\n\u2022 Elegant blue, white, and metallic gold color palette\n\u2022 Sophisticated avian subject matter",
+            "suitable_for": "living room, dining room, office, bedroom",
+            "dimensions": "25.00 x 37.00"
+        },
+        "image_path": "public\/product_images\/product_4373_1784651995_6a5fa0db0dee3.jpg"
+    },
+    {
+        "timestamp": "2026-07-21 18:43:08",
+        "product_id": "2620",
+        "mockup_type": "Stylish Entryway Setting",
+        "metadata": {
+            "mockup_type": "Stylish Entryway Setting",
+            "product_name": "Glass Items",
+            "suitable_for": "home, office, dining, bedroom",
+            "artist_name": "In House",
+            "dimensions": "20.00 x 40.00"
+        },
+        "image_path": "public\/product_images\/product_2620_1784659388_6a5fbdbc0871e.jpg"
+    },
+    {
+        "timestamp": "2026-07-21 18:46:15",
+        "product_id": "4563",
+        "mockup_type": "Modern Corridor Setting",
+        "metadata": {
+            "mockup_type": "Modern Corridor Setting",
+            "product_name": "Traditional Indian Scene",
+            "description": "A vibrant depiction of two women interacting with a cow in a rural setting.  \n\u2022 Rich colors and intricate details  \n\u2022 Cultural significance and traditional themes  \n\u2022 Elegant framing for added sophistication",
+            "suitable_for": "corridor, entryway",
+            "artist_name": "In House",
+            "dimensions": "40.00 x 52.00"
+        },
+        "image_path": "public\/product_images\/product_4563_1784659575_6a5fbe7705b70.jpg"
+    },
+    {
+        "timestamp": "2026-07-21 18:46:15",
+        "product_id": "4563",
+        "mockup_type": "Stylish Entryway Setting",
+        "metadata": {
+            "mockup_type": "Stylish Entryway Setting",
+            "product_name": "Traditional Indian Scene",
+            "description": "A vibrant depiction of two women interacting with a cow in a rural setting.  \n\u2022 Rich colors and intricate details  \n\u2022 Cultural significance and traditional themes  \n\u2022 Elegant framing for added sophistication",
+            "suitable_for": "corridor, entryway",
+            "artist_name": "In House",
+            "dimensions": "40.00 x 52.00"
+        },
+        "image_path": "public\/product_images\/product_4563_1784659575_6a5fbe77d140f.jpg"
+    },
+    {
+        "timestamp": "2026-07-21 19:00:24",
+        "product_id": "4563",
+        "mockup_type": "Modern Corridor Setting",
+        "metadata": {
+            "mockup_type": "Modern Corridor Setting",
+            "product_name": "Traditional Indian Scene",
+            "description": "A traditional Indian painting of a woman milking a cow, with a child clinging to her back \u2014 rich colors, detailed jewelry, and an elegant frame.",
+            "suitable_for": "home, living room, corridor, entryway",
+            "artist_name": "In House",
+            "dimensions": "40.00 x 52.00"
+        },
+        "image_path": "public\/product_images\/product_4563_1784660424_6a5fc1c860cf7.jpg"
+    },
+    {
+        "timestamp": "2026-07-21 19:00:25",
+        "product_id": "4563",
+        "mockup_type": "Stylish Entryway Setting",
+        "metadata": {
+            "mockup_type": "Stylish Entryway Setting",
+            "product_name": "Traditional Indian Scene",
+            "description": "A traditional Indian painting of a woman milking a cow, with a child clinging to her back \u2014 rich colors, detailed jewelry, and an elegant frame.",
+            "suitable_for": "home, living room, corridor, entryway",
+            "artist_name": "In House",
+            "dimensions": "40.00 x 52.00"
+        },
+        "image_path": "public\/product_images\/product_4563_1784660425_6a5fc1c9a21ce.jpg"
     }
 ]

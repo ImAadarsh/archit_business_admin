@@ -1,0 +1,224 @@
+[2026-07-21 18:41:48] === Product Mockup Generator (ChatGPT) Started ===
+[2026-07-21 18:41:48] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/
+[2026-07-21 18:41:48] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_chatgpt_generations_log.txt
+[2026-07-21 18:41:48] 
+[2026-07-21 18:41:48] Released 1 stale mockup claim(s) for retry
+[2026-07-21 18:41:48] 
+[2026-07-21 18:41:48] Products remaining to process (mockups): 89
+[2026-07-21 18:41:48] 
+[2026-07-21 18:41:48] Processing Product ID: 2620
+[2026-07-21 18:41:48] Product Name: Glass Items
+[2026-07-21 18:41:48] Description: N/A
+[2026-07-21 18:41:48] 
+[2026-07-21 18:41:48] ✓ Product claimed for this run (prevents duplicate generations)
+[2026-07-21 18:41:48] 
+[2026-07-21 18:41:48] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_2620_1767520558_695a392ed6343.jpg
+[2026-07-21 18:41:48] 
+[2026-07-21 18:41:48] Downloading artwork...
+[2026-07-21 18:41:48]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_2620_1767520558_695a392ed6343.jpg
+[2026-07-21 18:41:48]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/original_2620.jpg
+[2026-07-21 18:41:49]   Downloaded 273931 bytes
+[2026-07-21 18:41:49]   Successfully wrote 273931 bytes to file
+[2026-07-21 18:41:49] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/original_2620.jpg
+[2026-07-21 18:41:49] 
+[2026-07-21 18:41:49] Optimizing artwork for AI payload...
+[2026-07-21 18:41:49] Artwork optimized (max dimension 1024px) for AI requests.
+[2026-07-21 18:41:49] 
+[2026-07-21 18:41:49] AI analysis (2 rooms only; name already set: Glass Items)...
+[2026-07-21 18:41:51]   AI analysis raw: ROOMS: corridor, entryway
+[2026-07-21 18:41:51] Skipping AI naming — product already has a descriptive name: Glass Items
+[2026-07-21 18:41:51] AI selected mockup types: corridor, entryway
+[2026-07-21 18:41:51] 
+[2026-07-21 18:41:51] Product Info:
+[2026-07-21 18:41:51]   - AI Generated Name: Glass Items
+[2026-07-21 18:41:51]   - Original Name: Glass Items
+[2026-07-21 18:41:51]   - Dimensions: 20.00 x 40.00
+[2026-07-21 18:41:51]   - Framed: Yes
+[2026-07-21 18:41:51]   - AI Description: ...
+[2026-07-21 18:41:51]   - Suitable For: home, office, dining, bedroom
+[2026-07-21 18:41:51]   - Orientation: vertical
+[2026-07-21 18:41:51] 
+[2026-07-21 18:41:51] Generating all 2 mockup images in parallel...
+[2026-07-21 18:41:51]   Image model: gpt-image-1-mini (quality=medium)
+[2026-07-21 18:42:10]   ✗ corridor: IMAGE_SAFETY — Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID req_648bc72afe8a4f51a7bfe9703f419da8. safe
+[2026-07-21 18:42:10]   → Retrying corridor with safer prompt...
+[2026-07-21 18:42:38]   ✗ corridor retry failed: IMAGE_SAFETY — Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and inclu
+[2026-07-21 18:43:06]   ✓ entryway mockup generated successfully
+[2026-07-21 18:43:06] 
+[2026-07-21 18:43:06] ✓ All mockups generated in 75 seconds!
+[2026-07-21 18:43:06] 
+[2026-07-21 18:43:06] Total mockups generated: 1
+[2026-07-21 18:43:06] 
+[2026-07-21 18:43:06] Uploading mockups to product with metadata...
+[2026-07-21 18:43:06] Product Name: Glass Items
+[2026-07-21 18:43:06] Description: ...
+[2026-07-21 18:43:06] Suitable For: home, office, dining, bedroom
+[2026-07-21 18:43:06] 
+[2026-07-21 18:43:06] Uploading entryway mockup...
+[2026-07-21 18:43:08]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":2620,"image":"public\/product_images\/product_2620_1784659388_6a5fbdbc0871e.jpg","is_mockup":1,"mockup_description":"Sty
+[2026-07-21 18:43:08]   → ✓ Uploaded successfully via API to server!
+[2026-07-21 18:43:08]   → Metadata: Stylish Entryway Setting | Glass Items
+[2026-07-21 18:43:08]   ✓ Upload successful!
+[2026-07-21 18:45:12] === Product Mockup Generator (ChatGPT) Started ===
+[2026-07-21 18:45:12] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/
+[2026-07-21 18:45:12] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_chatgpt_generations_log.txt
+[2026-07-21 18:45:12] 
+[2026-07-21 18:45:12] Products remaining to process (mockups): 88
+[2026-07-21 18:45:12] 
+[2026-07-21 18:45:12] Processing Product ID: 4563
+[2026-07-21 18:45:12] Product Name: Devotional
+[2026-07-21 18:45:12] Description: N/A
+[2026-07-21 18:45:12] 
+[2026-07-21 18:45:12] ✓ Product claimed for this run (prevents duplicate generations)
+[2026-07-21 18:45:12] 
+[2026-07-21 18:45:12] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_4563_1783599490_6a4f918288a85.jpg
+[2026-07-21 18:45:12] 
+[2026-07-21 18:45:12] Downloading artwork...
+[2026-07-21 18:45:12]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_4563_1783599490_6a4f918288a85.jpg
+[2026-07-21 18:45:12]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/original_4563.jpg
+[2026-07-21 18:45:13]   Downloaded 1044763 bytes
+[2026-07-21 18:45:13]   Successfully wrote 1044763 bytes to file
+[2026-07-21 18:45:13] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/original_4563.jpg
+[2026-07-21 18:45:13] 
+[2026-07-21 18:45:13] Optimizing artwork for AI payload...
+[2026-07-21 18:45:13] Artwork optimized (max dimension 1024px) for AI requests.
+[2026-07-21 18:45:13] 
+[2026-07-21 18:45:13] AI analysis (name + description + 2 rooms) in one call...
+[2026-07-21 18:45:16]   AI analysis raw: NAME: Traditional Indian Scene   | DESCRIPTION: A vibrant depiction of two women interacting with a cow in a rural setting.   | • Rich colors and intricate details   | • Cultural significance and traditional themes   | • Elegant framing for added sophistication   | SUITABLE_FOR: corridor, entryway   | ROOMS: corridor, entryway
+[2026-07-21 18:45:16] ✓ AI Product Name Generated: Traditional Indian Scene
+[2026-07-21 18:45:16] ✓ AI Product Description Generated:
+[2026-07-21 18:45:16]    A vibrant depiction of two women interacting with a cow in a rural setting.  
+[2026-07-21 18:45:16]    • Rich colors and intricate details  
+[2026-07-21 18:45:16]    • Cultural significance and traditional themes  
+[2026-07-21 18:45:16]    • Elegant framing for added sophistication
+[2026-07-21 18:45:16] ✓ AI Suitable For Generated: corridor, entryway
+[2026-07-21 18:45:16] AI selected mockup types: corridor, entryway
+[2026-07-21 18:45:16] 
+[2026-07-21 18:45:16] Product Info:
+[2026-07-21 18:45:16]   - AI Generated Name: Traditional Indian Scene
+[2026-07-21 18:45:16]   - Original Name: Devotional
+[2026-07-21 18:45:16]   - Dimensions: 40.00 x 52.00
+[2026-07-21 18:45:16]   - Framed: Yes
+[2026-07-21 18:45:16]   - AI Description: A vibrant depiction of two women interacting with a cow in a rural setting.  
+• Rich colors and in...
+[2026-07-21 18:45:16]   - Suitable For: corridor, entryway
+[2026-07-21 18:45:16]   - Orientation: vertical
+[2026-07-21 18:45:16] 
+[2026-07-21 18:45:16] Generating all 2 mockup images in parallel...
+[2026-07-21 18:45:16]   Image model: gpt-image-1-mini (quality=medium)
+[2026-07-21 18:45:48]   ✓ corridor mockup generated successfully
+[2026-07-21 18:46:14]   ✓ entryway mockup generated successfully
+[2026-07-21 18:46:14] 
+[2026-07-21 18:46:14] ✓ All mockups generated in 58 seconds!
+[2026-07-21 18:46:14] 
+[2026-07-21 18:46:14] Total mockups generated: 2
+[2026-07-21 18:46:14] 
+[2026-07-21 18:46:14] Uploading mockups to product with metadata...
+[2026-07-21 18:46:14] Product Name: Traditional Indian Scene
+[2026-07-21 18:46:14] Description: A vibrant depiction of two women interacting with ...
+[2026-07-21 18:46:14] Suitable For: corridor, entryway
+[2026-07-21 18:46:14] 
+[2026-07-21 18:46:14] Uploading corridor mockup...
+[2026-07-21 18:46:15]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":4563,"image":"public\/product_images\/product_4563_1784659575_6a5fbe7705b70.jpg","is_mockup":1,"mockup_description":"Mod
+[2026-07-21 18:46:15]   → ✓ Uploaded successfully via API to server!
+[2026-07-21 18:46:15]   → Metadata: Modern Corridor Setting | Traditional Indian Scene
+[2026-07-21 18:46:15]   ✓ Upload successful!
+[2026-07-21 18:46:15] Uploading entryway mockup...
+[2026-07-21 18:46:15]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":4563,"image":"public\/product_images\/product_4563_1784659575_6a5fbe77d140f.jpg","is_mockup":1,"mockup_description":"Sty
+[2026-07-21 18:46:15]   → ✓ Uploaded successfully via API to server!
+[2026-07-21 18:46:15]   → Metadata: Stylish Entryway Setting | Traditional Indian Scene
+[2026-07-21 18:46:15]   ✓ Upload successful!
+[2026-07-21 18:46:16] 
+[2026-07-21 18:46:16] Successfully uploaded 2 out of 2 mockups
+[2026-07-21 18:46:16] Metadata log saved to: mockup_metadata_log.json
+[2026-07-21 18:46:16] 
+[2026-07-21 18:46:16] ✓ Product remains marked as processed (claimed at start)
+[2026-07-21 18:46:16] 
+[2026-07-21 18:46:16] === Processing Complete ===
+[2026-07-21 18:46:16] Product ID: 4563
+[2026-07-21 18:46:16] Product Name: Devotional
+[2026-07-21 18:46:16] Mockups Generated: 2
+[2026-07-21 18:46:16] Mockups Uploaded: 2
+[2026-07-21 18:46:16] Status: Marked as processed
+[2026-07-21 18:46:16] Products remaining after this run: 87
+[2026-07-21 18:46:16] 
+[2026-07-21 18:46:16] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/
+[2026-07-21 18:58:39] === Product Mockup Generator (ChatGPT) Started ===
+[2026-07-21 18:58:39] Temp Directory: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/
+[2026-07-21 18:58:39] Log File: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/mockup_chatgpt_generations_log.txt
+[2026-07-21 18:58:39] 
+[2026-07-21 18:58:40] Products remaining to process (mockups): 88
+[2026-07-21 18:58:40] 
+[2026-07-21 18:58:40] Processing Product ID: 4563
+[2026-07-21 18:58:40] Product Name: Traditional Indian Scene
+[2026-07-21 18:58:40] Description: A traditional Indian painting of a woman milking a cow, with a child clinging to her back — rich colors, detailed jewelry, and an elegant frame.
+[2026-07-21 18:58:40] 
+[2026-07-21 18:58:40] ✓ Product claimed for this run (prevents duplicate generations)
+[2026-07-21 18:58:40] 
+[2026-07-21 18:58:41] Product Image URL: https://api.invoicemate.in/storage/app/public/product_images/product_4563_1783599490_6a4f918288a85.jpg
+[2026-07-21 18:58:41] 
+[2026-07-21 18:58:41] Downloading artwork...
+[2026-07-21 18:58:41]   Downloading from: https://api.invoicemate.in/storage/app/public/product_images/product_4563_1783599490_6a4f918288a85.jpg
+[2026-07-21 18:58:41]   Saving to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/original_4563.jpg
+[2026-07-21 18:58:41]   Downloaded 1044763 bytes
+[2026-07-21 18:58:41]   Successfully wrote 1044763 bytes to file
+[2026-07-21 18:58:41] Artwork downloaded successfully to: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/original_4563.jpg
+[2026-07-21 18:58:41] 
+[2026-07-21 18:58:41] Optimizing artwork for AI payload...
+[2026-07-21 18:58:41] Artwork optimized (max dimension 1024px) for AI requests.
+[2026-07-21 18:58:41] 
+[2026-07-21 18:58:41] AI analysis (2 rooms only; name already set: Traditional Indian Scene)...
+[2026-07-21 18:58:44]   AI analysis raw: ROOMS: corridor, entryway
+[2026-07-21 18:58:44] Skipping AI naming — product already has a descriptive name: Traditional Indian Scene
+[2026-07-21 18:58:44] AI selected mockup types: corridor, entryway
+[2026-07-21 18:58:44] 
+[2026-07-21 18:58:44] Product Info:
+[2026-07-21 18:58:44]   - AI Generated Name: Traditional Indian Scene
+[2026-07-21 18:58:44]   - Original Name: Traditional Indian Scene
+[2026-07-21 18:58:44]   - Dimensions: 40.00 x 52.00
+[2026-07-21 18:58:44]   - Framed: Yes
+[2026-07-21 18:58:44]   - AI Description: A traditional Indian painting of a woman milking a cow, with a child clinging to her back — rich c...
+[2026-07-21 18:58:44]   - Suitable For: home, living room, corridor, entryway
+[2026-07-21 18:58:44]   - Orientation: vertical
+[2026-07-21 18:58:44] 
+[2026-07-21 18:58:44] Generating all 2 mockup images in parallel...
+[2026-07-21 18:58:44]   Image model: gpt-image-1 (quality=medium, input_fidelity=high, moderation=low)
+[2026-07-21 18:59:17]   ✗ corridor: IMAGE_SAFETY — Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID req_7239e6fd422b4086956d3516eedb4242. safe
+[2026-07-21 18:59:17]   → Retrying corridor with safer prompt...
+[2026-07-21 18:59:51]   ✓ corridor mockup generated on safer retry
+[2026-07-21 19:00:23]   ✓ entryway mockup generated successfully
+[2026-07-21 19:00:23] 
+[2026-07-21 19:00:23] ✓ All mockups generated in 99 seconds!
+[2026-07-21 19:00:23] 
+[2026-07-21 19:00:23] Total mockups generated: 2
+[2026-07-21 19:00:23] 
+[2026-07-21 19:00:23] Uploading mockups to product with metadata...
+[2026-07-21 19:00:23] Product Name: Traditional Indian Scene
+[2026-07-21 19:00:23] Description: A traditional Indian painting of a woman milking a...
+[2026-07-21 19:00:23] Suitable For: home, living room, corridor, entryway
+[2026-07-21 19:00:23] 
+[2026-07-21 19:00:23] Uploading corridor mockup...
+[2026-07-21 19:00:24]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":4563,"image":"public\/product_images\/product_4563_1784660424_6a5fc1c860cf7.jpg","is_mockup":1,"mockup_description":"Mod
+[2026-07-21 19:00:24]   → ✓ Uploaded successfully via API to server!
+[2026-07-21 19:00:24]   → Metadata: Modern Corridor Setting | Traditional Indian Scene
+[2026-07-21 19:00:24]   ✓ Upload successful!
+[2026-07-21 19:00:24] Uploading entryway mockup...
+[2026-07-21 19:00:25]   → API Response (HTTP 200): {"status":true,"message":"1 image(s) added successfully.","data":[{"product_id":4563,"image":"public\/product_images\/product_4563_1784660425_6a5fc1c9a21ce.jpg","is_mockup":1,"mockup_description":"Sty
+[2026-07-21 19:00:25]   → ✓ Uploaded successfully via API to server!
+[2026-07-21 19:00:25]   → Metadata: Stylish Entryway Setting | Traditional Indian Scene
+[2026-07-21 19:00:25]   ✓ Upload successful!
+[2026-07-21 19:00:26] 
+[2026-07-21 19:00:26] Successfully uploaded 2 out of 2 mockups
+[2026-07-21 19:00:26] Metadata log saved to: mockup_metadata_log.json
+[2026-07-21 19:00:26] 
+[2026-07-21 19:00:26] ✓ Product remains marked as processed (claimed at start)
+[2026-07-21 19:00:26] 
+[2026-07-21 19:00:26] === Processing Complete ===
+[2026-07-21 19:00:26] Product ID: 4563
+[2026-07-21 19:00:26] Product Name: Traditional Indian Scene
+[2026-07-21 19:00:26] Mockups Generated: 2
+[2026-07-21 19:00:26] Mockups Uploaded: 2
+[2026-07-21 19:00:26] Status: Marked as processed
+[2026-07-21 19:00:26] Products remaining after this run: 87
+[2026-07-21 19:00:26] 
+[2026-07-21 19:00:26] Temp Directory Location: /Applications/XAMPP/xamppfiles/htdocs/archit_2026/business/temp/product_mockups_chatgpt/
