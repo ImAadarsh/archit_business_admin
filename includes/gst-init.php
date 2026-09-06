@@ -166,7 +166,7 @@ if (!function_exists('gst_inr')) {
         return 'Pending';
     }
 
-    function gst_itc_badge($status)
+    function gst_itc_badge($status, $notes = '')
     {
         $s = strtolower(trim((string) $status));
         $map = [
@@ -176,7 +176,11 @@ if (!function_exists('gst_inr')) {
             'pending' => 'badge-warning',
         ];
         $cls = $map[$s] ?? 'badge-secondary';
-        return '<span class="badge ' . $cls . '">' . gst_h(gst_itc_label($s)) . '</span>';
+        $label = gst_itc_label($s);
+        if ($s === 'matched' && stripos(ltrim((string) $notes), 'AUTO_APPROVED') === 0) {
+            $label = 'Auto-approved';
+        }
+        return '<span class="badge ' . $cls . '">' . gst_h($label) . '</span>';
     }
 
     function gst_public_credentials($row)

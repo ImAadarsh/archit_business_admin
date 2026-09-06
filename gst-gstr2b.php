@@ -58,8 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $gst && $gst_db_ok && $gst_action !
         if (!empty($data['portal_warning'])) {
             $msg .= ' ' . $data['portal_warning'];
         }
-        if (!empty($data['auto_matched'])) {
-            $msg .= ' Auto-matched ' . (int) $data['auto_matched'] . ' purchase(s).';
+        if (!empty($data['auto_approved'])) {
+            $msg .= ' Auto-approved ' . (int) $data['auto_approved'] . ' matching ITC row(s).';
+        } elseif (!empty($data['auto_matched'])) {
+            $msg .= ' Paired ' . (int) $data['auto_matched'] . ' purchase(s) — review pending mismatches.';
         }
         gst_flash($ok, $msg);
         if ($ok && (!empty($data['auth_required']) || !empty($data['needs_otp']) || gst_needs_otp($res) || gst_needs_auth($res))) {
@@ -199,8 +201,9 @@ $ghostDismissed = is_array($data['ghost_dismissed'] ?? null) ? $data['ghost_dism
 $eligibleNotes = is_array($data['eligible_notes'] ?? null) ? $data['eligible_notes'] : [];
 $totals = is_array($data['totals'] ?? null) ? $data['totals'] : [];
 $counts = is_array($data['counts'] ?? null) ? $data['counts'] : [
-    'all' => 0, 'pending' => 0, 'matched' => 0, 'carry' => 0, 'ghost' => 0,
+    'all' => 0, 'pending' => 0, 'matched' => 0, 'carry' => 0, 'ghost' => 0, 'auto_approved' => 0,
 ];
+$autoApprovedCount = (int) ($counts['auto_approved'] ?? $data['auto_approved'] ?? 0);
 $eligible = (float) ($totals['eligible'] ?? 0);
 $lastSynced = $data['last_synced_at'] ?? null;
 $gstr2bStatus = (string) ($data['gstr2b_status'] ?? 'pending');
@@ -446,6 +449,12 @@ $gst_page_extra = function () use (
                 $chip('ghost', 'Ghost', $counts['ghost'] ?? 0);
                 ?>
             </div>
+            <?php if ($autoApprovedCount > 0): ?>
+                <p class="small text-success mb-2 mb-md-0">
+                    <?php echo (int) $autoApprovedCount; ?> row(s) auto-approved from GSTR-2B match
+                    (invoice no + GSTIN + date + amounts). Review only Pending.
+                </p>
+            <?php endif; ?>
             <form method="GET" action="gst-gstr2b.php" class="form-inline">
                 <input type="hidden" name="period" value="<?php echo gst_h($gst_period); ?>">
                 <input type="hidden" name="filter" value="<?php echo gst_h($gst_2b_filter); ?>">
@@ -561,7 +570,7 @@ $gst_page_extra = function () use (
                                 <td class="text-right small"><?php echo gst_h(gst_inr($m['igst'] ?? 0)); ?></td>
                                 <td class="text-right small"><?php echo gst_h(gst_inr($m['cgst'] ?? 0)); ?></td>
                                 <td class="text-right small"><?php echo gst_h(gst_inr($m['sgst'] ?? 0)); ?></td>
-                                <td><?php echo gst_itc_badge($st); ?></td>
+                                <td><?php echo gst_itc_badge($st, $m['notes'] ?? ''); ?></td>
                                 <td class="small" style="max-width:220px;">
                                     <?php echo gst_h($m['mismatch_reason'] ?: '—'); ?>
                                 </td>
@@ -569,6 +578,11 @@ $gst_page_extra = function () use (
                                     <?php if ($ghost): ?>
                                         <button type="button" class="btn btn-sm btn-outline-danger gst-dismiss-ghost"
                                                 data-id="<?php echo gst_h($eid); ?>">Dismiss</button>
+                                    <?php elseif ($st === 'matched'): ?>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                onclick="return gst2bRow(this, '<?php echo gst_h($eid); ?>', 'pending');">Reject</button>
+                                        <button type="button" class="btn btn-sm btn-outline-info"
+                                                onclick="return gst2bRow(this, '<?php echo gst_h($eid); ?>', 'carry');">Carry</button>
                                     <?php else: ?>
                                         <button type="button" class="btn btn-sm btn-success"
                                                 onclick="return gst2bRow(this, '<?php echo gst_h($eid); ?>', 'matched');">Approve</button>

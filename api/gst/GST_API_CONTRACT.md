@@ -117,24 +117,39 @@ Snapshots rows into `gst_gstr1_invoices` and builds GSTN JSON (`b2b` / `b2cs` / 
 
 ### 7. Sync GSTR-2B — `sync-gstr2b.php`
 
-Loads local expenses with GST, optionally GET Perione `/gstr2b/all`, auto-matches by vendor GSTIN + amount/date. Unmatched portal invoices become `ghost` rows.
+Loads local expenses with GST, optionally GET Perione `/gstr2b/all`, then auto-matches.
+
+**Auto-approve (status → `matched`, notes `AUTO_APPROVED`)** when books ↔ portal agree on:
+- Normalized invoice number (exact)
+- Supplier GSTIN (exact)
+- Invoice date (exact when both present)
+- Taxable + tax within ±₹1 or 0.5%
+
+Weaker pairs stay `pending`. Unmatched portal invoices become `ghost` rows. Manual `MANUAL_*` decisions are preserved on re-sync.
 
 - **Body**: `business_id`, `period`, optional `location_id`
+- **`data.auto_approved`**: count of rows auto-approved this sync
+- **`data.auto_matched`**: count of pairs with score ≥ 40 (approved + pending links)
 
 ### 8. GSTR-2B list — `get-gstr2b.php`
 
+Re-applies auto-approve against already-synced portal 2B rows (no portal re-fetch) so hub/app pick up matches without Sync.
+
 - **Params**: `business_id`, `period`, optional `location_id`, `status` (`all`\|`pending`\|`matched`\|`carry`\|`ghost`)
-- **`data.invoices[]`** (Android `GstItcRow`):
+- **`data.invoices[]`** / **`data.matches[]`** (Android `GstItcRow`):
 
 | Field | Notes |
 |---|---|
 | `id` | Expense id or `ghost_…` |
-| `name`, `paid_to` / `paidTo` | |
+| `name`, `paid_to` / `paidTo` / `vendor` | |
 | `gstin` | Vendor GSTIN |
 | `date` | Expense / portal date |
 | `taxable`, `amount` | |
-| `gst_claimed` / `gstClaimed` | ITC amount |
+| `gst_claimed` / `gstClaimed` / `tax` | ITC amount |
 | `status` | `pending` \| `matched` \| `carry` \| `ghost` |
+| `notes` | `AUTO_APPROVED` / `MANUAL_*` |
+| `auto_approved` | bool — portal match auto-approved |
+| `counts.auto_approved` | int |
 
 ### 9. Reconcile ITC — `reconcile-itc.php`
 

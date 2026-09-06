@@ -136,6 +136,7 @@ $netCash = (float) ($summary['net_cash'] ?? max(0, $salesGst - $itcEligible));
 $countAll = (int) ($summary['counts']['all'] ?? 0);
 $countPending = (int) ($summary['counts']['pending'] ?? 0);
 $countApproved = (int) ($summary['counts']['approved'] ?? 0);
+$countAutoApproved = (int) ($summary['counts']['auto_approved'] ?? $summary['auto_approved'] ?? 0);
 $pendingMini = is_array($summary['pending_mini'] ?? null) ? $summary['pending_mini'] : [];
 $lastSynced = $summary['last_synced_at'] ?? null;
 $filingUnlocked = !empty($summary['filing_unlocked']) || ($invoiceCount > 0 && $countPending === 0);
@@ -338,7 +339,9 @@ include __DIR__ . '/admin/header.php';
                                         </p>
                                         <p class="mb-1 <?php echo $step2Ok ? 'text-success' : 'text-muted'; ?>">
                                             <?php echo $step2Ok ? '✓' : '○'; ?>
-                                            Step 2 · Approve ITC (<?php echo (int) $countApproved; ?>/<?php echo max($countAll, 1); ?> approved)
+                                            Step 2 · Approve ITC (<?php echo (int) $countApproved; ?>/<?php echo max($countAll, 1); ?> approved<?php
+                                            echo $countAutoApproved > 0 ? ', ' . (int) $countAutoApproved . ' auto' : '';
+                                            ?>)
                                         </p>
                                         <p class="mb-0 <?php echo $filingUnlocked ? 'text-success' : 'text-muted'; ?>">
                                             <?php echo $filingUnlocked ? '✓ Step 3 · Compute &amp; file (unlocked)' : '🔒 Step 3 · Compute &amp; file (locked)'; ?>
@@ -396,6 +399,12 @@ include __DIR__ . '/admin/header.php';
                                                 <a class="btn btn-sm <?php echo $gst_itc_filter === 'approved' ? 'btn-primary' : 'btn-outline-secondary'; ?>"
                                                    href="<?php echo gst_h(gst_url('gst-filing.php', ['itc' => 'approved'])); ?>">Approved (<?php echo (int) $countApproved; ?>)</a>
                                             </div>
+                                            <?php if ($countAutoApproved > 0): ?>
+                                                <p class="small text-success mb-3">
+                                                    <?php echo (int) $countAutoApproved; ?> ITC row(s) already auto-approved from GSTR-2B match.
+                                                    Only Pending needs manual review.
+                                                </p>
+                                            <?php endif; ?>
 
                                             <div class="border rounded p-3 mb-3 bg-light">
                                                 <h6 class="mb-2">ITC &amp; Tax Ledger Balance</h6>
@@ -436,7 +445,7 @@ include __DIR__ . '/admin/header.php';
                                                         <div class="font-weight-bold"><?php echo gst_h($vname); ?></div>
                                                         <div class="small text-muted mb-2">
                                                             <?php echo gst_h(gst_inr($claimed)); ?> ITC · <?php echo $vgstin !== '' ? gst_h($vgstin) : 'No GSTIN'; ?>
-                                                            · <?php echo gst_status_badge($st); ?>
+                                                            · <?php echo gst_itc_badge($st, $row['notes'] ?? ''); ?>
                                                         </div>
                                                         <?php if ($st === 'pending'): ?>
                                                             <form method="POST" class="d-inline" action="<?php echo gst_h(gst_url('gst-filing.php')); ?>">

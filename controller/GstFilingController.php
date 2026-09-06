@@ -932,6 +932,10 @@ class GstFilingController
                 $row['notes'] = (string) ($map['expense'][$key]['notes'] ?? '');
                 $row['gst_portal'] = (float) ($map['expense'][$key]['gst_portal'] ?? 0);
                 $row['gstr2b_id'] = (int) ($map['expense'][$key]['gstr2b_id'] ?? 0);
+                $row['auto_approved'] = ($row['status'] === 'matched')
+                    && $this->isAutoApprovedNote($row['notes']);
+            } else {
+                $row['auto_approved'] = false;
             }
         }
         unset($row);
@@ -1119,6 +1123,8 @@ class GstFilingController
         if ($err) {
             return $err;
         }
+        // Auto-approve strong books↔2B matches so hub counts stay current without a re-sync.
+        $autoStats = $this->ensureItcAutoMatched($ctx['business_id'], $ctx['period'], $ctx['location_id']);
         $sales = $this->loadSalesInvoices($ctx['business_id'], $ctx['period'], $ctx['location_id']);
         $purch = $this->attachItcStatus(
             $ctx['business_id'],
@@ -1131,7 +1137,7 @@ class GstFilingController
             $salesGst += $r['gst'];
         }
         $claimed = $eligible = $pendingAmt = $carryAmt = 0.0;
-        $countAll = $countPending = $countApproved = 0;
+        $countAll = $countPending = $countApproved = $countAutoApproved = 0;
         $pendingRows = [];
         foreach ($purch as $r) {
             if (($r['status'] ?? '') === 'ghost') {
@@ -1142,6 +1148,9 @@ class GstFilingController
             if (($r['status'] ?? '') === 'matched') {
                 $eligible += $r['gstClaimed'];
                 $countApproved++;
+                if ($this->isAutoApprovedNote($r['notes'] ?? '')) {
+                    $countAutoApproved++;
+                }
             } elseif (($r['status'] ?? '') === 'carry') {
                 $carryAmt += $r['gstClaimed'];
             } else {
@@ -1173,7 +1182,10 @@ class GstFilingController
                 'all' => $countAll,
                 'pending' => $countPending,
                 'approved' => $countApproved,
+                'auto_approved' => $countAutoApproved,
             ],
+            'auto_approved' => $countAutoApproved,
+            'auto_matched_this_pass' => (int) ($autoStats['auto_approved'] ?? 0),
             'pending_mini' => $pendingRows,
             'gstr1_status' => $periodRow['gstr1_status'] ?? 'pending',
             'gstr2b_status' => $periodRow['gstr2b_status'] ?? 'pending',
@@ -2167,7 +2179,9 @@ class GstFilingController
             $portalErr = 'GST session not authenticated; synced local expenses only.';
         }
 
-        $matched = $this->autoMatchItc($ctx['business_id'], $ctx['period'], $local, $portalRows);
+        $matchStats = $this->autoMatchItc($ctx['business_id'], $ctx['period'], $local, $portalRows);
+        $matched = (int) ($matchStats['paired'] ?? 0);
+        $autoApproved = (int) ($matchStats['auto_approved'] ?? 0);
         $this->updatePeriodStatus($ctx['business_id'], $ctx['period'], [
             'gstr2b_status' => $portalErr && $cred && $this->tokenValid($cred) ? 'error' : 'synced',
             'last_synced_at' => date('Y-m-d H:i:s'),
@@ -2179,6 +2193,7 @@ class GstFilingController
             'local_count' => count($local),
             'portal_count' => count($portalRows),
             'auto_matched' => $matched,
+            'auto_approved' => $autoApproved,
             'invoices' => $rows,
             'auth_required' => $auth['auth_required'],
             'needs_otp' => !empty($auth['auth_required']),
@@ -2187,7 +2202,11 @@ class GstFilingController
         if ($portalErr) {
             $out['portal_warning'] = $portalErr;
         }
-        return $this->ok($out, 'GSTR-2B synced.');
+        $msg = 'GSTR-2B synced.';
+        if ($autoApproved > 0) {
+            $msg = 'GSTR-2B synced. Auto-approved ' . $autoApproved . ' matching ITC row(s).';
+        }
+        return $this->ok($out, $msg);
     }
 
     public function getGstr2b(array $in)
@@ -2196,6 +2215,7 @@ class GstFilingController
         if ($err) {
             return $err;
         }
+        $autoStats = $this->ensureItcAutoMatched($ctx['business_id'], $ctx['period'], $ctx['location_id']);
         $local = $this->loadPurchaseExpenses($ctx['business_id'], $ctx['period'], $ctx['location_id']);
         $rows = $this->attachItcStatus($ctx['business_id'], $ctx['period'], $local);
         $filter = strtolower(trim((string) ($in['status'] ?? $in['filter'] ?? 'all')));
@@ -2205,7 +2225,7 @@ class GstFilingController
             }));
         }
         $sum = ['pending' => 0, 'matched' => 0, 'carry' => 0, 'ghost' => 0];
-        $counts = ['all' => 0, 'pending' => 0, 'matched' => 0, 'carry' => 0, 'ghost' => 0];
+        $counts = ['all' => 0, 'pending' => 0, 'matched' => 0, 'carry' => 0, 'ghost' => 0, 'auto_approved' => 0];
         $all = $this->attachItcStatus(
             $ctx['business_id'],
             $ctx['period'],
@@ -2220,6 +2240,9 @@ class GstFilingController
             $counts[$st] = ($counts[$st] ?? 0) + 1;
             if ($st !== 'ghost') {
                 $counts['all']++;
+            }
+            if ($st === 'matched' && $this->isAutoApprovedNote($r['notes'] ?? '')) {
+                $counts['auto_approved']++;
             }
         }
         $home = $this->homeState($ctx['business_id']);
@@ -2254,9 +2277,12 @@ class GstFilingController
                 'ineligible' => round($sum['ghost'] + $sum['pending'] + $sum['carry'], 2),
             ],
             'counts' => $counts,
+            'auto_approved' => (int) ($counts['auto_approved'] ?? 0),
+            'auto_matched_this_pass' => (int) ($autoStats['auto_approved'] ?? 0),
             'gstr2b_status' => $periodRow['gstr2b_status'] ?? 'pending',
             'last_synced_at' => $periodRow['last_synced_at'] ?? null,
             'auth_required' => $auth['auth_required'],
+            'needs_otp' => !empty($auth['auth_required']),
             'gstin' => $auth['gstin'],
         ]);
     }
@@ -2280,7 +2306,8 @@ class GstFilingController
                     continue;
                 }
                 if (($r['status'] ?? 'pending') === 'pending' && $r['gstClaimed'] <= $max) {
-                    $this->upsertItcRow($ctx['business_id'], $ctx['period'], $r, 'matched');
+                    $r['notes'] = 'MANUAL_APPROVE';
+                    $this->upsertItcRow($ctx['business_id'], $ctx['period'], $r, 'matched', false);
                     $updated++;
                 }
             }
@@ -2289,7 +2316,8 @@ class GstFilingController
             $local = $this->attachItcStatus($ctx['business_id'], $ctx['period'], $local);
             foreach ($local as $r) {
                 if (($r['status'] ?? 'pending') === 'pending') {
-                    $this->upsertItcRow($ctx['business_id'], $ctx['period'], $r, 'carry');
+                    $r['notes'] = 'MANUAL_CARRY';
+                    $this->upsertItcRow($ctx['business_id'], $ctx['period'], $r, 'carry', false);
                     $this->upsertCarry($ctx['business_id'], $ctx['period'], $r);
                     $updated++;
                 }
@@ -2368,27 +2396,62 @@ class GstFilingController
         if (!$row) {
             return false;
         }
-        if ($notes !== '') {
-            $row['notes'] = $notes;
+        // Tag manual decisions so auto-match never undoes Approve / Reject / Carry.
+        $extra = trim((string) $notes);
+        if ($status === 'pending') {
+            $row['notes'] = 'MANUAL_REJECT' . ($extra !== '' ? (': ' . $extra) : '');
+        } elseif ($status === 'matched') {
+            $row['notes'] = 'MANUAL_APPROVE' . ($extra !== '' ? (': ' . $extra) : '');
+        } elseif ($status === 'carry') {
+            $row['notes'] = 'MANUAL_CARRY' . ($extra !== '' ? (': ' . $extra) : '');
+        } elseif ($extra !== '') {
+            $row['notes'] = $extra;
         }
-        $this->upsertItcRow($business_id, $period, $row, $status);
+        $this->upsertItcRow($business_id, $period, $row, $status, false);
         if ($status === 'carry') {
             $this->upsertCarry($business_id, $period, $row);
         }
         return true;
     }
 
-    private function upsertItcRow($business_id, $period, array $row, $status)
+    /**
+     * Upsert ITC reconcile row.
+     * $auto=true preserves MANUAL_* notes and never downgrades matched/carry.
+     */
+    private function upsertItcRow($business_id, $period, array $row, $status, $auto = false)
     {
-        $sql = 'INSERT INTO gst_itc_reconcile
-            (business_id, period, source, source_ref, expense_id, gstr2b_id, status, gst_claimed, gst_portal, taxable, vendor_name, vendor_gstin, doc_date, notes)
-            VALUES (?, ?, \'expense\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE status = VALUES(status), gst_claimed = VALUES(gst_claimed),
-              taxable = VALUES(taxable), vendor_name = VALUES(vendor_name), vendor_gstin = VALUES(vendor_gstin),
-              doc_date = VALUES(doc_date),
-              notes = IF(VALUES(notes) = \'\', notes, VALUES(notes)),
-              gstr2b_id = IF(VALUES(gstr2b_id) = 0, gstr2b_id, VALUES(gstr2b_id)),
-              gst_portal = IF(VALUES(gst_portal) = 0, gst_portal, VALUES(gst_portal))';
+        if ($auto) {
+            $sql = 'INSERT INTO gst_itc_reconcile
+                (business_id, period, source, source_ref, expense_id, gstr2b_id, status, gst_claimed, gst_portal, taxable, vendor_name, vendor_gstin, doc_date, notes)
+                VALUES (?, ?, \'expense\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                  status = CASE
+                    WHEN notes LIKE \'MANUAL%\' THEN status
+                    WHEN status = \'carry\' THEN status
+                    WHEN status = \'matched\' AND VALUES(status) = \'pending\' THEN status
+                    ELSE VALUES(status)
+                  END,
+                  gst_claimed = VALUES(gst_claimed),
+                  taxable = VALUES(taxable), vendor_name = VALUES(vendor_name), vendor_gstin = VALUES(vendor_gstin),
+                  doc_date = VALUES(doc_date),
+                  notes = CASE
+                    WHEN notes LIKE \'MANUAL%\' THEN notes
+                    WHEN VALUES(notes) = \'\' THEN notes
+                    ELSE VALUES(notes)
+                  END,
+                  gstr2b_id = IF(VALUES(gstr2b_id) = 0, gstr2b_id, VALUES(gstr2b_id)),
+                  gst_portal = IF(VALUES(gst_portal) = 0, gst_portal, VALUES(gst_portal))';
+        } else {
+            $sql = 'INSERT INTO gst_itc_reconcile
+                (business_id, period, source, source_ref, expense_id, gstr2b_id, status, gst_claimed, gst_portal, taxable, vendor_name, vendor_gstin, doc_date, notes)
+                VALUES (?, ?, \'expense\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE status = VALUES(status), gst_claimed = VALUES(gst_claimed),
+                  taxable = VALUES(taxable), vendor_name = VALUES(vendor_name), vendor_gstin = VALUES(vendor_gstin),
+                  doc_date = VALUES(doc_date),
+                  notes = IF(VALUES(notes) = \'\', notes, VALUES(notes)),
+                  gstr2b_id = IF(VALUES(gstr2b_id) = 0, gstr2b_id, VALUES(gstr2b_id)),
+                  gst_portal = IF(VALUES(gst_portal) = 0, gst_portal, VALUES(gst_portal))';
+        }
         $stmt = $this->connect->prepare($sql);
         if (!$stmt) {
             return;
@@ -2583,13 +2646,28 @@ class GstFilingController
         return $ts ? date('Y-m-d', $ts) : null;
     }
 
+    /**
+     * Pair books purchases to portal 2B rows and auto-approve strong matches.
+     *
+     * Matching basis (auto-approve → status matched):
+     * - Normalize invoice numbers (strip spaces/special chars) — must match exactly
+     * - Supplier GSTIN must match exactly
+     * - Invoice date must match exactly when both sides have a date
+     * - Taxable + tax totals within ±1 INR or 0.5% (see amountWithinTolerance)
+     * Weaker pairs (score ≥ 40) stay pending for manual review.
+     * Manual Approve/Reject/Carry (notes MANUAL_*) are never overwritten.
+     *
+     * @return array{paired:int,auto_approved:int}
+     */
     private function autoMatchItc($business_id, $period, array $local, array $portal)
     {
         $matched = 0;
+        $autoApproved = 0;
         $usedPortal = [];
         foreach ($local as $lr) {
             $bestIdx = null;
             $bestScore = 0;
+            $bestScored = null;
             foreach ($portal as $i => $pr) {
                 if (isset($usedPortal[$i])) {
                     continue;
@@ -2598,12 +2676,23 @@ class GstFilingController
                 if ($scored['score'] > $bestScore) {
                     $bestScore = $scored['score'];
                     $bestIdx = $i;
+                    $bestScored = $scored;
                 }
             }
-            if ($bestIdx !== null && $bestScore >= 40) {
+            if ($bestIdx !== null && $bestScore >= 40 && is_array($bestScored)) {
                 $pr = $portal[$bestIdx];
                 $lr['gst_portal'] = (float) ($pr['itc_eligible'] ?? 0);
-                $this->upsertItcRow($business_id, $period, $lr, 'pending');
+                if (!empty($pr['id'])) {
+                    $lr['gstr2b_id'] = (int) $pr['id'];
+                }
+                if ($this->shouldAutoApproveItc($bestScored)) {
+                    $lr['notes'] = 'AUTO_APPROVED';
+                    $this->upsertItcRow($business_id, $period, $lr, 'matched', true);
+                    $autoApproved++;
+                } else {
+                    // Soft link only — keep pending for manual approve/reject/carry.
+                    $this->upsertItcRow($business_id, $period, $lr, 'pending', true);
+                }
                 $usedPortal[$bestIdx] = true;
                 $matched++;
             }
@@ -2633,7 +2722,53 @@ class GstFilingController
             $stmt->execute();
             $stmt->close();
         }
-        return $matched;
+        return ['paired' => $matched, 'auto_approved' => $autoApproved];
+    }
+
+    /**
+     * Re-run auto-approve against already-synced portal 2B rows (no portal fetch).
+     * @return array{paired:int,auto_approved:int}
+     */
+    private function ensureItcAutoMatched($business_id, $period, $location_id = null)
+    {
+        $portal = $this->loadPortal2b($business_id, $period);
+        if (!$portal) {
+            return ['paired' => 0, 'auto_approved' => 0];
+        }
+        $local = $this->loadPurchaseExpenses($business_id, $period, $location_id);
+        return $this->autoMatchItc($business_id, $period, $local, $portal);
+    }
+
+    private function isAutoApprovedNote($notes)
+    {
+        return stripos(ltrim((string) $notes), 'AUTO_APPROVED') === 0;
+    }
+
+    /**
+     * Amounts agree when absolute gap ≤ ₹1 or relative gap ≤ 0.5%.
+     */
+    private function amountWithinTolerance($a, $b)
+    {
+        $a = (float) $a;
+        $b = (float) $b;
+        if ($a <= 0 || $b <= 0) {
+            return false;
+        }
+        $gap = abs($a - $b);
+        if ($gap <= 1.0) {
+            return true;
+        }
+        $base = max($a, $b);
+        return $gap <= ($base * 0.005);
+    }
+
+    /**
+     * Auto-approve only when quality is exact/matched with no field mismatches.
+     */
+    private function shouldAutoApproveItc(array $scored)
+    {
+        // Require quality=exact: GSTIN exact + normalized invoice exact + no date/amount mismatches.
+        return ((string) ($scored['quality'] ?? '')) === 'exact' && empty($scored['mismatches']);
     }
 
     private function authPublic($business_id)
@@ -2771,7 +2906,8 @@ class GstFilingController
         $tx2 = (float) ($portal['taxable'] ?? 0);
         if ($tx1 > 0 && $tx2 > 0) {
             $gap = abs($tx1 - $tx2);
-            if ($gap < 1) {
+            // Match rule: taxable within ±1 INR or 0.5%.
+            if ($this->amountWithinTolerance($tx1, $tx2)) {
                 $score += 10;
             } elseif ($gap <= max(10, $tx1 * 0.01)) {
                 $score += 4;
@@ -2787,7 +2923,8 @@ class GstFilingController
         $tax2 = (float) ($portal['itc_eligible'] ?? 0);
         if ($tax1 > 0 && $tax2 > 0) {
             $gap = abs($tax1 - $tax2);
-            if ($gap < 1) {
+            // Match rule: tax / ITC within ±1 INR or 0.5%.
+            if ($this->amountWithinTolerance($tax1, $tax2)) {
                 $score += 8;
             } else {
                 $mismatches[] = 'tax';
@@ -2962,6 +3099,7 @@ class GstFilingController
             'igst' => (float) ($book['igst'] ?? 0),
             'tax' => $booksTax,
             'status' => $status,
+            'auto_approved' => $status === 'matched' && $this->isAutoApprovedNote($book['notes'] ?? ''),
             'match_quality' => $scored['quality'] ?? 'books_only',
             'match_score' => (int) ($scored['score'] ?? 0),
             'mismatch_keys' => $scored['mismatches'] ?? [],
@@ -3054,12 +3192,12 @@ class GstFilingController
             [
                 'kind' => 'eligible',
                 'title' => 'Eligible ITC (Approved)',
-                'body' => 'Only Approved (matched) purchases reduce net tax in GSTR-3B. The vendor handshake is treated as present in your GSTR-2B.',
+                'body' => 'Only Approved (matched) purchases reduce net tax in GSTR-3B. Rows that match GSTR-2B on invoice no, GSTIN, date, and amounts (±₹1 / 0.5%) are auto-approved on sync.',
             ],
             [
                 'kind' => 'ineligible',
                 'title' => 'Pending',
-                'body' => 'Claimed from expenses but not confirmed in GSTR-2B yet. Kept out of eligible ITC until you Approve.',
+                'body' => 'Not auto-matched (typo, amount gap, missing 2B row, etc.). Review and Approve / Reject / Carry — only these need manual work.',
             ],
             [
                 'kind' => 'ineligible',
