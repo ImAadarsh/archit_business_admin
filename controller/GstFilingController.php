@@ -659,6 +659,70 @@ class GstFilingController
         return strtotime($cred['token_expiry']) > (time() + 120);
     }
 
+    /**
+     * Public GST session fields for clients (never includes auth_token).
+     * Validity uses DB token_expiry from the last successful auth-verify.
+     */
+    private function authSessionPayload(?array $cred = null)
+    {
+        $cred = is_array($cred) ? $cred : [];
+        $token = trim((string) ($cred['auth_token'] ?? ''));
+        $expiry = trim((string) ($cred['token_expiry'] ?? ''));
+        $expiryTs = $expiry !== '' ? strtotime($expiry) : false;
+        $valid = $token !== '' && $expiryTs && $expiryTs > (time() + 120);
+
+        if ($token === '' || $expiry === '') {
+            $status = 'missing';
+        } elseif ($valid) {
+            $status = 'valid';
+        } else {
+            $status = 'expired';
+        }
+
+        $display = ($expiryTs) ? date('j M Y, g:i A', $expiryTs) : null;
+        $iso = ($expiryTs) ? date('c', $expiryTs) : null;
+
+        return [
+            'gst_auth_valid' => $valid,
+            'gst_auth_expires_at' => $iso ?: ($expiry !== '' ? $expiry : null),
+            'gst_auth_expires_display' => $display,
+            'gst_auth_status' => $status,
+            'session_valid' => $valid,
+            'auth_required' => !$valid,
+            'needs_otp' => !$valid,
+            'token_expiry' => $expiry !== '' ? $expiry : null,
+            'gstin' => (string) ($cred['gstin'] ?? ''),
+        ];
+    }
+
+    private function mergeAuthSession(array $out, $business_id_or_cred)
+    {
+        $cred = is_array($business_id_or_cred)
+            ? $business_id_or_cred
+            : ($this->getCredentials($business_id_or_cred) ?: []);
+        return array_merge($out, $this->authSessionPayload($cred));
+    }
+
+    /** Prefer Perione/GSTN expiry when present; else fall back to AUTH_VALIDITY_SECONDS. */
+    private function resolveTokenExpiry(array $decoded)
+    {
+        $d = $decoded;
+        $nested = is_array($d['data'] ?? null) ? $d['data'] : [];
+        foreach (['token_expiry', 'expiry', 'expires_at', 'valid_upto', 'valid_until'] as $k) {
+            $raw = $d[$k] ?? $nested[$k] ?? null;
+            if ($raw !== null && $raw !== '' && strtotime((string) $raw)) {
+                return date('Y-m-d H:i:s', strtotime((string) $raw));
+            }
+        }
+        foreach (['expires_in', 'expiry_seconds', 'ttl'] as $k) {
+            $sec = $d[$k] ?? $nested[$k] ?? null;
+            if ($sec !== null && is_numeric($sec) && (int) $sec > 60) {
+                return date('Y-m-d H:i:s', time() + (int) $sec);
+            }
+        }
+        return date('Y-m-d H:i:s', time() + self::AUTH_VALIDITY_SECONDS);
+    }
+
     /* ------------------------------------------------------------------ */
     /*  Local sales / purchases                                            */
     /* ------------------------------------------------------------------ */
@@ -1017,6 +1081,7 @@ class GstFilingController
             return $err;
         }
         $business_id = $ctx['business_id'];
+        $force = !empty($in['force']) || !empty($in['force_otp']) || !empty($in['force_new']);
         $fields = [];
         if (!empty($in['gstin'])) {
             $fields['gstin'] = strtoupper(preg_replace('/\s+/', '', (string) $in['gstin']));
@@ -1039,6 +1104,18 @@ class GstFilingController
         if (!$cred || $cred['gstin'] === '' || $cred['gst_username'] === '') {
             return $this->err('GSTIN and gst_username are required. Pass them once to auth-otp.php or save gst_credentials.');
         }
+
+        // Skip a fresh OTP when DB session is still valid (unless force).
+        if (!$force && $this->tokenValid($cred)) {
+            $session = $this->authSessionPayload($cred);
+            $until = $session['gst_auth_expires_display'] ?? $session['token_expiry'];
+            return $this->ok(array_merge($session, [
+                'otp_sent' => false,
+                'already_authenticated' => true,
+                'needs_otp' => false,
+            ]), 'OTP already verified — valid till ' . ($until ?: 'session end') . '.');
+        }
+
         $password = $this->resolveGstPassword($cred, $in);
         if ($password === '') {
             return $this->err('GST portal password is required. Save gst_password in gst_credentials or pass it once to auth-otp.php.');
@@ -1057,11 +1134,17 @@ class GstFilingController
         if (!$this->perioneOk($res)) {
             return $this->err($this->perioneMessage($res, 'OTP request failed'), ['portal' => $res['decoded']]);
         }
-        return $this->ok([
+        $session = $this->authSessionPayload($cred);
+        return $this->ok(array_merge($session, [
             'otp_sent' => true,
+            'already_authenticated' => false,
             'gstin' => $cred['gstin'],
             'needs_otp' => true,
-        ], 'OTP sent to GST-registered mobile/email.');
+            'gst_auth_valid' => false,
+            'gst_auth_status' => 'missing',
+            'auth_required' => true,
+            'session_valid' => false,
+        ]), 'OTP sent to GST-registered mobile/email.');
     }
 
     public function authVerify(array $in)
@@ -1100,17 +1183,22 @@ class GstFilingController
         if ($token === '' && !empty($d['header']['auth-token'])) {
             $token = (string) $d['header']['auth-token'];
         }
-        $expiry = date('Y-m-d H:i:s', time() + self::AUTH_VALIDITY_SECONDS);
+        $expiry = $this->resolveTokenExpiry(is_array($d) ? $d : []);
         $upd = ['auth_token' => $token, 'token_expiry' => $expiry];
         if (!empty($d['txn']) || !empty($d['header']['txn'])) {
             $upd['txn'] = (string) ($d['txn'] ?? $d['header']['txn']);
         }
         $this->upsertCredentials($business_id, $upd);
-        return $this->ok([
+        $cred = $this->getCredentials($business_id) ?: $cred;
+        $session = $this->authSessionPayload($cred);
+        $until = $session['gst_auth_expires_display'] ?? $expiry;
+        return $this->ok(array_merge($session, [
             'authenticated' => $token !== '',
-            'token_expiry' => $expiry,
-            'gstin' => $cred['gstin'],
-        ], 'GST session authenticated.');
+            'already_authenticated' => true,
+            'otp_sent' => false,
+            'needs_otp' => false,
+            'gstin' => $cred['gstin'] ?? '',
+        ]), 'GST session authenticated — valid till ' . ($until ?: $expiry) . '.');
     }
 
     /* ------------------------------------------------------------------ */
@@ -1165,7 +1253,7 @@ class GstFilingController
         $net = max(0, round($salesGst - $eligible, 2));
         $periodRow = $this->ensurePeriod($ctx['business_id'], $ctx['period']);
         $unlocked = count($sales) > 0 && $countPending === 0;
-        return $this->ok([
+        $payload = $this->mergeAuthSession([
             'period' => $ctx['period'],
             'period_label' => self::periodLabel($ctx['period']),
             'ret_period' => self::retPeriod($ctx['period']),
@@ -1192,8 +1280,8 @@ class GstFilingController
             'gstr3b_status' => $periodRow['gstr3b_status'] ?? 'pending',
             'last_synced_at' => $periodRow['last_synced_at'] ?? null,
             'filing_unlocked' => $unlocked,
-            'auth_required' => !$this->tokenValid($this->getCredentials($ctx['business_id']) ?: []),
-        ]);
+        ], $ctx['business_id']);
+        return $this->ok($payload);
     }
 
     /* ------------------------------------------------------------------ */
@@ -1214,7 +1302,7 @@ class GstFilingController
         $periodRow = $this->ensurePeriod($ctx['business_id'], $ctx['period']);
         $cred = $this->getCredentials($ctx['business_id']);
         $gstin = $cred['gstin'] ?? '';
-        return $this->ok([
+        return $this->ok($this->mergeAuthSession([
             'period' => $ctx['period'],
             'period_label' => self::periodLabel($ctx['period']),
             'ret_period' => self::retPeriod($ctx['period']),
@@ -1230,10 +1318,9 @@ class GstFilingController
             'gstr1_ref_id' => $periodRow['gstr1_ref_id'] ?? null,
             'gstr1_filed_at' => $periodRow['gstr1_filed_at'] ?? null,
             'last_synced_at' => $periodRow['last_synced_at'] ?? null,
-            'auth_required' => !$this->tokenValid($cred ?: []),
             'source' => 'local',
             'excluded_count' => count($rows) - count($included),
-        ]);
+        ], $cred ?: []));
     }
 
     public function prepareGstr1(array $in)
@@ -2188,17 +2275,15 @@ class GstFilingController
         ]);
         $rows = $this->attachItcStatus($ctx['business_id'], $ctx['period'], $local);
         $auth = $this->authPublic($ctx['business_id']);
-        $out = [
+        $out = array_merge([
             'period' => $ctx['period'],
             'local_count' => count($local),
             'portal_count' => count($portalRows),
             'auto_matched' => $matched,
             'auto_approved' => $autoApproved,
             'invoices' => $rows,
-            'auth_required' => $auth['auth_required'],
-            'needs_otp' => !empty($auth['auth_required']),
             'gstin' => $auth['gstin'],
-        ];
+        ], $auth);
         if ($portalErr) {
             $out['portal_warning'] = $portalErr;
         }
@@ -2259,7 +2344,7 @@ class GstFilingController
         }
         $auth = $this->authPublic($ctx['business_id']);
         $periodRow = $this->ensurePeriod($ctx['business_id'], $ctx['period']);
-        return $this->ok([
+        return $this->ok(array_merge([
             'period' => $ctx['period'],
             'period_label' => self::periodLabel($ctx['period']),
             'invoices' => array_values($rows),
@@ -2281,10 +2366,8 @@ class GstFilingController
             'auto_matched_this_pass' => (int) ($autoStats['auto_approved'] ?? 0),
             'gstr2b_status' => $periodRow['gstr2b_status'] ?? 'pending',
             'last_synced_at' => $periodRow['last_synced_at'] ?? null,
-            'auth_required' => $auth['auth_required'],
-            'needs_otp' => !empty($auth['auth_required']),
             'gstin' => $auth['gstin'],
-        ]);
+        ], $auth));
     }
 
     public function reconcileItc(array $in)
@@ -2773,11 +2856,7 @@ class GstFilingController
 
     private function authPublic($business_id)
     {
-        $cred = $this->getCredentials($business_id);
-        return [
-            'auth_required' => !$cred || !$this->tokenValid($cred),
-            'gstin' => $cred['gstin'] ?? '',
-        ];
+        return $this->authSessionPayload($this->getCredentials($business_id) ?: []);
     }
 
     private function enrichGstSplit(array &$rows, $homeState)
@@ -3514,7 +3593,6 @@ class GstFilingController
             'status' => $status,
             'offset_ref_id' => (string) ($stored['offset_ref_id'] ?? ''),
             'file_ref_id' => (string) ($stored['file_ref_id'] ?? ''),
-            'auth_required' => !$this->tokenValid($cred),
             'eco_dtls' => [
                 'txval' => 0,
                 'iamt' => 0,
@@ -3557,7 +3635,7 @@ class GstFilingController
         $base['offset_preview'] = $preview;
         $base['table_6_1'] = $this->buildTable61($preview, $charges);
         $base['stored'] = $stored;
-        return $base;
+        return $this->mergeAuthSession($base, $cred ?: []);
     }
 
     private function emptyTaxHead()
@@ -3824,7 +3902,7 @@ class GstFilingController
         if ($ref === '') {
             $ref = (string) ($in['ref_id'] ?? $local['gstr3b_ref_id'] ?? $local['gstr1_ref_id'] ?? '');
         }
-        $out = [
+        $out = array_merge([
             'period' => $ctx['period'],
             'period_label' => self::periodLabel($ctx['period']),
             'ret_period' => self::retPeriod($ctx['period']),
@@ -3845,8 +3923,7 @@ class GstFilingController
                 'last_synced_at' => $local['last_synced_at'] ?? null,
             ],
             'portal' => $portal,
-            'auth_required' => !$cred || !$this->tokenValid($cred),
-        ];
+        ], $this->authSessionPayload($cred ?: []));
         if (!empty($in['include_history'])) {
             $hist = $this->listFilingHistory([
                 'business_id' => $ctx['business_id'],
@@ -3973,33 +4050,32 @@ class GstFilingController
         }
         $row = $this->getCredentials($ctx['business_id']);
         if (!$row) {
-            return $this->ok([
+            return $this->ok(array_merge([
                 'gstin' => '',
                 'gst_username' => '',
                 'gst_email' => '',
                 'state_cd' => '',
-                'session_valid' => false,
                 'last_auth_at' => null,
-                'token_expiry' => null,
-            ], 'No GST credentials saved yet.');
+                'updated_at' => null,
+                'is_active' => 0,
+                'ip_address' => '',
+            ], $this->authSessionPayload([])), 'No GST credentials saved yet.');
         }
         $expiry = $row['token_expiry'] ?? null;
         $lastAuth = null;
         if (!empty($expiry) && strtotime((string) $expiry)) {
             $lastAuth = date('Y-m-d H:i:s', strtotime((string) $expiry) - self::AUTH_VALIDITY_SECONDS);
         }
-        return $this->ok([
+        return $this->ok(array_merge([
             'gstin' => (string) ($row['gstin'] ?? ''),
             'gst_username' => (string) ($row['gst_username'] ?? ''),
             'gst_email' => (string) ($row['gst_email'] ?? ''),
             'state_cd' => (string) ($row['state_cd'] ?? ''),
             'ip_address' => (string) ($row['ip_address'] ?? ''),
             'is_active' => (int) ($row['is_active'] ?? 1),
-            'token_expiry' => $expiry,
             'last_auth_at' => $lastAuth,
             'updated_at' => $row['updated_at'] ?? null,
-            'session_valid' => $this->tokenValid($row),
-        ]);
+        ], $this->authSessionPayload($row)));
     }
 
     public function saveSafeCredentials(array $in)

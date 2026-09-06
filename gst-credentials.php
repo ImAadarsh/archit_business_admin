@@ -42,12 +42,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $gst && $gst_db_ok) {
     }
 
     if ($gst_action === 'request_otp') {
-        $res = $gst->authOtp(['business_id' => $gst_business_id]);
+        $otpIn = ['business_id' => $gst_business_id];
+        if (!empty($_POST['force'])) {
+            $otpIn['force'] = 1;
+        }
+        $res = $gst->authOtp($otpIn);
         $ok = ($res['status'] ?? '') === 'success';
+        $already = !empty($res['data']['already_authenticated']) || !empty($res['data']['gst_auth_valid']);
         gst_flash($ok, $ok
-            ? (string) ($res['message'] ?? 'OTP sent to GST-registered mobile/email.')
+            ? (string) ($res['message'] ?? ($already ? 'OTP already verified.' : 'OTP sent to GST-registered mobile/email.'))
             : (string) ($res['message'] ?? 'Could not request OTP.'));
-        if ($ok) {
+        if ($ok && !$already) {
             $_SESSION['gst_otp_prompt'] = 1;
         }
         header('Location: ' . gst_url('gst-credentials.php'));
@@ -123,20 +128,7 @@ include __DIR__ . '/admin/header.php';
                             <div class="alert alert-danger"><?php echo gst_h($gst_flash['error']); ?></div>
                         <?php endif; ?>
 
-                        <?php if (!$portal['connected']): ?>
-                            <div class="alert alert-warning">GST portal not connected. Save GSTIN and username, then request OTP.</div>
-                        <?php elseif ($portal['needs_otp']): ?>
-                            <div class="alert alert-info">
-                                OTP needed to file or sync from the GST portal. Local reads still work.
-                                <form method="POST" class="d-inline ml-2">
-                                    <input type="hidden" name="gst_action" value="request_otp">
-                                    <input type="hidden" name="period" value="<?php echo gst_h($gst_period); ?>">
-                                    <button type="submit" class="btn btn-sm btn-primary">Request OTP</button>
-                                </form>
-                            </div>
-                        <?php else: ?>
-                            <div class="alert alert-success">GST portal session is authenticated.</div>
-                        <?php endif; ?>
+                        <?php echo gst_auth_banner_html($portal); ?>
 
                         <div class="row">
                             <div class="col-lg-8">
@@ -186,19 +178,34 @@ include __DIR__ . '/admin/header.php';
                                         </p>
                                         <p class="mb-3">
                                             Session:
-                                            <?php echo !empty($safe['session_valid']) || !empty($portal['authenticated'])
-                                                ? '<span class="badge badge-success">valid</span>'
-                                                : '<span class="badge badge-warning">needs OTP</span>'; ?>
+                                            <?php
+                                            $st = $safe['gst_auth_status'] ?? ($portal['gst_auth_status'] ?? 'missing');
+                                            if (!empty($safe['gst_auth_valid']) || !empty($portal['authenticated']) || $st === 'valid') {
+                                                echo '<span class="badge badge-success">valid</span>';
+                                            } elseif ($st === 'expired') {
+                                                echo '<span class="badge badge-warning">expired</span>';
+                                            } else {
+                                                echo '<span class="badge badge-secondary">missing</span>';
+                                            }
+                                            ?>
                                         </p>
-                                        <?php if ($portal['connected'] && !$portal['authenticated']): ?>
+                                        <?php if ($portal['connected'] && empty($portal['authenticated'])): ?>
                                             <form method="POST">
                                                 <input type="hidden" name="gst_action" value="request_otp">
                                                 <button type="submit" class="btn btn-primary btn-block">Request GST OTP</button>
                                             </form>
-                                        <?php elseif ($portal['authenticated']): ?>
+                                        <?php elseif (!empty($portal['authenticated'])): ?>
+                                            <p class="small text-success mb-2">
+                                                OTP already verified<?php echo $tokenExpiry && strtotime((string) $tokenExpiry)
+                                                    ? ' — valid till ' . gst_h(date('j M Y, g:i A', strtotime((string) $tokenExpiry)))
+                                                    : ''; ?>.
+                                            </p>
                                             <form method="POST">
                                                 <input type="hidden" name="gst_action" value="request_otp">
-                                                <button type="submit" class="btn btn-outline-secondary btn-block">Re-authenticate</button>
+                                                <input type="hidden" name="force" value="1">
+                                                <button type="submit" class="btn btn-link btn-sm btn-block text-muted p-0">
+                                                    Force new OTP (re-authenticate)
+                                                </button>
                                             </form>
                                         <?php endif; ?>
                                         <p class="small text-muted mt-3 mb-0">

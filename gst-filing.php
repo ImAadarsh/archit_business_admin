@@ -84,10 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $gst && $gst_db_ok) {
     if ($gst_action === 'request_otp') {
         $res = $gst->authOtp(['business_id' => $gst_business_id]);
         $ok = ($res['status'] ?? '') === 'success';
+        $already = !empty($res['data']['already_authenticated']) || !empty($res['data']['gst_auth_valid']);
         gst_flash($ok, $ok
-            ? (string) ($res['message'] ?? 'OTP sent to GST-registered mobile/email.')
+            ? (string) ($res['message'] ?? ($already ? 'OTP already verified.' : 'OTP sent to GST-registered mobile/email.'))
             : (string) ($res['message'] ?? 'Could not request OTP.'));
-        if ($ok) {
+        if ($ok && !$already) {
             $_SESSION['gst_otp_prompt'] = 1;
         }
         gst_redirect_hub();
@@ -259,28 +260,7 @@ include __DIR__ . '/admin/header.php';
                             <div class="alert alert-danger"><?php echo gst_h($summaryErr); ?></div>
                         <?php endif; ?>
 
-                        <?php if (!$portal['connected']): ?>
-                            <div class="alert alert-warning">
-                                <strong>GST portal not connected.</strong>
-                                Add GSTIN and portal username below, then request OTP.
-                                Local sales and expenses still drive this preview.
-                                <a class="alert-link" href="<?php echo gst_h(gst_url('gst-credentials.php')); ?>">Open GST credentials</a>
-                            </div>
-                        <?php elseif ($portal['needs_otp']): ?>
-                            <div class="alert alert-info">
-                                <strong>OTP needed.</strong>
-                                GST session is not authenticated. Local reads work; portal file/sync/offset need OTP.
-                                <form method="POST" class="d-inline ml-2" action="<?php echo gst_h(gst_url('gst-filing.php')); ?>">
-                                    <input type="hidden" name="gst_action" value="request_otp">
-                                    <input type="hidden" name="period" value="<?php echo gst_h($gst_period); ?>">
-                                    <button type="submit" class="btn btn-sm btn-primary">Request OTP</button>
-                                </form>
-                            </div>
-                        <?php else: ?>
-                            <div class="alert alert-success">
-                                GST portal connected<?php echo !empty($portal['token_expiry']) ? ' until ' . gst_h(date('j M Y, g:i A', strtotime($portal['token_expiry']))) : ''; ?>.
-                            </div>
-                        <?php endif; ?>
+                        <?php echo gst_auth_banner_html($portal, ['form_action' => gst_url('gst-filing.php')]); ?>
 
                         <div class="card shadow mb-4">
                             <div class="card-body">

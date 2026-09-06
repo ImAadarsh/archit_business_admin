@@ -168,22 +168,10 @@ include __DIR__ . '/admin/header.php';
                         <?php endif; ?>
                         <div id="gstFlash" class="d-none"></div>
 
-                        <?php if (!$portal['connected']): ?>
-                            <div class="alert alert-warning">
-                                GST portal not connected.
-                                <a class="alert-link" href="<?php echo gst_h(gst_url('gst-credentials.php')); ?>">Add GSTIN &amp; username</a>
-                                then request OTP. Local computation still works.
-                            </div>
-                        <?php elseif ($portal['needs_otp']): ?>
-                            <div class="alert alert-info">
-                                GST session needs OTP for offset / file.
-                                <button type="button" class="btn btn-sm btn-primary ml-2" id="gstAuthOtpBtn">Request OTP</button>
-                            </div>
-                        <?php else: ?>
-                            <div class="alert alert-success">
-                                GST portal connected<?php echo !empty($portal['token_expiry']) ? ' until ' . gst_h(date('j M Y, g:i A', strtotime($portal['token_expiry']))) : ''; ?>.
-                            </div>
-                        <?php endif; ?>
+                        <?php echo gst_auth_banner_html($portal, [
+                            'ajax' => true,
+                            'button_id' => 'gstAuthOtpBtn',
+                        ]); ?>
 
                         <div class="card shadow mb-4">
                             <div class="card-body">
@@ -559,13 +547,32 @@ include __DIR__ . '/admin/header.php';
                         if (otpCallback) otpCallback(otp);
                     });
 
+                    function markAuthBanner(d) {
+                        var el = document.getElementById('gstAuthBanner');
+                        if (!el) return;
+                        var until = (d && (d.gst_auth_expires_display || d.token_expiry)) || '';
+                        if (d && (d.gst_auth_valid || d.session_valid || d.already_authenticated)) {
+                            el.className = 'alert alert-success';
+                            el.setAttribute('data-gst-auth-status', 'valid');
+                            el.innerHTML = '<strong>OTP already verified' + (until ? ' — valid till ' + until : '') + '.</strong>';
+                        }
+                    }
+
                     function authThen(next) {
                         post('auth_otp', {}, function (res) {
-                            if (res.status === 'success' || (res.data && (res.data.needs_otp || res.data.otp_sent))) {
+                            var d = (res && res.data) || {};
+                            if (res.status === 'success' && (d.already_authenticated || d.gst_auth_valid || d.session_valid) && !d.otp_sent) {
+                                flash(true, res.message || 'OTP already verified.');
+                                markAuthBanner(d);
+                                if (next) next();
+                                return;
+                            }
+                            if (res.status === 'success' || (d.needs_otp || d.otp_sent)) {
                                 promptOtp('GST portal OTP', res.message || 'Enter the GST portal OTP.', function (otp) {
                                     post('auth_verify', { otp: otp }, function (v) {
                                         if (v.status === 'success') {
                                             flash(true, v.message || 'Authenticated.');
+                                            markAuthBanner(v.data || {});
                                             if (next) next();
                                         } else {
                                             flash(false, v.message || 'OTP verification failed.');

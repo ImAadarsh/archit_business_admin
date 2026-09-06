@@ -172,24 +172,13 @@ $gst_page_body = function () use (
                             <div class="alert alert-danger"><?php echo gst_h($loadErr); ?> Local invoice data is used when the portal is unavailable.</div>
                         <?php endif; ?>
 
-                        <?php if (!$portal['connected']): ?>
-                            <div class="alert alert-warning">
-                                <strong>GST portal not connected.</strong>
-                                Local sales still appear here. Connect GSTIN to push or file.
-                                <a class="alert-link" href="<?php echo gst_h(gst_url('gst-credentials.php')); ?>">Open GST credentials</a>
-                            </div>
-                        <?php elseif ($portal['needs_otp'] || $portal['authenticated'] === false): ?>
-                            <div class="alert alert-info">
-                                <strong>OTP needed for portal actions.</strong>
-                                Prepare (local snapshot) works without OTP. Push to portal and File need a GST session.
-                                <button type="button" class="btn btn-sm btn-primary ml-2" id="gstr1RequestOtpBtn">Request GST OTP</button>
-                            </div>
-                        <?php else: ?>
-                            <div class="alert alert-success">
-                                GST portal connected<?php echo !empty($portal['token_expiry']) ? ' until ' . gst_h(date('j M Y, g:i A', strtotime($portal['token_expiry']))) : ''; ?>.
-                                GSTIN <strong><?php echo gst_h($gst_cred_public['gstin'] ?? ''); ?></strong>
-                            </div>
-                        <?php endif; ?>
+                        <?php echo gst_auth_banner_html($portal, [
+                            'ajax' => true,
+                            'button_id' => 'gstr1RequestOtpBtn',
+                            'extra_html' => !empty($portal['needs_otp'])
+                                ? '<span class="d-block small mt-1">Prepare (local snapshot) works without OTP. Push to portal and File need a GST session.</span>'
+                                : '',
+                        ]); ?>
 
                         <div id="gstr1Flash" class="d-none"></div>
                         <div id="gstr1Errors" class="d-none alert alert-danger">
@@ -937,12 +926,32 @@ $gst_page_footer_scripts = function () use ($gstJs) {
                         window.prompt('Copy GSTR-1 summary', txt);
                     }
                 });
+                function markAuthBanner(d) {
+                    var el = document.getElementById('gstAuthBanner');
+                    if (!el) return;
+                    var until = (d && (d.gst_auth_expires_display || d.token_expiry)) || '';
+                    if (d && (d.gst_auth_valid || d.session_valid || d.already_authenticated)) {
+                        el.className = 'alert alert-success';
+                        el.setAttribute('data-gst-auth-status', 'valid');
+                        el.innerHTML = '<strong>OTP already verified' + (until ? ' — valid till ' + until : '') + '.</strong>';
+                    }
+                }
                 function sendSessionOtp() {
-                    busy('Requesting GST OTP…');
+                    busy('Checking GST session…');
                     api('auth-otp.php', {}).then(function (res) {
                         busy('');
                         var d = dataOf(res);
                         document.getElementById('gstr1SessionOtpHint').textContent = res.message || '';
+                        if (res.status === 'success' && (d.already_authenticated || d.gst_auth_valid || d.session_valid) && !d.otp_sent) {
+                            flash(true, res.message || 'OTP already verified.');
+                            markAuthBanner(d);
+                            if (typeof pendingRetry === 'function') {
+                                var fn = pendingRetry;
+                                pendingRetry = null;
+                                fn();
+                            }
+                            return;
+                        }
                         if (res.status === 'success' || d.needs_otp || d.otp_sent) {
                             flash(true, res.message || 'OTP sent.');
                             if (window.jQuery) jQuery('#gstr1SessionOtpModal').modal('show');
@@ -964,6 +973,7 @@ $gst_page_footer_scripts = function () use ($gstJs) {
                             return;
                         }
                         flash(true, res.message || 'GST session authenticated.');
+                        markAuthBanner(dataOf(res));
                         if (window.jQuery) jQuery('#gstr1SessionOtpModal').modal('hide');
                         if (typeof pendingRetry === 'function') {
                             var fn = pendingRetry;

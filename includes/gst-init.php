@@ -199,7 +199,16 @@ if (!function_exists('gst_inr')) {
         $expiry = (string) ($cred['token_expiry'] ?? '');
         $token = trim((string) ($cred['auth_token'] ?? ''));
         $connected = $gstin !== '' && $user !== '';
-        $authed = $connected && $token !== '' && $expiry !== '' && strtotime($expiry) > (time() + 120);
+        $expiryTs = $expiry !== '' ? strtotime($expiry) : false;
+        $authed = $connected && $token !== '' && $expiryTs && $expiryTs > (time() + 120);
+        if ($token === '' || $expiry === '') {
+            $status = 'missing';
+        } elseif ($authed) {
+            $status = 'valid';
+        } else {
+            $status = 'expired';
+        }
+        $display = $expiryTs ? date('j M Y, g:i A', $expiryTs) : null;
         return [
             'connected' => $connected,
             'authenticated' => $authed,
@@ -208,7 +217,73 @@ if (!function_exists('gst_inr')) {
             'gst_username' => $user,
             'gst_email' => (string) ($cred['gst_email'] ?? ''),
             'token_expiry' => $expiry,
+            'gst_auth_valid' => $authed,
+            'gst_auth_expires_at' => $expiryTs ? date('c', $expiryTs) : ($expiry !== '' ? $expiry : null),
+            'gst_auth_expires_display' => $display,
+            'gst_auth_status' => $status,
+            'session_valid' => $authed,
+            'auth_required' => !$authed,
         ];
+    }
+
+    /** Shared OTP / session banner for GST admin pages. Uses $portal from gst_portal_state(). */
+    function gst_auth_banner_html(array $portal, array $opts = [])
+    {
+        $formAction = (string) ($opts['form_action'] ?? '');
+        $btnId = (string) ($opts['button_id'] ?? '');
+        $useAjaxBtn = !empty($opts['ajax']);
+        $extra = (string) ($opts['extra_html'] ?? '');
+        $until = $portal['gst_auth_expires_display']
+            ?? ((!empty($portal['token_expiry']) && strtotime((string) $portal['token_expiry']))
+                ? date('j M Y, g:i A', strtotime((string) $portal['token_expiry']))
+                : '');
+
+        if (empty($portal['connected'])) {
+            $credUrl = function_exists('gst_url') ? gst_url('gst-credentials.php') : 'gst-credentials.php';
+            return '<div class="alert alert-warning" id="gstAuthBanner" data-gst-auth-status="missing">'
+                . '<strong>GST portal not connected.</strong> '
+                . 'Add GSTIN and portal username, then request OTP. '
+                . '<a class="alert-link" href="' . gst_h($credUrl) . '">Open GST credentials</a>'
+                . $extra
+                . '</div>';
+        }
+
+        if (!empty($portal['authenticated']) || !empty($portal['gst_auth_valid'])) {
+            $label = $until !== ''
+                ? ('OTP already verified — valid till ' . gst_h($until))
+                : 'OTP already verified.';
+            return '<div class="alert alert-success" id="gstAuthBanner" data-gst-auth-status="valid"'
+                . ' data-gst-auth-expires="' . gst_h((string) ($portal['gst_auth_expires_at'] ?? $portal['token_expiry'] ?? '')) . '">'
+                . '<strong>' . $label . '</strong>'
+                . $extra
+                . '</div>';
+        }
+
+        $status = (string) ($portal['gst_auth_status'] ?? 'expired');
+        $msg = $status === 'expired'
+            ? 'GST session expired. Request a new OTP to file or sync from the portal.'
+            : 'GST session is not authenticated. Request OTP for portal file/sync/offset.';
+
+        ob_start();
+        echo '<div class="alert alert-info" id="gstAuthBanner" data-gst-auth-status="' . gst_h($status) . '">';
+        echo '<strong>OTP needed.</strong> ' . gst_h($msg);
+        if ($useAjaxBtn && $btnId !== '') {
+            echo ' <button type="button" class="btn btn-sm btn-primary ml-2" id="' . gst_h($btnId) . '">Request OTP</button>';
+        } else {
+            $actionAttr = $formAction !== '' ? ' action="' . gst_h($formAction) . '"' : '';
+            echo '<form method="POST" class="d-inline ml-2"' . $actionAttr . '>';
+            echo '<input type="hidden" name="gst_action" value="request_otp">';
+            if (function_exists('gst_ctx_fields')) {
+                gst_ctx_fields();
+            } else {
+                echo '<input type="hidden" name="period" value="' . gst_h((string) ($GLOBALS['gst_period'] ?? '')) . '">';
+            }
+            echo '<button type="submit" class="btn btn-sm btn-primary">Request OTP</button>';
+            echo '</form>';
+        }
+        echo $extra;
+        echo '</div>';
+        return ob_get_clean();
     }
 
     function gst_url($page, $extra = [])

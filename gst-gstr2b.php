@@ -73,10 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $gst && $gst_db_ok && $gst_action !
     if ($gst_action === 'request_otp') {
         $res = $gst->authOtp(['business_id' => $gst_business_id]);
         $ok = ($res['status'] ?? '') === 'success';
+        $already = !empty($res['data']['already_authenticated']) || !empty($res['data']['gst_auth_valid']);
         gst_flash($ok, $ok
-            ? (string) ($res['message'] ?? 'OTP sent to GST-registered mobile/email.')
+            ? (string) ($res['message'] ?? ($already ? 'OTP already verified.' : 'OTP sent to GST-registered mobile/email.'))
             : (string) ($res['message'] ?? 'Could not request OTP.'));
-        if ($ok) {
+        if ($ok && !$already) {
             $_SESSION['gst_otp_prompt'] = 1;
         }
         gst_2b_go();
@@ -346,21 +347,7 @@ $gst_page_extra = function () use (
         <div class="alert alert-danger"><?php echo gst_h($loadErr); ?></div>
     <?php endif; ?>
 
-    <?php if (!$portal['connected']): ?>
-        <div class="alert alert-warning">
-            GST portal not connected. Local expenses still reconcile here.
-            <a class="alert-link" href="<?php echo gst_h(gst_url('gst-credentials.php')); ?>">Open GST credentials</a>
-        </div>
-    <?php elseif ($portal['needs_otp']): ?>
-        <div class="alert alert-info">
-            GST session needs OTP for portal GSTR-2B sync. Local books still load.
-            <form method="POST" class="d-inline ml-2">
-                <input type="hidden" name="gst_action" value="request_otp">
-                <?php gst_ctx_fields(); ?>
-                <button type="submit" class="btn btn-sm btn-primary">Request OTP</button>
-            </form>
-        </div>
-    <?php endif; ?>
+    <?php echo gst_auth_banner_html($portal); ?>
 
     <div class="card shadow mb-4">
         <div class="card-body">

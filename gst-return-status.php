@@ -16,10 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $gst && $gst_db_ok) {
     if ($gst_action === 'request_otp') {
         $res = $gst->authOtp(['business_id' => $gst_business_id]);
         $ok = ($res['status'] ?? '') === 'success';
+        $already = !empty($res['data']['already_authenticated']) || !empty($res['data']['gst_auth_valid']);
         gst_flash($ok, $ok
-            ? (string) ($res['message'] ?? 'OTP sent.')
+            ? (string) ($res['message'] ?? ($already ? 'OTP already verified.' : 'OTP sent.'))
             : (string) ($res['message'] ?? 'Could not request OTP.'));
-        if ($ok) {
+        if ($ok && !$already) {
             $_SESSION['gst_otp_prompt'] = 1;
         }
         header('Location: ' . gst_url('gst-return-status.php', $pollRef !== '' ? ['ref_id' => $pollRef] : []));
@@ -120,21 +121,7 @@ include __DIR__ . '/admin/header.php';
                             <div class="alert alert-danger"><?php echo gst_h($statusErr); ?></div>
                         <?php endif; ?>
 
-                        <?php if (!$portal['connected']): ?>
-                            <div class="alert alert-warning">
-                                GST portal not connected.
-                                <a class="alert-link" href="<?php echo gst_h(gst_url('gst-credentials.php')); ?>">Open GST credentials</a>
-                            </div>
-                        <?php elseif (!empty($status['auth_required']) || $portal['needs_otp']): ?>
-                            <div class="alert alert-info">
-                                Authenticate to poll the GST portal.
-                                <form method="POST" class="d-inline ml-2">
-                                    <input type="hidden" name="gst_action" value="request_otp">
-                                    <input type="hidden" name="period" value="<?php echo gst_h($gst_period); ?>">
-                                    <button type="submit" class="btn btn-sm btn-primary">Request OTP</button>
-                                </form>
-                            </div>
-                        <?php endif; ?>
+                        <?php echo gst_auth_banner_html($portal); ?>
 
                         <div class="card shadow mb-4">
                             <div class="card-body">
