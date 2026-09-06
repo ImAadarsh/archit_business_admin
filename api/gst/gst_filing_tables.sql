@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `gst_credentials` (
   `business_id` int(11) NOT NULL,
   `gstin` varchar(15) NOT NULL DEFAULT '',
   `gst_username` varchar(64) NOT NULL DEFAULT '' COMMENT 'GSTN portal username',
+  `gst_password` varchar(128) NOT NULL DEFAULT '' COMMENT 'GSTN portal password (server-side only)',
   `gst_email` varchar(191) NOT NULL DEFAULT '' COMMENT 'Perione registered email',
   `state_cd` varchar(2) NOT NULL DEFAULT '',
   `ip_address` varchar(64) NOT NULL DEFAULT 'auto',

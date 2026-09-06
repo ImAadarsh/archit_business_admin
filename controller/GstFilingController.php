@@ -17,6 +17,7 @@ class GstFilingController
         $this->connect = $connect;
         $this->ensureTables();
         $this->ensureGstr1Extras();
+        $this->ensureGstPasswordColumn();
     }
 
     private function dbOk()
@@ -117,6 +118,22 @@ class GstFilingController
      * GSTR-1 include/exclude persists across prepare snapshots.
      * gst_gstr1_invoices is wiped on prepare, so exclusions live in their own table.
      */
+    private function ensureGstPasswordColumn()
+    {
+        if (!$this->dbOk()) {
+            return;
+        }
+        $chk = @$this->connect->query("SHOW COLUMNS FROM gst_credentials LIKE 'gst_password'");
+        if ($chk && $chk->num_rows > 0) {
+            return;
+        }
+        @$this->connect->query(
+            "ALTER TABLE `gst_credentials`
+             ADD COLUMN `gst_password` varchar(128) NOT NULL DEFAULT '' COMMENT 'GSTN portal password (server-side only)'
+             AFTER `gst_username`"
+        );
+    }
+
     private function ensureGstr1Extras()
     {
         if (!$this->dbOk()) {
@@ -239,6 +256,37 @@ class GstFilingController
         return $stored;
     }
 
+    /**
+     * Perione GST auth expects camelCase userName plus email/gstin/password in query and JSON body.
+     */
+    private function buildPerioneAuthPayload(array $cred, array $extra = [])
+    {
+        $payload = [
+            'email' => trim((string) ($cred['gst_email'] ?? '')),
+            'gstin' => strtoupper(preg_replace('/\s+/', '', (string) ($cred['gstin'] ?? ''))),
+            'userName' => trim((string) ($cred['gst_username'] ?? '')),
+            'password' => (string) ($extra['password'] ?? ($cred['gst_password'] ?? '')),
+            'state_cd' => (string) ($cred['state_cd'] ?? self::stateFromGstin($cred['gstin'] ?? '')),
+        ];
+        foreach ($extra as $k => $v) {
+            if ($v === null || $v === '') {
+                continue;
+            }
+            $payload[$k] = $v;
+        }
+        return $payload;
+    }
+
+    private function resolveGstPassword(array $cred, array $in = [])
+    {
+        foreach (['gst_password', 'password', 'gst_portal_password'] as $key) {
+            if (!empty($in[$key]) && is_string($in[$key])) {
+                return trim($in[$key]);
+            }
+        }
+        return trim((string) ($cred['gst_password'] ?? ''));
+    }
+
     /* ------------------------------------------------------------------ */
     /*  Credentials                                                        */
     /* ------------------------------------------------------------------ */
@@ -334,7 +382,7 @@ class GstFilingController
     public function upsertCredentials($business_id, array $fields)
     {
         $this->getCredentials($business_id);
-        $allowed = ['gstin', 'gst_username', 'gst_email', 'state_cd', 'ip_address', 'auth_token', 'token_expiry', 'txn', 'evc_txn'];
+        $allowed = ['gstin', 'gst_username', 'gst_password', 'gst_email', 'state_cd', 'ip_address', 'auth_token', 'token_expiry', 'txn', 'evc_txn'];
         $sets = [];
         $types = '';
         $vals = [];
@@ -462,7 +510,7 @@ class GstFilingController
         $out = [];
         foreach ($value as $k => $v) {
             $lk = strtolower((string) $k);
-            if (in_array($lk, ['client_secret', 'client_id', 'password', 'auth_token', 'auth-token', 'otp'], true)) {
+            if (in_array($lk, ['client_secret', 'client_id', 'password', 'gst_password', 'auth_token', 'auth-token', 'otp'], true)) {
                 $s = (string) $v;
                 $out[$k] = strlen($s) > 8 ? substr($s, 0, 4) . '…***' : '***';
             } elseif (is_array($v)) {
@@ -583,13 +631,16 @@ class GstFilingController
     private function perioneMessage(array $res, $fallback = 'Perione request failed')
     {
         $d = $res['decoded'];
-        foreach (['message', 'status_desc', 'error_msg', 'error'] as $k) {
+        foreach (['message', 'status_desc', 'error_msg', 'ErrorMessage', 'error'] as $k) {
             if (!empty($d[$k]) && is_string($d[$k])) {
                 return $d[$k];
             }
         }
         if (!empty($d['error']['message'])) {
             return (string) $d['error']['message'];
+        }
+        if (!empty($d['error']['error_cd'])) {
+            return (string) ($d['error']['message'] ?? $d['error']['error_cd']);
         }
         if ($res['curl_error']) {
             return $res['curl_error'];
@@ -967,8 +1018,12 @@ class GstFilingController
             $fields['gstin'] = strtoupper(preg_replace('/\s+/', '', (string) $in['gstin']));
             $fields['state_cd'] = self::stateFromGstin($fields['gstin']);
         }
-        if (!empty($in['gst_username'])) {
-            $fields['gst_username'] = trim((string) $in['gst_username']);
+        if (!empty($in['gst_username']) || !empty($in['userName']) || !empty($in['username'])) {
+            $fields['gst_username'] = trim((string) ($in['gst_username'] ?? $in['userName'] ?? $in['username']));
+        }
+        $password = $this->resolveGstPassword([], $in);
+        if ($password !== '') {
+            $fields['gst_password'] = $password;
         }
         if (!empty($in['email']) || !empty($in['gst_email'])) {
             $fields['gst_email'] = trim((string) ($in['email'] ?? $in['gst_email']));
@@ -980,11 +1035,16 @@ class GstFilingController
         if (!$cred || $cred['gstin'] === '' || $cred['gst_username'] === '') {
             return $this->err('GSTIN and gst_username are required. Pass them once to auth-otp.php or save gst_credentials.');
         }
-        $res = $this->perione('POST', 'authentication/otprequest', $cred, [], [
-            'gstin' => $cred['gstin'],
-            'username' => $cred['gst_username'],
-            'state_cd' => $cred['state_cd'],
-        ], 'auth-otp');
+        $password = $this->resolveGstPassword($cred, $in);
+        if ($password === '') {
+            return $this->err('GST portal password is required. Save gst_password in gst_credentials or pass it once to auth-otp.php.');
+        }
+        $cred['gst_password'] = $password;
+        $authPayload = $this->buildPerioneAuthPayload($cred, ['password' => $password]);
+        if ($authPayload['email'] === '') {
+            return $this->err('Registered email is required for GST login. Save gst_email or pass email to auth-otp.php.');
+        }
+        $res = $this->perione('POST', 'authentication/otprequest', $cred, $authPayload, $authPayload, 'auth-otp');
         if (!empty($res['decoded']['header']['txn'])) {
             $this->upsertCredentials($business_id, ['txn' => $res['decoded']['header']['txn']]);
         } elseif (!empty($res['decoded']['txn'])) {
@@ -1015,12 +1075,19 @@ class GstFilingController
         if (!$cred) {
             return $this->err('GST credentials not found. Call auth-otp.php first.');
         }
-        $res = $this->perione('POST', 'authentication/authtoken', $cred, ['otp' => $otp], [
-            'gstin' => $cred['gstin'],
-            'username' => $cred['gst_username'],
+        $password = $this->resolveGstPassword($cred, $in);
+        if ($password === '') {
+            return $this->err('GST portal password is required. Save gst_password or pass it to auth-otp.php before verify.');
+        }
+        $cred['gst_password'] = $password;
+        $authPayload = $this->buildPerioneAuthPayload($cred, [
+            'password' => $password,
             'otp' => $otp,
-            'state_cd' => $cred['state_cd'],
-        ], 'auth-verify');
+        ]);
+        if ($authPayload['email'] === '') {
+            return $this->err('Registered email is required for GST login.');
+        }
+        $res = $this->perione('POST', 'authentication/authtoken', $cred, $authPayload, $authPayload, 'auth-verify');
         if (!$this->perioneOk($res)) {
             return $this->err($this->perioneMessage($res, 'OTP verification failed'), ['portal' => $res['decoded']]);
         }
@@ -3810,6 +3877,10 @@ class GstFilingController
         }
         if (isset($in['gst_username'])) {
             $fields['gst_username'] = trim((string) $in['gst_username']);
+        }
+        $password = $this->resolveGstPassword([], $in);
+        if ($password !== '') {
+            $fields['gst_password'] = $password;
         }
         if (isset($in['gst_email']) || isset($in['email'])) {
             $fields['gst_email'] = trim((string) ($in['gst_email'] ?? $in['email']));

@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $gst && $gst_db_ok) {
         $gstin = strtoupper(preg_replace('/\s+/', '', (string) ($_POST['gstin'] ?? '')));
         $username = trim((string) ($_POST['gst_username'] ?? ''));
         $email = trim((string) ($_POST['gst_email'] ?? ''));
+        $password = trim((string) ($_POST['gst_password'] ?? ''));
         $ip = trim((string) ($_POST['ip_address'] ?? 'auto'));
         if ($ip === '') {
             $ip = 'auto';
@@ -24,13 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $gst && $gst_db_ok) {
         if ($gstin === '' || $username === '') {
             gst_flash(false, 'GSTIN and portal username are required.');
         } else {
-            $ok = $gst->upsertCredentials($gst_business_id, [
+            $fields = [
                 'gstin' => $gstin,
                 'gst_username' => $username,
                 'gst_email' => $email,
                 'state_cd' => GstFilingController::stateFromGstin($gstin),
                 'ip_address' => $ip,
-            ]);
+            ];
+            if ($password !== '') {
+                $fields['gst_password'] = $password;
+            }
+            $ok = $gst->upsertCredentials($gst_business_id, $fields);
             gst_flash($ok, $ok ? 'GST details saved.' : 'Could not save GST details.');
         }
         gst_redirect_hub();
@@ -169,6 +174,9 @@ if ($gst_itc_filter === 'pending') {
 $credRaw = ($gst && $gst_db_ok) ? $gst->getCredentials($gst_business_id) : null;
 $portal = gst_portal_state(is_array($credRaw) ? $credRaw : []);
 $gst_cred_public = gst_public_credentials($credRaw) ?: [];
+if (is_array($credRaw) && trim((string) ($credRaw['gst_password'] ?? '')) !== '') {
+    $gst_cred_public['has_password'] = true;
+}
 $showOtpModal = !empty($_SESSION['gst_otp_prompt']);
 if ($showOtpModal) {
     unset($_SESSION['gst_otp_prompt']);

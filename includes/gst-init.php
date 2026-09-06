@@ -184,7 +184,7 @@ if (!function_exists('gst_inr')) {
         if (!is_array($row)) {
             return null;
         }
-        unset($row['client_id'], $row['client_secret'], $row['auth_token'], $row['txn'], $row['evc_txn']);
+        unset($row['client_id'], $row['client_secret'], $row['auth_token'], $row['txn'], $row['evc_txn'], $row['gst_password']);
         return $row;
     }
 

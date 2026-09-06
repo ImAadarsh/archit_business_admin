@@ -28,6 +28,12 @@ $gst_cred_action = isset($gst_cred_action) ? $gst_cred_action : gst_url('gst-cre
                value="<?php echo gst_h($gst_cred_public['gst_email'] ?? ''); ?>">
     </div>
     <div class="form-group col-md-4">
+        <label>GST portal password</label>
+        <input type="password" class="form-control" name="gst_password" maxlength="128"
+               value="" autocomplete="new-password"
+               placeholder="<?php echo !empty($gst_cred_public['has_password']) ? 'Saved (leave blank to keep)' : 'Required for OTP login'; ?>">
+    </div>
+    <div class="form-group col-md-4">
         <label>IP address <span class="text-muted small">(optional)</span></label>
         <input type="text" class="form-control" name="ip_address" maxlength="64"
                value="<?php echo gst_h($gst_cred_public['ip_address'] ?? 'auto'); ?>"
