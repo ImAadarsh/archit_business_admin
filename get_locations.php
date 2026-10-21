@@ -2,7 +2,7 @@
 // Establish database connection
 $host = "82.180.142.204";
 $user = "u262009927_invoicemate";
-$password = "1@Endeavour07791";
+$password = "gF8@^vP>!8RabL*HUr:";
 $dbname = "u262009927_invoicemate";
 
 // Create connection

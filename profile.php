@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_business'])) {
                 
                 // Call API to upload file
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.invoicemate.in/public/api/upload-business-logo');
+                curl_setopt($ch, CURLOPT_URL, 'https://api.invoicemate.in/public/api/v2/upload-business-logo');
                 curl_setopt($ch, CURLOPT_POST, 1);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $upload_data);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

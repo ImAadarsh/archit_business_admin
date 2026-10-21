@@ -711,7 +711,7 @@ function uploadImageToProduct($productId, $imagePath, $mockupType, $productInfo,
     }
     
     // Use the correct API endpoint
-    $apiUrl = 'https://api.invoicemate.in/public/api/products/images/add';
+    $apiUrl = 'https://api.invoicemate.in/public/api/v2/products/images/add';
     
     // Create CURLFile for the image
     $cFile = new CURLFile($imagePath, 'image/jpeg', basename($imagePath));

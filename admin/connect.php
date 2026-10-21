@@ -7,7 +7,7 @@ define('CONNECT_LOADED', true);
 
 $host = "82.25.121.184";
 $user = "u262009927_invoicemate";
-$password = "1@Endeavour07791";
+$password = "gF8@^vP>!8RabL*HUr:";
 $dbname = "u262009927_invoicemate";
 $connect = mysqli_connect($host, $user, $password, $dbname);
 if ($connect === false) {
@@ -51,7 +51,7 @@ function callAPI($method, $urlpoint, $data, $token){
         $token = "";
     }
     
-    $url = 'https://api.invoicemate.in/public/api/'.$urlpoint.'';
+    $url = 'https://api.invoicemate.in/public/api/v2/'.$urlpoint.'';
     $curl = curl_init($url);
     switch ($method){
        case "POST":
@@ -97,7 +97,7 @@ function callAPI1($method, $urlpoint, $data, $token){
         $token = "";
     }
     
-    $url = 'https://api.invoicemate.in/public/api/'.$urlpoint.'';
+    $url = 'https://api.invoicemate.in/public/api/v2/'.$urlpoint.'';
     $curl = curl_init($url);
     switch ($method){
        case "POST":

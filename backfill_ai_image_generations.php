@@ -20,7 +20,7 @@ if (!$connect) {
     // Live shop / invoicemate DB (same products data used by generators on server)
     $host = getenv('DATABASE_HOST') ?: '82.25.121.184';
     $user = getenv('DATABASE_USER') ?: 'u262009927_invoicemate';
-    $password = getenv('DATABASE_PASSWORD') ?: '1@Endeavour07791';
+    $password = getenv('DATABASE_PASSWORD') ?: 'gF8@^vP>!8RabL*HUr:';
     $dbname = getenv('DATABASE_NAME') ?: 'u262009927_invoicemate';
     $connect = @mysqli_connect($host, $user, $password, $dbname);
 }
